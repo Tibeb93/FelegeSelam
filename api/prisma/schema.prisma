@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex"]
 }
 
 datasource db {
@@ -7,12 +8,567 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model SystemSetting {
-  id        String   @id @default(uuid())
-  key       String   @unique
-  value     String   @db.Text
+// -------------------------------------------------------------
+// ENUMS
+// -------------------------------------------------------------
+
+enum UserStatus {
+  pending
+  active
+  suspended
+}
+
+enum Sex {
+  male
+  female
+}
+
+enum MemberStatus {
+  pending
+  active
+  inactive
+  graduated
+  transferred
+}
+
+enum CourseStatus {
+  draft
+  open
+  closed
+  archived
+}
+
+enum MediaType {
+  text
+  pdf
+  audio
+  video
+  link
+}
+
+enum EnrollmentStatus {
+  active
+  completed
+  dropped
+}
+
+enum AttendanceStatus {
+  present
+  absent
+  late
+  excused
+}
+
+enum PostType {
+  sinksar
+  bible_reading
+  saint_of_day
+  urgent
+  event
+  news
+  teaching
+}
+
+enum EventRsvpStatus {
+  going
+  maybe
+  not_going
+}
+
+enum FormStatus {
+  draft
+  open
+  closed
+}
+
+enum FormResponseStatus {
+  submitted
+  approved
+  rejected
+}
+
+enum DevicePlatform {
+  android
+  ios
+  web
+}
+
+// -------------------------------------------------------------
+// 1. AUTH & ROLES
+// -------------------------------------------------------------
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(50)
+  permissions Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+
+  @@map("roles")
+}
+
+model User {
+  id               String      @id @default(uuid()) @db.Char(36)
+  email            String?     @unique @db.VarChar(191)
+  phone            String?     @unique @db.VarChar(50)
+  passwordHash     String      @db.VarChar(255)
+  roleId           Int
+  status           UserStatus  @default(pending)
+  twoFactorSecret  String?     @db.VarChar(255)
+  failedLogins     Int         @default(0)
+  lockedUntil      DateTime?
+  lastLogin        DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  role             Role        @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  member           Member?
+  refreshTokens    RefreshToken[]
+  deviceTokens     DeviceToken[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+
+  @@index([roleId])
+  @@index([status])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Char(36)
+  userId    String   @db.Char(36)
+  tokenHash String   @db.VarChar(255)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+// -------------------------------------------------------------
+// 2. DEPARTMENTS & MEMBERS
+// -------------------------------------------------------------
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  nameAm      String   @unique @db.VarChar(100)
+  nameEn      String?  @db.VarChar(100)
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     Member[]
+
+  @@map("departments")
+}
+
+model Member {
+  id               String       @id @default(uuid()) @db.Char(36)
+  memberNo         String       @unique @db.VarChar(50)
+  userId           String?      @unique @db.Char(36)
+  firstName        String       @db.VarChar(100)
+  fatherName       String       @db.VarChar(100)
+  grandfatherName  String?      @db.VarChar(100)
+  baptismalName    String?      @db.VarChar(100)
+  sex              Sex
+  dateOfBirth      DateTime?
+  phone            String?      @db.VarChar(50)
+  email            String?      @db.VarChar(191)
+  region           String?      @db.VarChar(100)
+  zone             String?      @db.VarChar(100)
+  woreda           String?      @db.VarChar(100)
+  kebele           String?      @db.VarChar(100)
+  addressDetail    String?      @db.Text
+  parish           String?      @db.VarChar(191)
+  confessionFather String?      @db.VarChar(191)
+  educationLevel   String?      @db.VarChar(100)
+  occupation       String?      @db.VarChar(100)
+  emergencyName    String?      @db.VarChar(100)
+  emergencyPhone   String?      @db.VarChar(50)
+  departmentId     Int?
+  photoUrl         String?      @db.VarChar(500)
+  status           MemberStatus @default(active)
+  joinedAt         DateTime     @default(now())
+  notes            String?      @db.Text
+  createdBy        String?      @db.Char(36)
+  deletedAt        DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  user             User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  department       Department?  @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  enrollments      Enrollment[]
+  attendances      Attendance[]
+  certificates     Certificate[]
+  favorites        Favorite[]
+  eventRsvps       EventRsvp[]
+  formResponses    FormResponse[]
+  contributions    Contribution[]
+
+  @@index([departmentId])
+  @@index([status])
+  @@index([phone])
+  @@index([deletedAt])
+  @@fulltext([firstName, fatherName, grandfatherName, baptismalName])
+  @@map("members")
+}
+
+// -------------------------------------------------------------
+// 3. ACADEMIC (COURSES, LESSONS, ATTENDANCE, GRADES, CERTIFICATES)
+// -------------------------------------------------------------
+
+model Course {
+  id          String       @id @default(uuid()) @db.Char(36)
+  titleAm     String       @db.VarChar(200)
+  titleEn     String?      @db.VarChar(200)
+  description String?      @db.Text
+  level       String?      @db.VarChar(50)
+  teacherId   String?      @db.Char(36)
+  schedule    String?      @db.VarChar(200)
+  capacity    Int?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      CourseStatus @default(draft)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  attendances  Attendance[]
+  certificates Certificate[]
+
+  @@index([status])
+  @@index([teacherId])
+  @@map("courses")
+}
+
+model Lesson {
+  id        String    @id @default(uuid()) @db.Char(36)
+  courseId  String    @db.Char(36)
+  title     String    @db.VarChar(200)
+  content   String?   @db.LongText
+  mediaType MediaType @default(text)
+  fileUrl   String?   @db.VarChar(500)
+  orderNo   Int       @default(1)
+  published Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([orderNo])
+  @@map("lessons")
+}
+
+model Enrollment {
+  id        String           @id @default(uuid()) @db.Char(36)
+  memberId  String           @db.Char(36)
+  courseId  String           @db.Char(36)
+  status    EnrollmentStatus @default(active)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  member    Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  grades    Grade[]
+
+  @@unique([memberId, courseId])
+  @@index([memberId])
+  @@index([courseId])
+  @@index([status])
+  @@map("enrollments")
+}
+
+model Attendance {
+  id          String           @id @default(uuid()) @db.Char(36)
+  memberId    String           @db.Char(36)
+  courseId    String           @db.Char(36)
+  sessionDate DateTime         @db.Date
+  status      AttendanceStatus @default(present)
+  markedBy    String?          @db.Char(36)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  member      Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, courseId, sessionDate])
+  @@index([memberId])
+  @@index([courseId])
+  @@index([sessionDate])
+  @@map("attendances")
+}
+
+model Grade {
+  id           String     @id @default(uuid()) @db.Char(36)
+  enrollmentId String     @db.Char(36)
+  assessment   String     @db.VarChar(100)
+  score        Float
+  maxScore     Float      @default(100)
+  remark       String?    @db.VarChar(255)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@index([enrollmentId])
+  @@map("grades")
+}
+
+model Certificate {
+  id        String   @id @default(uuid()) @db.Char(36)
+  memberId  String   @db.Char(36)
+  courseId  String   @db.Char(36)
+  code      String   @unique @db.VarChar(100)
+  issuedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([courseId])
+  @@map("certificates")
+}
+
+// -------------------------------------------------------------
+// 4. MEZMUR & CATEGORIES
+// -------------------------------------------------------------
+
+model MezmurCategory {
+  id        Int      @id @default(autoincrement())
+  nameAm    String   @unique @db.VarChar(100)
+  nameEn    String?  @db.VarChar(100)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("system_settings")
+  mezmurs   Mezmur[]
+
+  @@map("mezmur_categories")
+}
+
+model Mezmur {
+  id         String          @id @default(uuid()) @db.Char(36)
+  title      String          @db.VarChar(255)
+  lyrics     String?         @db.LongText
+  categoryId Int?
+  singer     String?         @db.VarChar(150)
+  audioUrl   String?         @db.VarChar(500)
+  videoUrl   String?         @db.VarChar(500)
+  isPublic   Boolean         @default(true)
+  createdBy  String?         @db.Char(36)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  category   MezmurCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  favorites  Favorite[]
+
+  @@index([categoryId])
+  @@index([isPublic])
+  @@fulltext([title, lyrics])
+  @@map("mezmurs")
+}
+
+model Favorite {
+  memberId  String   @db.Char(36)
+  mezmurId  String   @db.Char(36)
+  createdAt DateTime @default(now())
+
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  mezmur    Mezmur   @relation(fields: [mezmurId], references: [id], onDelete: Cascade)
+
+  @@id([memberId, mezmurId])
+  @@index([memberId])
+  @@index([mezmurId])
+  @@map("favorites")
+}
+
+// -------------------------------------------------------------
+// 5. POSTS & EVENTS
+// -------------------------------------------------------------
+
+model Post {
+  id        String    @id @default(uuid()) @db.Char(36)
+  type      PostType  @default(news)
+  title     String    @db.VarChar(255)
+  body      String    @db.LongText
+  imageUrl  String?   @db.VarChar(500)
+  isUrgent  Boolean   @default(false)
+  publishAt DateTime  @default(now())
+  expiresAt DateTime?
+  authorId  String?   @db.Char(36)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([type])
+  @@index([isUrgent])
+  @@index([publishAt])
+  @@index([authorId])
+  @@map("posts")
+}
+
+model Event {
+  id          String      @id @default(uuid()) @db.Char(36)
+  title       String      @db.VarChar(255)
+  description String?     @db.Text
+  location    String?     @db.VarChar(255)
+  startAt     DateTime
+  endAt       DateTime?
+  capacity    Int?
+  createdBy   String?     @db.Char(36)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  rsvps       EventRsvp[]
+
+  @@index([startAt])
+  @@index([createdBy])
+  @@map("events")
+}
+
+model EventRsvp {
+  eventId   String          @db.Char(36)
+  memberId  String          @db.Char(36)
+  status    EventRsvpStatus @default(going)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  event     Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  member    Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, memberId])
+  @@index([eventId])
+  @@index([memberId])
+  @@map("event_rsvps")
+}
+
+// -------------------------------------------------------------
+// 6. FORMS & RESPONSES
+// -------------------------------------------------------------
+
+model Form {
+  id          String         @id @default(uuid()) @db.Char(36)
+  title       String         @db.VarChar(255)
+  description String?        @db.Text
+  formSchema  Json
+  status      FormStatus     @default(draft)
+  openUntil   DateTime?
+  createdBy   String?        @db.Char(36)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  responses   FormResponse[]
+
+  @@index([status])
+  @@index([openUntil])
+  @@map("forms")
+}
+
+model FormResponse {
+  id          String             @id @default(uuid()) @db.Char(36)
+  formId      String             @db.Char(36)
+  memberId    String?            @db.Char(36)
+  answers     Json
+  status      FormResponseStatus @default(submitted)
+  reviewedBy  String?            @db.Char(36)
+  submittedAt DateTime           @default(now())
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  form        Form               @relation(fields: [formId], references: [id], onDelete: Cascade)
+  member      Member?            @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@index([formId])
+  @@index([memberId])
+  @@index([status])
+  @@map("form_responses")
+}
+
+// -------------------------------------------------------------
+// 7. FINANCE & SYSTEM
+// -------------------------------------------------------------
+
+model Contribution {
+  id         String   @id @default(uuid()) @db.Char(36)
+  memberId   String   @db.Char(36)
+  amount     Decimal  @db.Decimal(12, 2)
+  type       String   @db.VarChar(50)
+  period     String?  @db.VarChar(50)
+  receiptNo  String?  @unique @db.VarChar(100)
+  paidAt     DateTime @default(now())
+  recordedBy String?  @db.Char(36)
+  createdAt  DateTime @default(now())
+
+  member     Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([type])
+  @@index([paidAt])
+  @@map("contributions")
+}
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Char(36)
+  userId    String    @db.Char(36)
+  title     String    @db.VarChar(255)
+  body      String?   @db.Text
+  data      Json?
+  sentAt    DateTime  @default(now())
+  readAt    DateTime?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sentAt])
+  @@index([readAt])
+  @@map("notifications")
+}
+
+model DeviceToken {
+  id        String         @id @default(uuid()) @db.Char(36)
+  userId    String         @db.Char(36)
+  token     String         @unique @db.VarChar(500)
+  platform  DevicePlatform @default(web)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([platform])
+  @@map("device_tokens")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Char(36)
+  userId    String?  @db.Char(36)
+  action    String   @db.VarChar(100)
+  entity    String   @db.VarChar(100)
+  entityId  String?  @db.VarChar(100)
+  oldValue  Json?
+  newValue  Json?
+  ip        String?  @db.VarChar(50)
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Setting {
+  settingKey   String   @id @db.VarChar(100)
+  settingValue Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("settings")
 }
