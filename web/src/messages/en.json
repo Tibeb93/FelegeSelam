@@ -1,0 +1,51 @@
+{
+  "Common": {
+    "churchName": "Ethiopian Orthodox Tewahedo Church",
+    "schoolName": "Aemade Selam Sunday School",
+    "language": "Language",
+    "english": "English",
+    "amharic": "አማርኛ",
+    "login": "Sign In",
+    "register": "Register",
+    "portal": "Member Portal",
+    "admin": "Admin",
+    "contact": "Contact",
+    "explore": "Explore"
+  },
+  "Hero": {
+    "title": "Spiritual Wisdom & Orthodox Tewahedo Heritage",
+    "subtitle": "\"Let the word of Christ dwell in you richly\" - Colossians 3:16. A sacred home where we learn the Word of God, grounded in faith, ethics, and holy tradition.",
+    "primaryCta": "Member Portal",
+    "secondaryCta": "About Sunday School"
+  },
+  "Features": {
+    "title": "Core Services & Programs",
+    "subtitle": "Spiritual departments designed for children, youth, and adults",
+    "academic": {
+      "title": "Theological Education",
+      "desc": "Bible studies, church history, liturgy, hymnology (Zema), and Ge'ez language curriculum."
+    },
+    "attendance": {
+      "title": "Student & Class Records",
+      "desc": "Digital attendance tracking, academic progress, and structured class management."
+    },
+    "activities": {
+      "title": "Ministries & Departments",
+      "desc": "Hymn ministry, literature, charity, outreach, and community youth fellowship."
+    }
+  },
+  "Stats": {
+    "members": "Students & Members",
+    "membersCount": "1,200+",
+    "classes": "Class Divisions",
+    "classesCount": "14",
+    "teachers": "Teachers & Servants",
+    "teachersCount": "35+",
+    "founded": "Established",
+    "foundedValue": "2000 G.C"
+  },
+  "Footer": {
+    "rights": "All rights reserved. Aemade Selam Sunday School.",
+    "motto": "Raising a generation anchored in faith and virtue"
+  }
+}

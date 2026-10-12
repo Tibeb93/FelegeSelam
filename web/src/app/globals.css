@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 44 53% 95%; /* Cream #FAF6EB */
+    --foreground: 29 51% 11%; /* Dark Brown #2B1D0E */
+
+    --card: 44 50% 97%;
+    --card-foreground: 29 51% 11%;
+
+    --popover: 44 53% 95%;
+    --popover-foreground: 29 51% 11%;
+
+    --primary: 125 55% 24%; /* Church Green #1B5E20 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 68% 47%; /* Church Gold #C9A227 */
+    --secondary-foreground: 29 51% 11%;
+
+    --muted: 40 25% 88%;
+    --muted-foreground: 29 30% 28%;
+
+    --accent: 45 68% 47%;
+    --accent-foreground: 29 51% 11%;
+
+    --destructive: 0 74% 41%; /* Church Red #B71C1C */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 20% 82%;
+    --input: 40 20% 82%;
+    --ring: 125 55% 24%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-ethiopic antialiased;
+    font-size: 1.0625rem; /* Large readable 17px base text */
+    line-height: 1.6;
+  }
+}
