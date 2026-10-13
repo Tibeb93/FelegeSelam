@@ -58,9 +58,11 @@ export class AuditInterceptor implements NestInterceptor {
                 entity,
                 entityId: entityId ? String(entityId) : null,
                 newValue: responseData
-                  ? typeof responseData === 'object'
-                    ? responseData
-                    : null
+                  ? isExport || (responseData as any)?.getStream
+                    ? { exported: true, type: isExport ? 'export' : 'stream' }
+                    : typeof responseData === 'object'
+                      ? responseData
+                      : null
                   : null,
                 ip: String(ip),
               },

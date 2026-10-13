@@ -8,6 +8,8 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
+import { StorageModule } from './storage/storage.module';
+import { MembersModule } from './members/members.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { RequestLoggingMiddleware } from './common/middleware/logging.middleware';
@@ -26,6 +28,8 @@ import { RequestLoggingMiddleware } from './common/middleware/logging.middleware
     ]),
     PrismaModule,
     MailModule,
+    StorageModule,
+    MembersModule,
     AuthModule,
     UsersModule,
     HealthModule,

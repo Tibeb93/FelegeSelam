@@ -38,6 +38,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         }
       }
     } else if (exception instanceof Error) {
+      console.error(`[HttpExceptionFilter 500 ERROR]: ${exception.message}`, exception.stack);
       this.logger.error(`Unhandled error: ${exception.message}`, exception.stack);
       message = exception.message;
     }
