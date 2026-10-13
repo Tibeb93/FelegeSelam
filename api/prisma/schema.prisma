@@ -453,17 +453,18 @@ model EventRsvp {
 // -------------------------------------------------------------
 
 model Form {
-  id          String         @id @default(uuid()) @db.Char(36)
-  title       String         @db.VarChar(255)
-  description String?        @db.Text
-  formSchema  Json
-  status      FormStatus     @default(draft)
-  openUntil   DateTime?
-  createdBy   String?        @db.Char(36)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id                        String         @id @default(uuid()) @db.Char(36)
+  title                     String         @db.VarChar(255)
+  description               String?        @db.Text
+  formSchema                Json
+  status                    FormStatus     @default(draft)
+  openUntil                 DateTime?
+  allowOneResponsePerMember Boolean        @default(false)
+  createdBy                 String?        @db.Char(36)
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
 
-  responses   FormResponse[]
+  responses                 FormResponse[]
 
   @@index([status])
   @@index([openUntil])
@@ -476,6 +477,7 @@ model FormResponse {
   memberId    String?            @db.Char(36)
   answers     Json
   status      FormResponseStatus @default(submitted)
+  reviewNote  String?            @db.Text
   reviewedBy  String?            @db.Char(36)
   submittedAt DateTime           @default(now())
   createdAt   DateTime           @default(now())

@@ -678,63 +678,224 @@ async function main() {
   }
   console.log(`✓ 3 events with RSVPs verified`);
 
-  // F. 2 FORMS
-  console.log('Seeding 2 forms...');
-  const formsData = [
+  // F. 5 FORMS (READY TEMPLATES: Renewal, Event, Volunteer, Pledge, Survey)
+  console.log('Seeding 5 ready form templates...');
+  const templatesData = [
     {
-      title: 'የአዲስ ተማሪዎች ምዝገባ ቅጽ (2019 ዓ.ም)',
-      description: 'ወደ ሰንበት ትምህርት ቤቱ አዲስ ለሚገቡ ተማሪዎች የተዘጋጀ የመመዝገቢያ ቅጽ',
+      title: 'የአባልነት እድሳት ቅጽ (ዓመታዊ)',
+      description: 'በአዕማደ ሰላም ሰንበት ትምህርት ቤት የአገልግሎት አባላት ዓመታዊ ምዝገባ ማደሻና ቃል ኪዳን ማረጋገጫ ቅጽ',
+      status: FormStatus.open,
+      allowOneResponsePerMember: true,
+      openUntil: new Date('2026-12-31T23:59:59Z'),
       formSchema: {
+        titleAm: 'የአባልነት እድሳት ቅጽ',
+        titleEn: 'Membership Renewal Form',
         fields: [
-          { name: 'fullName', label: 'ሙሉ ስም', type: 'text', required: true },
-          { name: 'baptismalName', label: 'የክርስትና ስም', type: 'text', required: true },
-          { name: 'age', label: 'ዕድሜ', type: 'number', required: true },
-          { name: 'departmentInterest', label: 'የሚፈልጉት የአገልግሎት ክፍል', type: 'select', options: ['ትምህርት', 'መዝሙር', 'ልማት'] },
+          { name: 'fullName', type: 'text', labelAm: 'ሙሉ ስም (ከነ አያት)', labelEn: 'Full Name', required: true, validation: { minLength: 3 } },
+          { name: 'baptismalName', type: 'text', labelAm: 'የክርስትና ስም', labelEn: 'Baptismal Name', required: true },
+          { name: 'memberNo', type: 'text', labelAm: 'የአባልነት መለያ ቁጥር', labelEn: 'Member ID', required: true },
+          { name: 'phone', type: 'text', labelAm: 'ስልክ ቁጥር', labelEn: 'Phone Number', required: true },
+          { name: 'currentDepartment', type: 'dropdown', labelAm: 'ያሉበት የአገልግሎት ክፍል', labelEn: 'Department', required: true, options: [{ value: 'ትምህርት', labelAm: 'የትምህርት ክፍል' }, { value: 'መዝሙር', labelAm: 'የመዝሙር ክፍል' }, { value: 'ልማት', labelAm: 'የልማት ክፍል' }] },
+          { name: 'confessionFather', type: 'text', labelAm: 'የንስሐ አባት ስም', labelEn: 'Confession Father', required: true },
+          { name: 'renewalYear', type: 'number', labelAm: 'የእድሳት ዓ.ም', labelEn: 'Renewal Year', required: true, validation: { min: 2015, max: 2030 } },
+          { name: 'renewDate', type: 'date', labelAm: 'የማደሻ ቀን', labelEn: 'Renewal Date', required: true },
+          { name: 'serviceCommitment', type: 'radio', labelAm: 'የአገልግሎት ቁርጠኝነት', labelEn: 'Service Commitment', required: true, options: [{ value: 'ሙሉ ጊዜ', labelAm: 'ሙሉ ጊዜ' }, { value: 'በከፊል', labelAm: 'በከፊል' }] },
+          { name: 'agreement', type: 'checkbox', labelAm: 'የሰንበት ት/ቤቱን መተዳደሪያ ደንብ አከብራለሁ', labelEn: 'I agree to bylaws', required: true },
         ],
       },
-      status: FormStatus.open,
+      responses: [
+        {
+          memberIdx: 0,
+          status: FormResponseStatus.approved,
+          reviewNote: 'ሁሉም መረጃዎችና ማረጋገጫዎች በትክክል ተሟልተዋል።',
+          answers: {
+            fullName: `${createdMembers[0].firstName} ${createdMembers[0].fatherName}`,
+            baptismalName: createdMembers[0].baptismalName || 'ገብረ ክርስቶስ',
+            memberNo: createdMembers[0].memberNo,
+            phone: createdMembers[0].phone || '0911000001',
+            currentDepartment: 'ትምህርት',
+            confessionFather: createdMembers[0].confessionFather || 'ቀሲስ ተክለ ማርያም',
+            renewalYear: 2019,
+            renewDate: '2026-10-10',
+            serviceCommitment: 'ሙሉ ጊዜ',
+            agreement: true,
+          },
+        },
+      ],
     },
     {
-      title: 'የአባላት አስተያየትና መጠይቅ ቅጽ',
-      description: 'የሰንበት ትምህርት ቤቱን አገልግሎት ለማሻሻል የቀረበ የዳሰሳ ጥናት',
+      title: 'የልዩ ጉባኤና መርሐ ግብር ምዝገባ ቅጽ',
+      description: 'በዓመታዊ ጉባኤያት፣ ሲምፖዚየሞችና መንፈሳዊ ጉዞዎች ላይ ለመሳተፍ የተዘጋጀ የምዝገባ ቅጽ',
+      status: FormStatus.open,
+      allowOneResponsePerMember: false,
+      openUntil: new Date('2026-11-30T23:59:59Z'),
       formSchema: {
+        titleAm: 'የልዩ ጉባኤና መርሐ ግብር ምዝገባ ቅጽ',
+        titleEn: 'Special Event & Conference Registration Form',
         fields: [
-          { name: 'satisfaction', label: 'በትምህርቱ አገልግሎት ምን ያህል ረክተዋል?', type: 'rating', min: 1, max: 5 },
-          { name: 'suggestions', label: 'ተጨማሪ አስተያየትና ማሻሻያ ሀሳብ', type: 'textarea', required: false },
+          { name: 'participantName', type: 'text', labelAm: 'የተሳታፊ ሙሉ ስም', labelEn: 'Full Name', required: true },
+          { name: 'phone', type: 'text', labelAm: 'ስልክ ቁጥር', labelEn: 'Phone Number', required: true },
+          { name: 'ageGroup', type: 'radio', labelAm: 'የዕድሜ ክልል', labelEn: 'Age Group', required: true, options: [{ value: '21-30', labelAm: 'ከ 21 - 30 ዓመት' }, { value: '31-50', labelAm: 'ከ 31 - 50 ዓመት' }] },
+          { name: 'parishChurch', type: 'text', labelAm: 'የመጡበት ደብር', labelEn: 'Parish', required: true },
+          { name: 'attendanceDays', type: 'checkbox', labelAm: 'የሚገኙባቸው ቀናት', labelEn: 'Days', required: true, options: [{ value: 'ቅዳሜ', labelAm: 'ቅዳሜ' }, { value: 'እሑድ', labelAm: 'እሑድ' }] },
+          { name: 'transportation', type: 'dropdown', labelAm: 'የትራንስፖርት አገልግሎት', labelEn: 'Transport', required: true, options: [{ value: 'ካዛንቺስ', labelAm: 'ከካዛንቺስ' }, { value: 'በራሴ', labelAm: 'በራሴ' }] },
         ],
       },
+      responses: [
+        {
+          memberIdx: 1,
+          status: FormResponseStatus.approved,
+          reviewNote: 'ምዝገባው ተቀባይነት አግኝቷል፤ የመግቢያ ካርድ ተዘጋጅቷል።',
+          answers: {
+            participantName: `${createdMembers[1].firstName} ${createdMembers[1].fatherName}`,
+            phone: createdMembers[1].phone || '0911000002',
+            ageGroup: '21-30',
+            parishChurch: 'ደብረ ሰላም ቅዱስ እስጢፋኖስ',
+            attendanceDays: ['ቅዳሜ', 'እሑድ'],
+            transportation: 'ካዛንቺስ',
+          },
+        },
+      ],
+    },
+    {
+      title: 'የበጎ ፈቃድ አገልግሎት ምዝገባ ቅጽ',
+      description: 'በሰንበት ትምህርት ቤቱ በተለያዩ የበጎ አድራጎት፣ የልማትና የማኅበራዊ አገልግሎት ዘርፎች ለመሳተፍ የተዘጋጀ ቅጽ',
       status: FormStatus.open,
+      allowOneResponsePerMember: false,
+      openUntil: new Date('2026-12-31T23:59:59Z'),
+      formSchema: {
+        titleAm: 'የበጎ ፈቃድ አገልግሎት ምዝገባ ቅጽ',
+        titleEn: 'Volunteer Ministry Sign-Up Form',
+        fields: [
+          { name: 'volunteerName', type: 'text', labelAm: 'የበጎ ፈቃደኛው ስም', labelEn: 'Name', required: true },
+          { name: 'phone', type: 'text', labelAm: 'ስልክ ቁጥር', labelEn: 'Phone', required: true },
+          { name: 'profession', type: 'text', labelAm: 'የትምህርት ደረጃ ወይም ሙያ', labelEn: 'Profession', required: true },
+          { name: 'interestedMinistries', type: 'checkbox', labelAm: 'ለማገልገል የሚፈልጓቸው ዘርፎች', labelEn: 'Ministries', required: true, options: [{ value: 'media', labelAm: 'ሚዲያና ቴክኖሎጂ' }, { value: 'charity', labelAm: 'መርጃ ማዕድ' }] },
+          { name: 'experienceSummary', type: 'textarea', labelAm: 'ቀደም ሲል የነበሩዎት ልምዶች', labelEn: 'Experience', required: true, validation: { minLength: 10 } },
+          { name: 'hasConfessionFather', type: 'radio', labelAm: 'የንስሐ አባት አሎት?', labelEn: 'Confession Father', required: true, options: [{ value: 'yes', labelAm: 'አዎ አለኝ' }, { value: 'no', labelAm: 'የለኝም' }] },
+        ],
+      },
+      responses: [
+        {
+          memberIdx: 2,
+          status: FormResponseStatus.submitted,
+          reviewNote: null,
+          answers: {
+            volunteerName: `${createdMembers[2].firstName} ${createdMembers[2].fatherName}`,
+            phone: createdMembers[2].phone || '0911000003',
+            profession: 'የኮምፒውተር መሐንዲስ (Software Engineer)',
+            interestedMinistries: ['media'],
+            experienceSummary: 'በዌብሳይትና በቪዲዮ ኤዲቲንግ ዘርፍ ላለፉት 3 ዓመታት አገልግያለሁ።',
+            hasConfessionFather: 'yes',
+          },
+        },
+      ],
+    },
+    {
+      title: 'የስእለትና የልማት ቃል ኪዳን መመዝገቢያ ቅጽ',
+      description: 'ለቤተ ክርስቲያንና ሰንበት ትምህርት ቤት ሕንፃ፣ መጻሕፍት ሕትመትና ልማት የሚደረግ የገንዘብ ቃል ኪዳን መመዝገቢያ',
+      status: FormStatus.open,
+      allowOneResponsePerMember: false,
+      openUntil: new Date('2026-12-31T23:59:59Z'),
+      formSchema: {
+        titleAm: 'የስእለትና የልማት ቃል ኪዳን መመዝገቢያ ቅጽ',
+        titleEn: 'Pledge & Contribution Commitment Form',
+        fields: [
+          { name: 'pledgerName', type: 'text', labelAm: 'የሰጪው ሙሉ ስም', labelEn: 'Pledger Name', required: true },
+          { name: 'phone', type: 'text', labelAm: 'ስልክ ቁጥር', labelEn: 'Phone Number', required: true },
+          { name: 'pledgePurpose', type: 'dropdown', labelAm: 'የስእለት ዓላማ', labelEn: 'Purpose', required: true, options: [{ value: 'building', labelAm: 'ለሕንፃ ግንባታ' }, { value: 'books', labelAm: 'ለመጻሕፍት ሕትመት' }] },
+          { name: 'pledgeFrequency', type: 'radio', labelAm: 'የክፍያ ሁኔታ', labelEn: 'Frequency', required: true, options: [{ value: 'monthly', labelAm: 'ወርሃዊ' }, { value: 'one_time', labelAm: 'የአንድ ጊዜ' }] },
+          { name: 'pledgedAmount', type: 'number', labelAm: 'የተገባው መጠን (ብር)', labelEn: 'Amount', required: true, validation: { min: 100 } },
+          { name: 'pledgeStartDate', type: 'date', labelAm: 'የሚጀመርበት ቀን', labelEn: 'Start Date', required: true },
+        ],
+      },
+      responses: [
+        {
+          memberIdx: 3,
+          status: FormResponseStatus.approved,
+          reviewNote: 'የገንዘብ ማሰባሰቢያ ደረሰኝ ቁጥር RC-90123 ተመዝግቧል።',
+          answers: {
+            pledgerName: `${createdMembers[3].firstName} ${createdMembers[3].fatherName}`,
+            phone: createdMembers[3].phone || '0911000004',
+            pledgePurpose: 'building',
+            pledgeFrequency: 'monthly',
+            pledgedAmount: 1500,
+            pledgeStartDate: '2026-11-01',
+          },
+        },
+      ],
+    },
+    {
+      title: 'የሰንበት ትምህርት ቤት አገልግሎት እርካታ መጠይቅ ቅጽ',
+      description: 'የአገልግሎታችንን ጥራት ለማሻሻል ከአባላትና ከምእመናን ግብረ-መልስ የሚሰበሰብበት የዳሰሳ ጥናት',
+      status: FormStatus.open,
+      allowOneResponsePerMember: true,
+      openUntil: new Date('2026-12-31T23:59:59Z'),
+      formSchema: {
+        titleAm: 'የሰንበት ትምህርት ቤት አገልግሎት እርካታ መጠይቅ ቅጽ',
+        titleEn: 'Sunday School Service Satisfaction Survey',
+        fields: [
+          { name: 'respondentRole', type: 'dropdown', labelAm: 'በሰንበት ት/ቤቱ ያለዎት ሚና', labelEn: 'Role', required: true, options: [{ value: 'member', labelAm: 'ተማሪ / አባል' }, { value: 'parent', labelAm: 'ወላጅ' }] },
+          { name: 'overallSatisfaction', type: 'radio', labelAm: 'አጠቃላይ እርካታ', labelEn: 'Satisfaction', required: true, options: [{ value: 'very_satisfied', labelAm: 'በጣም ከፍተኛ' }, { value: 'satisfied', labelAm: 'ከፍተኛ' }] },
+          { name: 'spiritualLessonsRating', type: 'number', labelAm: 'የትምህርት ጥራት (1-5)', labelEn: 'Lessons Rating', required: true, validation: { min: 1, max: 5 } },
+          { name: 'punctualityRating', type: 'number', labelAm: 'የሰዓት አከባበር (1-5)', labelEn: 'Punctuality', required: true, validation: { min: 1, max: 5 } },
+          { name: 'improvementSuggestions', type: 'textarea', labelAm: 'መሻሻል አለባቸው የሚሏቸው ጉዳዮች', labelEn: 'Improvement Suggestions', required: true, validation: { minLength: 5 } },
+        ],
+      },
+      responses: [
+        {
+          memberIdx: 4,
+          status: FormResponseStatus.submitted,
+          reviewNote: null,
+          answers: {
+            respondentRole: 'member',
+            overallSatisfaction: 'very_satisfied',
+            spiritualLessonsRating: 5,
+            punctualityRating: 4,
+            improvementSuggestions: 'የጥናትና ምርምር መጻሕፍት በቤተ መጻሕፍቱ ቢጨመሩ መልካም ነው።',
+          },
+        },
+      ],
     },
   ];
 
-  for (const f of formsData) {
-    let form = await prisma.form.findFirst({ where: { title: f.title } });
+  for (const t of templatesData) {
+    let form = await prisma.form.findFirst({ where: { title: t.title } });
     if (!form) {
       form = await prisma.form.create({
         data: {
-          ...f,
+          title: t.title,
+          description: t.description,
+          formSchema: t.formSchema,
+          status: t.status,
+          allowOneResponsePerMember: t.allowOneResponsePerMember,
+          openUntil: t.openUntil,
           createdBy: superAdminMember.id,
-          openUntil: new Date('2026-12-31'),
-        },
-      });
-
-      // Add a response
-      await prisma.formResponse.create({
-        data: {
-          formId: form.id,
-          memberId: createdMembers[0].id,
-          answers: {
-            fullName: 'ተክለ ሃይማኖት ወልደስላሴ',
-            baptismalName: 'ገብረ ክርስቶስ',
-            age: 28,
-            departmentInterest: 'ትምህርት',
-          },
-          status: FormResponseStatus.submitted,
         },
       });
     }
+
+    // Seed responses
+    for (const r of t.responses) {
+      const targetMember = createdMembers[r.memberIdx];
+      const existing = await prisma.formResponse.findFirst({
+        where: { formId: form.id, memberId: targetMember.id },
+      });
+      if (!existing) {
+        await prisma.formResponse.create({
+          data: {
+            formId: form.id,
+            memberId: targetMember.id,
+            answers: r.answers,
+            status: r.status,
+            reviewNote: r.reviewNote,
+            reviewedBy: r.status === FormResponseStatus.approved ? superAdminMember.id : null,
+          },
+        });
+      }
+    }
   }
-  console.log(`✓ 2 forms with responses verified`);
+  console.log(`✓ 5 ready form templates with responses verified`);
 
   console.log('\n--- Demo Data Seeding Completed Successfully! ---');
 }

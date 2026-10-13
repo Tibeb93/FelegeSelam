@@ -52,7 +52,7 @@ export class MembersController {
   }
 
   @Get()
-  @Roles('super_admin', 'admin', 'teacher', 'content_manager')
+  @Roles('super_admin', 'admin', 'teacher')
   @ApiOperation({ summary: 'List members with search, filters, sorting & pagination' })
   @ApiResponse({ status: 200, description: 'Paginated list of members' })
   async findAll(@Query() query: QueryMemberDto) {
@@ -116,7 +116,7 @@ export class MembersController {
   }
 
   @Get(':id')
-  @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
+  @Roles('super_admin', 'admin', 'teacher', 'member')
   @ApiParam({ name: 'id', description: 'Member UUID' })
   @ApiOperation({ summary: 'Get member details by ID' })
   @ApiResponse({ status: 200, description: 'Member details' })
