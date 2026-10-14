@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import { Noto_Sans_Ethiopic } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { QueryProvider } from '../../providers/QueryProvider';
+import { ThemeProvider } from '../../providers/ThemeProvider';
+import { ToastProvider } from '../../providers/ToastProvider';
+import { AuthProvider } from '../../providers/AuthProvider';
 import '../globals.css';
 
 const notoSansEthiopic = Noto_Sans_Ethiopic({
@@ -28,9 +32,15 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={notoSansEthiopic.variable}>
-      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-secondary/30">
+      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-secondary/30 font-ethiopic">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
+          <QueryProvider>
+            <ThemeProvider>
+              <ToastProvider>
+                <AuthProvider>{children}</AuthProvider>
+              </ToastProvider>
+            </ThemeProvider>
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

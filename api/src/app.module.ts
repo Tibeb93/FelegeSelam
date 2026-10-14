@@ -17,6 +17,11 @@ import { MezmursModule } from './mezmurs/mezmurs.module';
 import { PostsModule } from './posts/posts.module';
 import { EventsModule } from './events/events.module';
 import { FormsModule } from './forms/forms.module';
+import { ReportsModule } from './reports/reports.module';
+import { ContributionsModule } from './contributions/contributions.module';
+import { SettingsModule } from './settings/settings.module';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { BackupsModule } from './backups/backups.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { RequestLoggingMiddleware } from './common/middleware/logging.middleware';
@@ -44,6 +49,11 @@ import { RequestLoggingMiddleware } from './common/middleware/logging.middleware
     PostsModule,
     EventsModule,
     FormsModule,
+    ReportsModule,
+    ContributionsModule,
+    SettingsModule,
+    AuditLogsModule,
+    BackupsModule,
     AuthModule,
     UsersModule,
     HealthModule,

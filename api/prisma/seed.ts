@@ -897,6 +897,93 @@ async function main() {
   }
   console.log(`✓ 5 ready form templates with responses verified`);
 
+  // G. 20 CONTRIBUTIONS
+  console.log('Seeding 20 member contributions...');
+  const contributionTypes = ['monthly_fee', 'donation', 'pledge', 'special_event'];
+  const paymentMethods = ['cash', 'telebirr', 'cbe_birr', 'bank_transfer'];
+  const sampleAmounts = [100, 200, 300, 500, 1000, 1500, 2000, 2500];
+
+  for (let i = 0; i < 20; i++) {
+    const receiptNo = `REC-2026-${String(i + 1).padStart(4, '0')}`;
+    const existing = await prisma.contribution.findUnique({ where: { receiptNo } });
+    if (!existing) {
+      const member = createdMembers[i % createdMembers.length];
+      const type = contributionTypes[i % contributionTypes.length];
+      const paymentMethod = paymentMethods[i % paymentMethods.length];
+      const amount = sampleAmounts[i % sampleAmounts.length];
+      const monthOffset = i % 10;
+      const paidDate = new Date();
+      paidDate.setMonth(paidDate.getMonth() - monthOffset);
+
+      await prisma.contribution.create({
+        data: {
+          memberId: member.id,
+          amount,
+          type,
+          paymentMethod,
+          period: `2026-${String(12 - monthOffset).padStart(2, '0')}`,
+          receiptNo,
+          notes: `የ${type === 'monthly_fee' ? 'ወርሃዊ መዋጮ' : 'ልዩ ስጦታና ድጋፍ'} ክፍያ`,
+          paidAt: paidDate,
+          recordedBy: superAdminMember.id,
+        },
+      });
+    }
+  }
+  console.log(`✓ 20 contributions verified`);
+
+  // H. SYSTEM SETTINGS
+  console.log('Seeding system settings...');
+  const defaultSettingsData = [
+    {
+      settingKey: 'school_profile',
+      settingValue: {
+        nameAm: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት',
+        nameEn: 'Aemade Selam Sunday School',
+        logoUrl: '/uploads/branding/logo.png',
+        parish: 'ደብረ ሰላም ቅዱስ እስጢፋኖስ',
+        mottoAm: 'በሃይማኖት ጽኑ፥ በመልካም ምግባር አብሩ',
+        mottoEn: 'Firm in Faith, Shining in Good Deeds',
+      },
+    },
+    {
+      settingKey: 'contact_details',
+      settingValue: {
+        phone: '+251 91 123 4567',
+        alternatePhone: '+251 11 551 2345',
+        email: 'info@aemadeselam.org',
+        address: 'አዲስ አበባ, ኢትዮጵያ',
+        poBox: '1234',
+      },
+    },
+    {
+      settingKey: 'localization',
+      settingValue: {
+        defaultLanguage: 'am',
+        supportedLanguages: ['am', 'en'],
+        timezone: 'Africa/Addis_Ababa',
+        calendar: 'ethiopian',
+      },
+    },
+    {
+      settingKey: 'system_config',
+      settingValue: {
+        allowSelfRegistration: true,
+        requireAdminApproval: true,
+        maintenanceMode: false,
+      },
+    },
+  ];
+
+  for (const s of defaultSettingsData) {
+    await prisma.setting.upsert({
+      where: { settingKey: s.settingKey },
+      update: { settingValue: s.settingValue },
+      create: { settingKey: s.settingKey, settingValue: s.settingValue },
+    });
+  }
+  console.log(`✓ System settings seeded/verified`);
+
   console.log('\n--- Demo Data Seeding Completed Successfully! ---');
 }
 
