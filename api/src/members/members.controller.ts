@@ -115,6 +115,14 @@ export class MembersController {
     return new StreamableFile(buffer);
   }
 
+  @Get('departments')
+  @Roles('super_admin', 'admin', 'teacher', 'member')
+  @ApiOperation({ summary: 'List all school departments' })
+  @ApiResponse({ status: 200, description: 'List of departments' })
+  async getDepartments() {
+    return this.membersService.getDepartments();
+  }
+
   @Get(':id')
   @Roles('super_admin', 'admin', 'teacher', 'member')
   @ApiParam({ name: 'id', description: 'Member UUID' })

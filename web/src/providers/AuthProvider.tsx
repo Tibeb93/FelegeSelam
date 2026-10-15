@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { User, UserRoleName } from '../types/api';
-import { setAccessToken } from '../lib/api-client';
+import { setAccessToken, refreshAccessToken } from '../lib/api-client';
 
 interface AuthContextType {
   user: User | null;
@@ -44,34 +44,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = Boolean(user);
 
   /**
-   * Refreshes the session by calling the BFF refresh route handler
+   * Refreshes the session by calling the deduplicated refreshAccessToken helper
    */
   const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
-      const res = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!res.ok) {
+      const newToken = await refreshAccessToken();
+      if (!newToken) {
         setUser(null);
-        setAccessToken(null);
         return false;
       }
 
-      const data = await res.json();
-      const { accessToken, user: refreshedUser } = data.data || {};
-
-      if (accessToken && refreshedUser) {
-        setAccessToken(accessToken);
-        setUser(refreshedUser);
-        return true;
+      // Read restored session metadata
+      const sessionRes = await fetch('/api/auth/session');
+      const sessionData = await sessionRes.json();
+      if (sessionData.authenticated && sessionData.session) {
+        setUser({
+          id: sessionData.session.userId,
+          email: sessionData.session.email,
+          phone: sessionData.session.phone,
+          status: sessionData.session.status,
+          role: { name: sessionData.session.role },
+        } as any);
       }
 
-      return false;
+      return true;
     } catch {
       setUser(null);
-      setAccessToken(null);
       return false;
     }
   }, []);

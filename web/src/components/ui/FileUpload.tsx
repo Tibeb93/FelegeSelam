@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { UploadCloud, X, File, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { UploadCloud, X, File as FileIcon, Image as ImageIcon, AlertCircle } from 'lucide-react';
 
 interface FileUploadProps {
   label?: string;
   accept?: string;
   maxSizeBytes?: number; // default 2MB
-  value?: File | string | null;
+  value?: any;
   onChange: (file: File | null) => void;
   error?: string;
   helperText?: string;
@@ -139,10 +139,10 @@ export function FileUpload({
             </button>
             <span className="text-xs text-muted-foreground">ፋይል ለመቀየር ጠቅ ያድርጉ</span>
           </div>
-        ) : value instanceof File ? (
+        ) : (value && typeof value === 'object' && 'name' in value && 'size' in value) ? (
           <div className="flex flex-col items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <File className="h-5 w-5" />
+              <FileIcon className="h-5 w-5" />
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">{value.name}</p>

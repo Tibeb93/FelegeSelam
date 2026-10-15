@@ -207,7 +207,16 @@ export class MembersService {
   /**
    * Find single member by ID
    */
-  async findOne(id: string): Promise<Member> {
+  /**
+   * Get all departments
+   */
+  async getDepartments() {
+    return this.prisma.department.findMany({
+      orderBy: { nameAm: 'asc' },
+    });
+  }
+
+  async findOne(id: string): Promise<any> {
     const member = await this.prisma.member.findFirst({
       where: { id, deletedAt: null },
       include: {
@@ -221,6 +230,28 @@ export class MembersService {
             roleId: true,
           },
         },
+        enrollments: {
+          include: {
+            course: true,
+            grades: true,
+          },
+        },
+        attendances: {
+          take: 15,
+          orderBy: { sessionDate: 'desc' },
+          include: {
+            course: true,
+          },
+        },
+        contributions: {
+          take: 15,
+          orderBy: { paidAt: 'desc' },
+        },
+        certificates: {
+          include: {
+            course: true,
+          },
+        },
       },
     });
 
@@ -228,7 +259,16 @@ export class MembersService {
       throw new NotFoundException(`Member with ID "${id}" not found`);
     }
 
-    return member;
+    const auditLogs = await this.prisma.auditLog.findMany({
+      where: { entity: 'Member', entityId: id },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
+
+    return {
+      ...member,
+      statusHistory: auditLogs,
+    };
   }
 
   /**

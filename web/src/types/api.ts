@@ -13,6 +13,15 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
   totalPages: number;
+  data?: T[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
+  };
 }
 
 export type UserRoleName =
@@ -43,7 +52,7 @@ export interface User {
 }
 
 export interface Department {
-  id: string;
+  id: number;
   nameAm: string;
   nameEn?: string | null;
   description?: string | null;
@@ -86,7 +95,7 @@ export interface Member {
   occupation?: string | null;
   emergencyName?: string | null;
   emergencyPhone?: string | null;
-  departmentId?: string | null;
+  departmentId?: number | null;
   department?: Department | null;
   photoUrl?: string | null;
   status: MemberStatus;
@@ -96,6 +105,67 @@ export interface Member {
   deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    id: string;
+    email?: string | null;
+    phone?: string | null;
+    status: string;
+    roleId?: string;
+  } | null;
+  enrollments?: Array<{
+    id: string;
+    courseId: string;
+    status: string;
+    course?: {
+      id: string;
+      titleAm: string;
+      titleEn?: string | null;
+      level?: string | null;
+    };
+    grades?: Array<{
+      id: string;
+      assessmentName: string;
+      score: number;
+      maxScore: number;
+    }>;
+  }>;
+  attendances?: Array<{
+    id: string;
+    sessionDate: string;
+    status: 'present' | 'absent' | 'late' | 'excused';
+    notes?: string | null;
+    course?: {
+      id: string;
+      titleAm: string;
+    };
+  }>;
+  contributions?: Array<{
+    id: string;
+    amount: number | string;
+    type: string;
+    period?: string | null;
+    receiptNo?: string | null;
+    paymentMethod?: string | null;
+    paidAt: string;
+  }>;
+  certificates?: Array<{
+    id: string;
+    certificateNo: string;
+    issuedDate: string;
+    course?: {
+      id: string;
+      titleAm: string;
+    };
+  }>;
+  statusHistory?: Array<{
+    id: string;
+    action: string;
+    entity: string;
+    oldData?: any;
+    newData?: any;
+    ipAddress?: string | null;
+    createdAt: string;
+  }>;
 }
 
 export interface Course {

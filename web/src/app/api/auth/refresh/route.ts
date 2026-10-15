@@ -39,29 +39,68 @@ export async function POST() {
     const payloadData = data.data || data;
     const { refreshToken: newRefreshToken, accessToken, user } = payloadData || {};
 
-    const userRole =
-      typeof user?.role === 'string'
-        ? user.role
-        : user?.role?.name || 'member';
+    // Decode JWT payload from access token to extract user claims (role, sub, email)
+    let decodedToken: any = null;
+    if (accessToken && typeof accessToken === 'string') {
+      try {
+        const tokenParts = accessToken.split('.');
+        if (tokenParts.length >= 2) {
+          decodedToken = JSON.parse(
+            Buffer.from(tokenParts[1], 'base64').toString('utf8'),
+          );
+        }
+      } catch {
+        decodedToken = null;
+      }
+    }
+
+    // Read existing session cookie if present
+    const existingSessionCookie = cookieStore.get('fs_session')?.value;
+    let existingSession: any = null;
+    if (existingSessionCookie) {
+      try {
+        existingSession = JSON.parse(existingSessionCookie);
+      } catch {
+        existingSession = null;
+      }
+    }
+
+    const finalRole =
+      (typeof user?.role === 'string' ? user.role : user?.role?.name) ||
+      decodedToken?.role ||
+      existingSession?.role ||
+      'member';
+
+    const finalUserId =
+      user?.id || decodedToken?.sub || existingSession?.userId || '';
+    const finalEmail =
+      user?.email || decodedToken?.email || existingSession?.email || '';
+    const finalPhone = user?.phone || existingSession?.phone || '';
+    const finalStatus = user?.status || existingSession?.status || 'active';
 
     const sessionData = {
-      userId: user?.id,
-      email: user?.email,
-      phone: user?.phone,
-      role: userRole,
-      status: user?.status,
+      userId: finalUserId,
+      email: finalEmail,
+      phone: finalPhone,
+      role: finalRole,
+      status: finalStatus,
+    };
+
+    const finalUser = user || {
+      id: finalUserId,
+      email: finalEmail,
+      phone: finalPhone,
+      role: { name: finalRole },
+      status: finalStatus,
     };
 
     const res = NextResponse.json({
       success: true,
       statusCode: 200,
-      message: data.message,
+      message: data.message || 'Token refreshed successfully',
       data: {
         accessToken,
-        user: {
-          ...user,
-          role: typeof user?.role === 'string' ? { name: user.role } : user?.role,
-        },
+        user: finalUser,
       },
     });
 

@@ -71,7 +71,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        ethiopic: ["var(--font-noto-ethiopic)", "sans-serif"],
+        ethiopic: ["'Noto Sans Ethiopic'", "Nyala", "'Abyssinica SIL'", "system-ui", "sans-serif"],
       },
       minHeight: {
         touch: "48px",

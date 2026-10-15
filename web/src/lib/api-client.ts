@@ -39,7 +39,7 @@ interface RequestOptions extends Omit<RequestInit, 'body'> {
 /**
  * Invokes the BFF refresh endpoint to exchange the httpOnly cookie for a fresh access token
  */
-async function refreshAccessToken(): Promise<string | null> {
+export async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) {
     return refreshPromise;
   }
@@ -175,6 +175,19 @@ export async function apiRequest<T = any>(
       json?.error ||
       `Request failed with status code ${response.status}`;
     throw new ApiError(errorMessage, response.status, json?.errors, json);
+  }
+
+  // If response matches a paginated response with data array and meta, normalize to PaginatedResponse
+  if (json && typeof json === 'object' && Array.isArray(json.data) && json.meta) {
+    return {
+      items: json.data,
+      total: json.meta.total ?? json.data.length,
+      page: json.meta.page ?? 1,
+      limit: json.meta.limit ?? json.data.length,
+      totalPages: json.meta.totalPages ?? 1,
+      data: json.data,
+      meta: json.meta,
+    } as unknown as T;
   }
 
   // If response matches our NestJS ApiResponse envelope, unwrap data
