@@ -15,13 +15,18 @@ import { TableSkeleton } from './SkeletonLoaders';
 import { EmptyState } from './EmptyState';
 
 export interface ColumnDef<T> {
-  key: string;
-  header: string;
+  key?: string;
+  accessorKey?: string;
+  header?: string;
+  title?: string;
   sortable?: boolean;
   render?: (row: T, index: number) => React.ReactNode;
+  cell?: (row: T, index: number) => React.ReactNode;
   align?: 'left' | 'center' | 'right';
   className?: string;
 }
+
+export type Column<T> = ColumnDef<T>;
 
 interface DataTableProps<T> {
   data: T[];
@@ -40,13 +45,14 @@ interface DataTableProps<T> {
   isLoading?: boolean;
   filtersSlot?: React.ReactNode;
   exportSlot?: React.ReactNode;
+  emptyMessage?: string;
   onRowClick?: (row: T) => void;
   locale?: 'am' | 'en';
 }
 
 export function DataTable<T extends Record<string, any>>({
   data,
-  columns,
+  columns: rawColumns,
   total = data.length,
   page = 1,
   pageSize = 10,
@@ -61,9 +67,20 @@ export function DataTable<T extends Record<string, any>>({
   isLoading = false,
   filtersSlot,
   exportSlot,
+  emptyMessage,
   onRowClick,
   locale = 'am',
 }: DataTableProps<T>) {
+  const columns = React.useMemo(
+    () =>
+      rawColumns.map((col, idx) => ({
+        ...col,
+        key: col.key || col.accessorKey || `col_${idx}`,
+        render: col.render || col.cell,
+      })),
+    [rawColumns],
+  );
+
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
     () => {
@@ -163,7 +180,7 @@ export function DataTable<T extends Record<string, any>>({
                           onChange={() => toggleColumn(col.key)}
                           className="h-3.5 w-3.5 rounded border-input text-primary focus:ring-primary"
                         />
-                        <span className="truncate">{col.header}</span>
+                        <span className="truncate">{col.header || col.title || ''}</span>
                       </label>
                     ))}
                   </div>
@@ -193,7 +210,7 @@ export function DataTable<T extends Record<string, any>>({
                       } ${col.className || ''}`}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span>{col.header}</span>
+                        <span>{col.header || col.title || ''}</span>
                         {col.sortable && (
                           <span className="text-muted-foreground/80">
                             {isSorted ? (
@@ -225,7 +242,7 @@ export function DataTable<T extends Record<string, any>>({
                 <tr>
                   <td colSpan={activeColumns.length} className="p-8">
                     <EmptyState
-                      title={locale === 'am' ? 'ምንም መረጃ አልተገኘም' : 'No records found'}
+                      title={emptyMessage || (locale === 'am' ? 'ምንም መረጃ አልተገኘም' : 'No records found')}
                       description={
                         searchValue
                           ? locale === 'am'

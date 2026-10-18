@@ -77,6 +77,15 @@ export class PostsService {
     };
   }
 
+  private validateAndSanitizeHtml(content: string): string {
+    if (!content) return '';
+    const unsafeRegex = /<script\b|<iframe\b|<object\b|<embed\b|<applet\b|javascript:\s*|\son\w+\s*=/i;
+    if (unsafeRegex.test(content)) {
+      throw new BadRequestException('Unsafe HTML detected: script, iframe, and inline event handlers are prohibited');
+    }
+    return content;
+  }
+
   // =========================================================================
   // 2. POSTS CRUD, SCHEDULING, IMAGE UPLOAD & TODAY FEED
   // =========================================================================
@@ -90,13 +99,14 @@ export class PostsService {
       throw new BadRequestException('expiresAt must be later than publishAt');
     }
 
+    const sanitizedBody = this.validateAndSanitizeHtml(dto.body);
     const isUrgent = dto.type === PostType.urgent ? true : (dto.isUrgent ?? false);
 
     const post = await this.prisma.post.create({
       data: {
         type: dto.type,
         title: dto.title,
-        body: dto.body,
+        body: sanitizedBody,
         imageUrl: dto.imageUrl ?? null,
         isUrgent,
         publishAt,
@@ -272,13 +282,15 @@ export class PostsService {
 
     const nextType = dto.type ?? existing.type;
     const nextUrgent = nextType === PostType.urgent ? true : (dto.isUrgent ?? existing.isUrgent);
+    const sanitizedBody =
+      dto.body !== undefined ? this.validateAndSanitizeHtml(dto.body) : undefined;
 
     const updated = await this.prisma.post.update({
       where: { id },
       data: {
         type: dto.type,
         title: dto.title,
-        body: dto.body,
+        body: sanitizedBody,
         imageUrl: dto.imageUrl,
         isUrgent: nextUrgent,
         publishAt: dto.publishAt ? nextPublishAt : undefined,

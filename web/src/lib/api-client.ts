@@ -154,7 +154,9 @@ export async function apiRequest<T = any>(
   if (
     contentType.includes('application/pdf') ||
     contentType.includes('application/vnd.openxmlformats-officedocument') ||
-    contentType.includes('application/octet-stream')
+    contentType.includes('application/octet-stream') ||
+    contentType.includes('application/sql') ||
+    contentType.includes('text/csv')
   ) {
     if (!response.ok) {
       throw new ApiError('Failed to download file', response.status);
@@ -205,6 +207,23 @@ export const apiClient = {
   post: <T = any>(endpoint: string, body?: any, options?: RequestOptions) =>
     apiRequest<T>(endpoint, { ...options, method: 'POST', body }),
 
+  postFormData: <T = any>(endpoint: string, formData: FormData, options?: RequestOptions) =>
+    apiRequest<T>(endpoint, { ...options, method: 'POST', body: formData }),
+
+  getBlob: async (endpoint: string, options?: RequestOptions): Promise<Blob> => {
+    let url = endpoint.startsWith('http')
+      ? endpoint
+      : `${BASE_API_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    const headers: Record<string, string> = {
+      ...((options?.headers as Record<string, string>) || {}),
+    };
+    if (inMemoryAccessToken) {
+      headers['Authorization'] = `Bearer ${inMemoryAccessToken}`;
+    }
+    const res = await fetch(url, { ...options, headers });
+    return res.blob();
+  },
+
   put: <T = any>(endpoint: string, body?: any, options?: RequestOptions) =>
     apiRequest<T>(endpoint, { ...options, method: 'PUT', body }),
 
@@ -214,3 +233,4 @@ export const apiClient = {
   delete: <T = any>(endpoint: string, options?: RequestOptions) =>
     apiRequest<T>(endpoint, { ...options, method: 'DELETE' }),
 };
+

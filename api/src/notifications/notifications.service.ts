@@ -169,6 +169,47 @@ export class NotificationsService {
     };
   }
 
+  async findNotificationHistory(query: QueryNotificationDto) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.NotificationWhereInput = {};
+
+    if (query.search && query.search.trim()) {
+      const term = query.search.trim();
+      where.OR = [{ title: { contains: term } }, { body: { contains: term } }];
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.notification.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { sentAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              phone: true,
+              member: {
+                select: {
+                  firstName: true,
+                  fatherName: true,
+                  memberNo: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.notification.count({ where }),
+    ]);
+
+    return paginate(items, total, page, limit);
+  }
+
   /**
    * Automatically create notifications for all active users when an urgent post goes live.
    * Ensures idempotency so a post only triggers notifications once.

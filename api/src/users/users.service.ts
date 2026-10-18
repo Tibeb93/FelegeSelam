@@ -212,4 +212,10 @@ export class UsersService {
 
     return updatedUser;
   }
+
+  async getRoles() {
+    return this.prisma.role.findMany({
+      orderBy: { id: 'asc' },
+    });
+  }
 }

@@ -39,6 +39,15 @@ export class NotificationsController {
     return this.notificationsService.findMyNotifications(userId, query);
   }
 
+  @Get('history')
+  @Roles('super_admin', 'admin', 'content_manager')
+  @ApiOperation({
+    summary: 'List notification dispatch history with pagination and search (Admin/Content Manager)',
+  })
+  async findNotificationHistory(@Query() query: QueryNotificationDto) {
+    return this.notificationsService.findNotificationHistory(query);
+  }
+
   @Patch('read-all')
   @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
   @ApiOperation({ summary: 'Mark all unread notifications as read for current user' })
@@ -55,7 +64,7 @@ export class NotificationsController {
   }
 
   @Post('send')
-  @Roles('super_admin', 'admin')
+  @Roles('super_admin', 'admin', 'content_manager')
   @ApiOperation({
     summary: 'Admin endpoint to send notifications to everyone, a department, or one user',
   })

@@ -22,6 +22,13 @@ export class UsersController {
     return this.usersService.findAll(query);
   }
 
+  @Get('roles')
+  @Roles('super_admin')
+  @ApiOperation({ summary: 'List all system roles (super_admin only)' })
+  async getRoles() {
+    return this.usersService.getRoles();
+  }
+
   @Get(':id')
   @Roles('super_admin')
   @ApiParam({ name: 'id', description: 'User UUID' })
