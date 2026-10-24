@@ -427,7 +427,7 @@ export default function FormResponsesPage({
                   {locale === 'am' ? 'የቀረቡ ምላሾች (Answers)' : 'Submitted Answers'}
                 </h4>
 
-                {form?.formSchema?.fields?.map((f, fIdx) => {
+                {form?.formSchema?.fields?.map((f: any, fIdx: number) => {
                   const answer = selectedResponse.answers[f.name];
                   const label = f.labelAm || f.labelEn || f.name;
 

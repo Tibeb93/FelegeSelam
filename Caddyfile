@@ -1,0 +1,33 @@
+# ==============================================================================
+# Caddy Alternative Configuration (Automatic Zero-Config TLS)
+# ==============================================================================
+
+{$DOMAIN_NAME:localhost} {
+    encode gzip zstd
+
+    # Security Headers
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    # API Proxy
+    handle /api/* {
+        reverse_proxy api:3000 {
+            header_up X-Real-IP {remote_host}
+        }
+    }
+
+    # Uploads Static Proxy
+    handle /uploads/* {
+        reverse_proxy api:3000
+    }
+
+    # Web Frontend Proxy
+    handle {
+        reverse_proxy web:3001
+    }
+}

@@ -20,6 +20,24 @@ export class SettingsController {
     return this.settingsService.getPublicSettings();
   }
 
+  @Get('calendar')
+  @Public()
+  @ApiOperation({
+    summary: 'Public Ethiopian calendar data with fasting seasons and feasts',
+  })
+  async getCalendarData() {
+    return this.settingsService.getCalendarSettings();
+  }
+
+  @Put('calendar')
+  @ApiBearerAuth('JWT-auth')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Update Ethiopian calendar data (Admin)' })
+  async updateCalendarData(@Body() body: Record<string, any>) {
+    const value = body.settingValue !== undefined ? body.settingValue : body;
+    return this.settingsService.upsertSetting('ethiopian_calendar', value);
+  }
+
   @Get()
   @ApiBearerAuth('JWT-auth')
   @Roles('super_admin', 'admin')

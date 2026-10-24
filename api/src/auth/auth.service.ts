@@ -252,29 +252,6 @@ export class AuthService {
     });
 
     if (!storedToken) {
-      // Check if token was recently rotated (within 30 seconds) to tolerate concurrent requests
-      const recentToken = await this.prisma.refreshToken.findFirst({
-        where: {
-          userId: payload.sub,
-          tokenHash,
-          revoked: true,
-          createdAt: { gt: new Date(Date.now() - 30 * 1000) },
-        },
-        include: {
-          user: {
-            include: { role: true },
-          },
-        },
-      });
-
-      if (recentToken) {
-        return this.generateTokens(
-          recentToken.user.id,
-          recentToken.user.email,
-          recentToken.user.role.name,
-        );
-      }
-
       throw new UnauthorizedException('Refresh token revoked or not found');
     }
 

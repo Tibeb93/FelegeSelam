@@ -24,6 +24,8 @@ export interface PaginatedResponse<T> {
   };
 }
 
+export type PaginatedResult<T> = PaginatedResponse<T>;
+
 export type UserRoleName =
   | 'super_admin'
   | 'admin'
@@ -44,6 +46,7 @@ export interface User {
   phone?: string | null;
   roleId: string;
   role?: Role;
+  member?: Member | null;
   status: 'pending' | 'active' | 'suspended';
   twoFactorEnabled?: boolean;
   lastLogin?: string | null;
@@ -170,8 +173,10 @@ export interface Member {
 
 export interface Course {
   id: string;
+  title?: string;
   titleAm: string;
   titleEn?: string | null;
+  code?: string | null;
   description?: string | null;
   level?: string | null;
   teacherId?: string | null;
@@ -203,6 +208,9 @@ export interface Lesson {
   content?: string | null;
   mediaType: 'text' | 'pdf' | 'audio' | 'video' | 'link';
   fileUrl?: string | null;
+  pdfUrl?: string | null;
+  audioUrl?: string | null;
+  videoUrl?: string | null;
   orderNo: number;
   published: boolean;
   createdAt?: string;
@@ -464,6 +472,8 @@ export interface Mezmur {
   updatedAt: string;
 }
 
+export type MezmurItem = Mezmur;
+
 // -------------------------------------------------------------
 // POSTS (DAILY SPIRITUAL CONTENT)
 // -------------------------------------------------------------
@@ -491,6 +501,8 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
 }
+
+export type PostItem = Post;
 
 // -------------------------------------------------------------
 // EVENTS & RSVPS
@@ -526,7 +538,9 @@ export interface EventItem {
   description?: string | null;
   location?: string | null;
   startAt: string;
+  startDate?: string;
   endAt?: string | null;
+  endDate?: string | null;
   capacity?: number | null;
   createdBy?: string | null;
   createdAt: string;
@@ -638,8 +652,10 @@ export interface FormItem {
   title: string;
   description?: string | null;
   formSchema: FormSchemaDefinition;
+  schema?: FormSchemaDefinition;
   status: FormStatus;
   openUntil?: string | null;
+  deadline?: string | null;
   allowOneResponsePerMember: boolean;
   createdBy?: string | null;
   createdAt: string;
@@ -648,6 +664,8 @@ export interface FormItem {
     responses?: number;
   };
 }
+
+export type CustomForm = FormItem;
 
 export type FormResponseStatus = 'submitted' | 'approved' | 'rejected';
 
@@ -904,4 +922,73 @@ export interface BackupFileInfo {
   createdAt: string;
 }
 
+// -------------------------------------------------------------
+// CALENDAR & FEASTS (PHASE 13)
+// -------------------------------------------------------------
 
+export interface CalendarFastingSeason {
+  id: string;
+  nameAm: string;
+  nameEn: string;
+  durationDays?: number;
+  startMonthAm?: string;
+  startDay?: number;
+  endMonthAm?: string;
+  endDay?: number;
+  type: 'fixed' | 'movable' | 'weekly';
+  isStrict: boolean;
+  descriptionAm: string;
+  descriptionEn: string;
+}
+
+export interface CalendarMajorFeast {
+  id: string;
+  nameAm: string;
+  nameEn: string;
+  monthAm?: string;
+  day?: number;
+  gregorianEquivalent?: string;
+  type?: 'fixed' | 'movable';
+  isLordFeast: boolean;
+  descriptionAm: string;
+  descriptionEn: string;
+}
+
+export interface CalendarMonthlyFeast {
+  day: number;
+  nameAm: string;
+  nameEn: string;
+}
+
+export interface CalendarDataResponse {
+  fastingSeasons: CalendarFastingSeason[];
+  majorFeasts: CalendarMajorFeast[];
+  monthlyFeasts: CalendarMonthlyFeast[];
+}
+
+export interface MemberFormSubmission {
+  id: string;
+  formId: string;
+  memberId?: string | null;
+  answers: Record<string, any>;
+  status: 'submitted' | 'approved' | 'rejected';
+  reviewNote?: string | null;
+  reviewerNote?: string | null;
+  reviewedBy?: string | null;
+  submittedAt: string;
+  form: {
+    id: string;
+    title: string;
+    description?: string | null;
+    status: 'draft' | 'open' | 'closed';
+    openUntil?: string | null;
+  };
+}
+
+export interface MemberPrivacySettings {
+  showPhoneToClassmates: boolean;
+  showEmailToClassmates: boolean;
+  showPhotoPublicly: boolean;
+  emailNotifications: boolean;
+  smsNotifications: boolean;
+}

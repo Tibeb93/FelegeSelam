@@ -272,6 +272,48 @@ export class MembersService {
   }
 
   /**
+   * Find profile of logged-in user's member record
+   */
+  async findMyProfile(user: any): Promise<any> {
+    const member = await this.prisma.member.findFirst({
+      where: {
+        OR: [
+          { userId: user.id },
+          ...(user.member?.id ? [{ id: user.member.id }] : []),
+        ],
+        deletedAt: null,
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException('No member record associated with current user');
+    }
+
+    return this.findOne(member.id);
+  }
+
+  /**
+   * Update profile of logged-in user's member record
+   */
+  async updateMyProfile(user: any, dto: UpdateMemberDto): Promise<Member> {
+    const member = await this.prisma.member.findFirst({
+      where: {
+        OR: [
+          { userId: user.id },
+          ...(user.member?.id ? [{ id: user.member.id }] : []),
+        ],
+        deletedAt: null,
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException('No member record associated with current user');
+    }
+
+    return this.update(member.id, dto);
+  }
+
+  /**
    * Update member
    */
   async update(id: string, dto: UpdateMemberDto): Promise<Member> {
@@ -709,5 +751,99 @@ export class MembersService {
    */
   async getImportTemplate(): Promise<Buffer> {
     return this.exportService.generateImportTemplateExcel();
+  }
+
+  /**
+   * Export complete member data (GDPR / Data Safety)
+   */
+  async exportMyData(user: any): Promise<any> {
+    const member = await this.prisma.member.findFirst({
+      where: {
+        OR: [
+          { userId: user.id },
+          ...(user.member?.id ? [{ id: user.member.id }] : []),
+        ],
+        deletedAt: null,
+      },
+      include: {
+        department: true,
+        enrollments: {
+          include: {
+            course: true,
+            grades: true,
+          },
+        },
+        attendances: {
+          include: {
+            course: true,
+          },
+        },
+        contributions: true,
+        certificates: {
+          include: {
+            course: true,
+          },
+        },
+        formResponses: {
+          include: {
+            form: true,
+          },
+        },
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException('No member profile associated with current user');
+    }
+
+    return {
+      exportedAt: new Date().toISOString(),
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
+      member,
+    };
+  }
+
+  /**
+   * Delete or deactivate own member account (GDPR / Data Safety)
+   */
+  async deleteMyAccount(user: any): Promise<{ message: string }> {
+    const member = await this.prisma.member.findFirst({
+      where: {
+        OR: [
+          { userId: user.id },
+          ...(user.member?.id ? [{ id: user.member.id }] : []),
+        ],
+        deletedAt: null,
+      },
+    });
+
+    if (member) {
+      await this.prisma.member.update({
+        where: { id: member.id },
+        data: {
+          deletedAt: new Date(),
+          status: 'inactive',
+        },
+      });
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { status: 'suspended' },
+    });
+
+    await this.prisma.refreshToken.updateMany({
+      where: { userId: user.id },
+      data: { revoked: true },
+    });
+
+    return {
+      message: 'Account successfully deactivated and member data removed.',
+    };
   }
 }

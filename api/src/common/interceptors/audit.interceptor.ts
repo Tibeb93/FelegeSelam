@@ -4,6 +4,30 @@ import { tap } from 'rxjs/operators';
 import { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
 
+function redactSensitive(obj: any): any {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(redactSensitive);
+  const copy: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const lower = key.toLowerCase();
+    if (
+      lower.includes('password') ||
+      lower.includes('secret') ||
+      lower.includes('token') ||
+      lower.includes('code') ||
+      lower.includes('hash') ||
+      lower.includes('otp')
+    ) {
+      copy[key] = '[REDACTED]';
+    } else if (value && typeof value === 'object') {
+      copy[key] = redactSensitive(value);
+    } else {
+      copy[key] = value;
+    }
+  }
+  return copy;
+}
+
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
   private readonly logger = new Logger(AuditInterceptor.name);
@@ -61,7 +85,7 @@ export class AuditInterceptor implements NestInterceptor {
                   ? isExport || (responseData as any)?.getStream
                     ? { exported: true, type: isExport ? 'export' : 'stream' }
                     : typeof responseData === 'object'
-                      ? responseData
+                      ? redactSensitive(responseData)
                       : null
                   : null,
                 ip: String(ip),

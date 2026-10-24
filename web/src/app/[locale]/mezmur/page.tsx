@@ -1,0 +1,426 @@
+'use client';
+
+import React, { useState, useRef, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+import {
+  Music,
+  Play,
+  Pause,
+  Search,
+  Volume2,
+  VolumeX,
+  FileText,
+  Heart,
+  ChevronRight,
+  Disc,
+  Share2,
+} from 'lucide-react';
+import { apiRequest } from '@/lib/api-client';
+import { MezmurItem, MezmurCategory, PaginatedResult } from '@/types/api';
+import { PublicHeader } from '@/components/public/PublicHeader';
+import { PublicFooter } from '@/components/public/PublicFooter';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/providers/AuthProvider';
+
+interface MezmurPageProps {
+  params: { locale: string };
+}
+
+export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProps) {
+  const t = useTranslations('Website');
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [activeMezmur, setActiveMezmur] = useState<MezmurItem | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [selectedLyricsMezmur, setSelectedLyricsMezmur] = useState<MezmurItem | null>(null);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Fetch categories
+  const { data: categoriesData } = useQuery<{ data: MezmurCategory[] }>({
+    queryKey: ['mezmurs', 'categories'],
+    queryFn: () => apiRequest('/mezmurs/categories'),
+  });
+
+  const categories = categoriesData?.data || [];
+
+  // Fetch mezmurs
+  const { data: mezmursData, isLoading } = useQuery<PaginatedResult<MezmurItem>>({
+    queryKey: ['mezmurs', 'public', searchQuery, selectedCategory],
+    queryFn: () =>
+      apiRequest('/mezmurs/public', {
+        params: {
+          search: searchQuery || undefined,
+          categoryId: selectedCategory || undefined,
+          limit: 30,
+        },
+      }),
+  });
+
+  const mezmurs = mezmursData?.data || [];
+
+  // Audio playback controls
+  const handlePlayMezmur = (m: MezmurItem) => {
+    if (activeMezmur?.id === m.id) {
+      if (isPlaying) {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current?.play();
+        setIsPlaying(true);
+      }
+    } else {
+      setActiveMezmur(m);
+      setIsPlaying(true);
+      if (audioRef.current) {
+        audioRef.current.src = m.audioUrl || '';
+        audioRef.current.play().catch(() => setIsPlaying(false));
+      }
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+      setDuration(audioRef.current.duration || 0);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = Number(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const formatTime = (secs: number) => {
+    if (isNaN(secs)) return '0:00';
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  // Add / Remove Favorite mutation
+  const favoriteMutation = useMutation({
+    mutationFn: async ({ id, isFav }: { id: string; isFav: boolean }) => {
+      if (isFav) {
+        return apiRequest(`/mezmurs/${id}/favorite`, { method: 'DELETE' });
+      } else {
+        return apiRequest(`/mezmurs/${id}/favorite`, { method: 'POST' });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mezmurs'] });
+    },
+  });
+
+  return (
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <PublicHeader locale={locale} />
+
+      <main id="main-content" className="flex-1 container mx-auto px-4 py-10 md:py-16 space-y-8" tabIndex={-1}>
+        {/* Header */}
+        <div className="space-y-2 text-center max-w-2xl mx-auto">
+          <Badge variant="outline" className="text-secondary border-secondary/40 px-3 py-1 text-xs uppercase font-semibold">
+            {t('navMezmur')}
+          </Badge>
+          <h1 className="text-3xl font-extrabold text-foreground sm:text-4xl">
+            {locale === 'am' ? 'የኦርቶዶክስ ተዋሕዶ መዝሙራት ቤተ-መጻሕፍት' : 'Orthodox Mezmur Library'}
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            {locale === 'am'
+              ? 'የበዓላት፣ የቅዱሳን መታሰቢያና የንስሐ መዝሙራትን በድምፅ ያዳምጡ፣ ግጥማቸውን ያንብቡ'
+              : 'Listen to hymns of praise, memorial feasts, and repentance with full lyrics and audio recordings.'}
+          </p>
+        </div>
+
+        {/* Search & Category Filter Bar */}
+        <div className="space-y-3 rounded-2xl border border-border bg-card p-4 shadow-xs">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder={t('searchMezmur')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 min-h-[48px] rounded-xl text-base"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors min-h-[36px] ${
+                selectedCategory === null
+                  ? 'bg-primary text-primary-foreground shadow-xs'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {locale === 'am' ? 'ሁሉም ክፍሎች' : 'All Categories'}
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors min-h-[36px] ${
+                  selectedCategory === cat.id
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                {locale === 'am' ? cat.nameAm : cat.nameEn || cat.nameAm}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Sticky Audio Player if active */}
+        {activeMezmur && (
+          <div className="sticky top-20 z-30 rounded-2xl border-2 border-secondary/40 bg-card/95 backdrop-blur-md p-4 shadow-xl animate-in slide-in-from-top-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground shadow-sm shrink-0">
+                  <Disc className={`h-6 w-6 ${isPlaying ? 'animate-spin' : ''}`} />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-foreground line-clamp-1">
+                    {activeMezmur.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {activeMezmur.singer || (locale === 'am' ? 'የሰንበት ት/ቤት መዘምራን' : 'Sunday School Choir')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress & Controls */}
+              <div className="flex-1 max-w-xl flex flex-col gap-1.5">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground font-mono w-10 text-right">
+                    {formatTime(currentTime)}
+                  </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max={duration || 100}
+                    value={currentTime}
+                    onChange={handleSeek}
+                    className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                    aria-label="Seek audio"
+                  />
+                  <span className="text-xs text-muted-foreground font-mono w-10">
+                    {formatTime(duration)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-center gap-4">
+                  <Button
+                    onClick={() => handlePlayMezmur(activeMezmur)}
+                    size="icon"
+                    className="h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
+                    aria-label={isPlaying ? 'Pause' : 'Play'}
+                  >
+                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
+                  </Button>
+
+                  <button
+                    onClick={toggleMute}
+                    className="p-2 text-muted-foreground hover:text-foreground"
+                    aria-label={isMuted ? 'Unmute' : 'Mute'}
+                  >
+                    {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                  </button>
+
+                  {activeMezmur.lyrics && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedLyricsMezmur(activeMezmur)}
+                      className="text-xs gap-1.5 rounded-lg text-secondary font-semibold"
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span>{t('lyrics')}</span>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <audio
+              ref={audioRef}
+              onTimeUpdate={handleTimeUpdate}
+              onEnded={() => setIsPlaying(false)}
+              className="hidden"
+            />
+          </div>
+        )}
+
+        {/* Mezmurs List Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-28 rounded-2xl bg-muted/40 animate-pulse border border-border" />
+            ))}
+          </div>
+        ) : mezmurs.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border p-12 text-center space-y-3">
+            <Music className="h-10 w-10 text-muted-foreground mx-auto" />
+            <h2 className="text-base font-bold text-foreground">
+              {locale === 'am' ? 'ምንም መዝሙር አልተገኘም' : 'No mezmurs found'}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {locale === 'am' ? 'እባክዎ የተለየ የፍለጋ ቃል ይሞክሩ።' : 'Try searching with another keyword.'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {mezmurs.map((m) => {
+              const isThisPlaying = activeMezmur?.id === m.id && isPlaying;
+              return (
+                <Card
+                  key={m.id}
+                  className={`border-border bg-card shadow-xs transition-all hover:border-primary/50 ${
+                    activeMezmur?.id === m.id ? 'border-primary ring-1 ring-primary' : ''
+                  }`}
+                >
+                  <CardHeader className="p-4 flex flex-row items-center justify-between gap-3 space-y-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <Button
+                        onClick={() => handlePlayMezmur(m)}
+                        size="icon"
+                        className={`h-11 w-11 rounded-xl shrink-0 transition-transform ${
+                          isThisPlaying
+                            ? 'bg-secondary text-secondary-foreground scale-105 shadow-md'
+                            : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        }`}
+                        aria-label={`Play ${m.title}`}
+                      >
+                        {isThisPlaying ? (
+                          <Pause className="h-5 w-5" />
+                        ) : (
+                          <Play className="h-5 w-5 ml-0.5" />
+                        )}
+                      </Button>
+
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-sm font-bold text-foreground truncate">
+                          {m.title}
+                        </CardTitle>
+                        <CardDescription className="text-xs text-muted-foreground truncate">
+                          {m.singer || (locale === 'am' ? 'የሰንበት ት/ቤት መዘምራን' : 'Sunday School Choir')}
+                        </CardDescription>
+                        {m.category && (
+                          <span className="inline-block text-[11px] font-semibold text-secondary mt-0.5">
+                            {locale === 'am' ? m.category.nameAm : m.category.nameEn || m.category.nameAm}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      {m.lyrics && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedLyricsMezmur(m)}
+                          className="p-2 text-muted-foreground hover:text-foreground rounded-lg"
+                          title={t('lyrics')}
+                          aria-label={`View lyrics of ${m.title}`}
+                        >
+                          <FileText className="h-4 w-4" />
+                        </button>
+                      )}
+
+                      {user && (
+                        <button
+                          type="button"
+                          onClick={() => favoriteMutation.mutate({ id: m.id, isFav: !!m.isFavorite })}
+                          className={`p-2 rounded-lg transition-colors ${
+                            m.isFavorite
+                              ? 'text-red-600 fill-red-600'
+                              : 'text-muted-foreground hover:text-red-600'
+                          }`}
+                          aria-label="Add to favorites"
+                        >
+                          <Heart className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </CardHeader>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Lyrics Modal / Drawer */}
+        {selectedLyricsMezmur && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+            <div className="w-full max-w-lg rounded-3xl border border-border bg-card p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <div>
+                  <span className="text-xs font-semibold text-primary block">
+                    {locale === 'am' ? 'የመዝሙር ግጥም' : 'Sacred Lyrics'}
+                  </span>
+                  <h3 className="text-lg font-bold text-foreground">
+                    {selectedLyricsMezmur.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedLyricsMezmur.singer}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedLyricsMezmur(null)}
+                  className="rounded-xl"
+                >
+                  {t('closeLyrics')}
+                </Button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-3 pr-2 text-sm leading-relaxed whitespace-pre-wrap font-ethiopic text-foreground/90">
+                {selectedLyricsMezmur.lyrics || (locale === 'am' ? 'ምንም ግጥም አልተገኘም።' : 'No lyrics recorded.')}
+              </div>
+
+              <div className="pt-2 border-t border-border flex items-center justify-between">
+                <Button
+                  onClick={() => handlePlayMezmur(selectedLyricsMezmur)}
+                  className="gap-2 bg-primary text-primary-foreground rounded-xl min-h-[44px]"
+                >
+                  <Play className="h-4 w-4" />
+                  <span>{t('play')}</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setSelectedLyricsMezmur(null)}
+                  className="min-h-[44px] rounded-xl"
+                >
+                  {locale === 'am' ? 'ዝጋ' : 'Close'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <PublicFooter locale={locale} />
+    </div>
+  );
+}

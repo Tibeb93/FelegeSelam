@@ -123,6 +123,34 @@ export class MembersController {
     return this.membersService.getDepartments();
   }
 
+  @Get('me/profile')
+  @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
+  @ApiOperation({ summary: 'Get current logged-in member full profile' })
+  async getMyProfile(@CurrentUser() user: any) {
+    return this.membersService.findMyProfile(user);
+  }
+
+  @Put('me/profile')
+  @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
+  @ApiOperation({ summary: 'Update current logged-in member profile' })
+  async updateMyProfile(@CurrentUser() user: any, @Body() dto: UpdateMemberDto) {
+    return this.membersService.updateMyProfile(user, dto);
+  }
+
+  @Get('me/data-export')
+  @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
+  @ApiOperation({ summary: 'Export all personal data belonging to current member (GDPR data safety)' })
+  async exportMyData(@CurrentUser() user: any) {
+    return this.membersService.exportMyData(user);
+  }
+
+  @Delete('me/account')
+  @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
+  @ApiOperation({ summary: 'Deactivate own account and soft-delete member record (GDPR data safety)' })
+  async deleteMyAccount(@CurrentUser() user: any) {
+    return this.membersService.deleteMyAccount(user);
+  }
+
   @Get(':id')
   @Roles('super_admin', 'admin', 'teacher', 'member')
   @ApiParam({ name: 'id', description: 'Member UUID' })
@@ -203,7 +231,7 @@ export class MembersController {
   }
 
   @Get(':id/id-card')
-  @Roles('super_admin', 'admin', 'teacher')
+  @Roles('super_admin', 'admin', 'teacher', 'member')
   @ApiParam({ name: 'id', description: 'Member UUID' })
   @ApiOperation({ summary: 'Download member ID Card (PDF with photo & QR code)' })
   async getIdCard(

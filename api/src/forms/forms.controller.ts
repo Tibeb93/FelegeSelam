@@ -249,6 +249,14 @@ export class FormsController {
     return this.formsService.findFormResponses(id, query);
   }
 
+  @Get('submissions/me')
+  @ApiBearerAuth('JWT-auth')
+  @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
+  @ApiOperation({ summary: 'List form submissions made by the logged-in member' })
+  async findMySubmissions(@CurrentUser() user: any) {
+    return this.formsService.findMyResponses(user);
+  }
+
   @Get('responses/:responseId')
   @ApiBearerAuth('JWT-auth')
   @Roles('super_admin', 'admin')

@@ -646,4 +646,40 @@ export class FormsService {
       };
     }
   }
+
+  /**
+   * Find form submissions made by current user / member
+   */
+  async findMyResponses(user: any) {
+    if (!user) return [];
+    const member = await this.prisma.member.findFirst({
+      where: {
+        OR: [
+          { userId: user.id },
+          ...(user.member?.id ? [{ id: user.member.id }] : []),
+        ],
+        deletedAt: null,
+      },
+    });
+
+    if (!member) {
+      return [];
+    }
+
+    return this.prisma.formResponse.findMany({
+      where: { memberId: member.id },
+      include: {
+        form: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            status: true,
+            openUntil: true,
+          },
+        },
+      },
+      orderBy: { submittedAt: 'desc' },
+    });
+  }
 }

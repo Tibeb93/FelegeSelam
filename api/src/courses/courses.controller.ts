@@ -23,7 +23,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { EnrollmentStatus } from '@prisma/client';
+import { CourseStatus, EnrollmentStatus } from '@prisma/client';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto, UpdateCourseDto, QueryCourseDto } from './dto/course.dto';
 import {
@@ -40,7 +40,7 @@ import {
 } from './dto/enrollment.dto';
 import { RecordSessionAttendanceDto, QueryAttendanceDto } from './dto/attendance.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles, CurrentUser } from '../common/decorators/auth.decorator';
+import { Roles, Public, CurrentUser } from '../common/decorators/auth.decorator';
 
 @ApiTags('Courses & Lessons')
 @ApiBearerAuth('JWT-auth')
@@ -50,8 +50,24 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   // =========================================================================
-  // 1. COURSES CRUD
+  // 1. COURSES CRUD & PUBLIC ACCESS
   // =========================================================================
+
+  @Get('public')
+  @Public()
+  @ApiOperation({
+    summary: 'Public list of open courses with lessons and enrollment counts',
+  })
+  async findPublicCourses(@Query() query: QueryCourseDto) {
+    return this.coursesService.findAllCourses({ ...query, status: CourseStatus.open });
+  }
+
+  @Get('public/:id')
+  @Public()
+  @ApiOperation({ summary: 'Public course details with published lessons' })
+  async findPublicCourseDetails(@Param('id', ParseUUIDPipe) id: string) {
+    return this.coursesService.findOneCourse(id);
+  }
 
   @Post()
   @Roles('super_admin', 'admin')

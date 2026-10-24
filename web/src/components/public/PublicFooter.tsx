@@ -1,0 +1,186 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Church, Cross, Mail, Phone, MapPin, Heart, ExternalLink } from 'lucide-react';
+
+interface PublicFooterProps {
+  locale: string;
+}
+
+export function PublicFooter({ locale }: PublicFooterProps) {
+  const t = useTranslations('Website');
+  const tCommon = useTranslations('Common');
+
+  return (
+    <footer className="border-t border-border bg-card text-foreground" aria-label="Website Footer">
+      <div className="container mx-auto px-4 py-12 md:py-16">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+          {/* Column 1: School Profile & Motto */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-secondary shadow-md">
+                <Cross className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold tracking-wider text-secondary uppercase">
+                  {tCommon('churchName')}
+                </p>
+                <h3 className="text-base font-bold text-foreground">
+                  {tCommon('schoolName')}
+                </h3>
+              </div>
+            </div>
+
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {locale === 'am'
+                ? 'በደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን አዕማደ ሰላም ሰንበት ትምህርት ቤት፤ የኦርቶዶክሳዊ ተዋሕዶ እምነት፣ ሥርዓትና ትውፊት ማዕከል ነው።'
+                : 'Aemade Selam Sunday School at Debre Selam St. Stephen Church, fostering faith, divine knowledge, and holy tradition.'}
+            </p>
+
+            <div className="inline-block rounded-lg bg-secondary/15 px-3 py-1.5 text-xs font-semibold text-secondary">
+              {locale === 'am'
+                ? 'መሪ ቃል: በሃይማኖት ጽኑ፥ በመልካም ምግባር አብሩ'
+                : 'Motto: Firm in Faith, Shining in Good Deeds'}
+            </div>
+          </div>
+
+          {/* Column 2: Quick Links */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-primary">
+              {locale === 'am' ? 'ፈጣን ማውጫ' : 'Quick Links'}
+            </h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link
+                  href={`/${locale}`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {t('navHome')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/about`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {t('navAbout')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/news`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {t('navNews')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/calendar`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {t('navCalendar')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/contact`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {t('navContact')}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Spiritual Content & Services */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-primary">
+              {locale === 'am' ? 'መንፈሳዊ አገልግሎቶች' : 'Spiritual Services'}
+            </h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link
+                  href={`/${locale}/mezmur`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {t('navMezmur')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/courses`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {t('navCourses')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/register`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {t('navRegister')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/portal`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {t('navPortal')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/verify/SAMPLE-CODE`}
+                  className="hover:text-primary transition-colors focus:underline"
+                >
+                  {locale === 'am' ? 'የምስክር ወረቀት ማረጋገጫ' : 'Certificate Verification'}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Contact & Location */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-primary">
+              {locale === 'am' ? 'የመገናኛ አድራሻ' : 'Contact & Location'}
+            </h4>
+            <div className="space-y-2.5 text-sm text-muted-foreground">
+              <div className="flex items-start gap-2.5">
+                <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>
+                  {locale === 'am'
+                    ? 'አዲስ አበባ፣ ኢትዮጵያ (ደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን)'
+                    : 'Addis Ababa, Ethiopia (Debre Selam St. Stephen Church)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Phone className="h-4 w-4 text-primary shrink-0" />
+                <span>+251 91 123 4567 / +251 11 551 2345</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Mail className="h-4 w-4 text-primary shrink-0" />
+                <span>info@aemadeselam.org</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="mt-12 border-t border-border/80 pt-6 flex flex-col items-center justify-between gap-4 text-xs text-muted-foreground sm:flex-row">
+          <p>
+            © {new Date().getFullYear()} {tCommon('schoolName')}. {locale === 'am' ? 'መብቱ በሕግ የተጠበቀ ነው።' : 'All rights reserved.'}
+          </p>
+          <div className="flex items-center gap-2">
+            <span>{locale === 'am' ? 'በፍቅርና በጸሎት የተዘጋጀ' : 'Built with faith and prayer'}</span>
+            <Heart className="h-3.5 w-3.5 text-red-600 fill-red-600" aria-hidden="true" />
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

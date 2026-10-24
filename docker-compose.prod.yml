@@ -1,0 +1,175 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. MySQL Database (utf8mb4, persistent volume, health checks)
+  # ----------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: aemade_prod_mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_production_password_secure}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-aemade_selam}
+      MYSQL_USER: ${MYSQL_USER:-aemade_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-aemade_user_password_secure}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_production_password_secure}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      - aemade_internal
+
+  # ----------------------------------------------------------------------------
+  # 2. NestJS Backend API (multi-stage build, non-root user, automatic migrations)
+  # ----------------------------------------------------------------------------
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: aemade_prod_api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_PREFIX: api/v1
+      DATABASE_URL: mysql://${MYSQL_USER:-aemade_user}:${MYSQL_PASSWORD:-aemade_user_password_secure}@mysql:3306/${MYSQL_DATABASE:-aemade_selam}?charset=utf8mb4
+      JWT_SECRET: ${JWT_SECRET:-generate_strong_64_char_secret_key_here}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-15m}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-7d}
+      SUPER_ADMIN_EMAIL: ${SUPER_ADMIN_EMAIL:-admin@aemade.org}
+      SUPER_ADMIN_PASSWORD: ${SUPER_ADMIN_PASSWORD:-Admin@123456!}
+      CORS_ORIGIN: https://${DOMAIN_NAME:-localhost},http://${DOMAIN_NAME:-localhost}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      BACKUP_STORAGE_PATH: /app/backups
+    volumes:
+      - api_uploads:/app/uploads
+      - api_backups:/app/backups
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      - aemade_internal
+
+  # ----------------------------------------------------------------------------
+  # 3. Next.js Web Frontend (multi-stage standalone build, non-root user)
+  # ----------------------------------------------------------------------------
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: /api/v1
+    container_name: aemade_prod_web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: /api/v1
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/am"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      - aemade_internal
+
+  # ----------------------------------------------------------------------------
+  # 4. Nginx Reverse Proxy (SSL Termination, Rate Limiting, Static Caching)
+  # ----------------------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: aemade_prod_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME:-localhost}
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/templates/default.conf.template:ro
+      - certbot_etc:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      - aemade_internal
+
+  # ----------------------------------------------------------------------------
+  # 5. Certbot (Automated Let's Encrypt TLS Renewal)
+  # ----------------------------------------------------------------------------
+  certbot:
+    image: certbot/certbot:latest
+    container_name: aemade_prod_certbot
+    restart: unless-stopped
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - aemade_internal
+
+# ==============================================================================
+# Persistent Named Volumes
+# ==============================================================================
+volumes:
+  mysql_data:
+    name: aemade_prod_mysql_data
+  api_uploads:
+    name: aemade_prod_api_uploads
+  api_backups:
+    name: aemade_prod_api_backups
+  certbot_etc:
+    name: aemade_prod_certbot_etc
+  certbot_www:
+    name: aemade_prod_certbot_www
+
+# ==============================================================================
+# Isolated Production Network
+# ==============================================================================
+networks:
+  aemade_internal:
+    name: aemade_prod_network
+    driver: bridge

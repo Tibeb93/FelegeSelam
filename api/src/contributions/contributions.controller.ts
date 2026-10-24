@@ -45,7 +45,7 @@ export class ContributionsController {
 
   @Get()
   @ApiBearerAuth('JWT-auth')
-  @Roles('super_admin', 'admin')
+  @Roles('super_admin', 'admin', 'member')
   @ApiOperation({
     summary: 'List contributions with filters, search, and pagination',
   })

@@ -224,7 +224,7 @@ export class CoursesService {
       where: { id },
       include: {
         lessons: {
-          where: user?.role === 'member' ? { published: true } : undefined,
+          where: (!user || user?.role === 'member') ? { published: true } : undefined,
           orderBy: { orderNo: 'asc' },
         },
         _count: {
