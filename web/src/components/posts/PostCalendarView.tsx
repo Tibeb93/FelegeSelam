@@ -12,7 +12,6 @@ import {
   Sparkles,
   Newspaper,
   GraduationCap,
-  Bell,
   Clock,
 } from 'lucide-react';
 

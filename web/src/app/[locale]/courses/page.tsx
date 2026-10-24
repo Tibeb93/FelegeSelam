@@ -9,10 +9,7 @@ import {
   Search,
   Clock,
   Users,
-  GraduationCap,
   ChevronRight,
-  ShieldCheck,
-  CheckCircle2,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { Course, PaginatedResult } from '@/types/api';

@@ -9,16 +9,9 @@ import {
   CheckCircle2,
   XCircle,
   Eye,
-  Clock,
-  User,
-  Phone,
-  Church,
-  Calendar,
-  Loader2,
 } from 'lucide-react';
 import { apiClient } from '../../../../../lib/api-client';
 import { Member, PaginatedResponse } from '../../../../../types/api';
-import { StatusBadge } from '../../../../../components/ui/StatusBadge';
 import { ConfirmDialog } from '../../../../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../../../../components/ui/EmptyState';
 import { TableSkeleton } from '../../../../../components/ui/SkeletonLoaders';

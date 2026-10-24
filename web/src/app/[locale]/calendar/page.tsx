@@ -7,13 +7,6 @@ import {
   Calendar as CalendarIcon,
   Sparkles,
   ShieldAlert,
-  Clock,
-  Info,
-  ChevronLeft,
-  ChevronRight,
-  Cross,
-  Sun,
-  Flame,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { CalendarDataResponse } from '@/types/api';
@@ -48,7 +41,7 @@ export default function CalendarPage({ params: { locale } }: CalendarPageProps) 
   const [selectedMonth, setSelectedMonth] = useState<number>(1); // 1 = Meskerem
 
   // Fetch dynamic calendar data from database
-  const { data: calendarData, isLoading } = useQuery<CalendarDataResponse>({
+  const { data: calendarData } = useQuery<CalendarDataResponse>({
     queryKey: ['settings', 'calendar'],
     queryFn: () => apiRequest('/settings/calendar'),
     staleTime: 600000,
@@ -135,7 +128,7 @@ export default function CalendarPage({ params: { locale } }: CalendarPageProps) 
                   <h2 className="text-xl font-bold text-foreground">
                     {locale === 'am' ? currentMonthData.nameAm : currentMonthData.nameEn} (2017 ዓ.ም)
                   </h2>
-                  <p className="text-xs text-secondary font-medium">{currentMonthData.season}</p>
+                  <p className="text-xs text-primary font-medium">{currentMonthData.season}</p>
                 </div>
               </div>
 
@@ -147,7 +140,7 @@ export default function CalendarPage({ params: { locale } }: CalendarPageProps) 
                     onClick={() => setSelectedMonth(m.id)}
                     className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-colors min-h-[36px] ${
                       selectedMonth === m.id
-                        ? 'bg-secondary text-secondary-foreground shadow-xs'
+                        ? 'bg-primary text-white shadow-xs'
                         : 'bg-muted/60 text-muted-foreground hover:bg-muted'
                     }`}
                   >
@@ -228,7 +221,7 @@ export default function CalendarPage({ params: { locale } }: CalendarPageProps) 
                       {locale === 'am' ? fast.nameAm : fast.nameEn}
                     </CardTitle>
                     {fast.startMonthAm && (
-                      <CardDescription className="text-xs text-secondary font-medium">
+                      <CardDescription className="text-xs text-primary font-medium">
                         {fast.startMonthAm} {fast.startDay} - {fast.endMonthAm} {fast.endDay}
                       </CardDescription>
                     )}
@@ -247,7 +240,7 @@ export default function CalendarPage({ params: { locale } }: CalendarPageProps) 
         {/* Major & Minor Feasts Section */}
         {(activeTab === 'all' || activeTab === 'feasts') && (
           <div className="space-y-4 pt-4">
-            <div className="flex items-center gap-2 text-secondary font-bold text-lg">
+            <div className="flex items-center gap-2 text-primary font-bold text-lg">
               <Sparkles className="h-5 w-5" />
               <h2>{t('majorFeasts')} ({locale === 'am' ? 'ዐበይትና ንዑሳን በዓላት' : 'Feasts of Our Lord & Saints'})</h2>
             </div>
@@ -260,8 +253,8 @@ export default function CalendarPage({ params: { locale } }: CalendarPageProps) 
                       <span
                         className={`rounded-md px-2 py-0.5 text-xs font-bold uppercase ${
                           feast.isLordFeast
-                            ? 'bg-secondary/20 text-secondary'
-                            : 'bg-primary/10 text-primary'
+                            ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/60 dark:text-primary-300'
+                            : 'bg-muted text-muted-foreground'
                         }`}
                       >
                         {feast.isLordFeast

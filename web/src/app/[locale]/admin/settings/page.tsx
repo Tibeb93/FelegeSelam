@@ -5,18 +5,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../../lib/api-client';
 import {
   SettingItem,
-  SchoolProfileSettings,
-  ContactDetailsSettings,
-  LocalizationSettings,
 } from '../../../../types/api';
 import {
-  Settings as SettingsIcon,
   Save,
   Upload,
   Globe,
   Phone,
-  Mail,
-  MapPin,
   Building,
   Image as ImageIcon,
   CheckCircle,
@@ -25,7 +19,6 @@ import {
   Smartphone,
   Monitor,
 } from 'lucide-react';
-import { Skeleton } from '../../../../components/ui/SkeletonLoaders';
 
 export default function SettingsPage({
   params: { locale },
@@ -56,7 +49,7 @@ export default function SettingsPage({
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   // Query existing settings
-  const { data: settingsData, isLoading } = useQuery<SettingItem[]>({
+  const { data: settingsData } = useQuery<SettingItem[]>({
     queryKey: ['admin-settings'],
     queryFn: () => apiClient.get<SettingItem[]>('/settings'),
   });

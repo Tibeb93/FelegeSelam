@@ -2,10 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import {
-  Church,
   ShieldCheck,
   Award,
-  Users,
   BookOpen,
   Music,
   Heart,
@@ -23,7 +21,6 @@ interface AboutPageProps {
 
 export default async function AboutPage({ params: { locale } }: AboutPageProps) {
   const t = await getTranslations({ locale, namespace: 'Website' });
-  const tCommon = await getTranslations({ locale, namespace: 'Common' });
 
   const departments = [
     {
@@ -85,14 +82,14 @@ export default async function AboutPage({ params: { locale } }: AboutPageProps) 
           <div className="mx-auto max-w-4xl space-y-8">
             <div className="rounded-3xl border border-border bg-card p-6 md:p-10 shadow-sm space-y-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-secondary shadow-xs">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white shadow-xs">
                   <Cross className="h-6 w-6" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-foreground sm:text-2xl">
                     {locale === 'am' ? 'መሠረተ አመሠራረትና አመጣጥ' : 'Foundation & Heritage'}
                   </h2>
-                  <p className="text-xs text-secondary font-semibold">
+                  <p className="text-xs text-primary font-semibold">
                     {locale === 'am' ? 'በደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን' : 'At Debre Selam Saint Stephen Church'}
                   </p>
                 </div>
@@ -117,8 +114,8 @@ export default async function AboutPage({ params: { locale } }: AboutPageProps) 
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-secondary/40 bg-secondary/10 p-6 space-y-3">
-                <div className="flex items-center gap-2 text-secondary font-bold text-lg">
+              <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 space-y-3">
+                <div className="flex items-center gap-2 text-primary font-bold text-lg">
                   <Award className="h-5 w-5" />
                   <span>{t('vision')}</span>
                 </div>
@@ -129,8 +126,8 @@ export default async function AboutPage({ params: { locale } }: AboutPageProps) 
             </div>
 
             {/* Patron Saint Profile */}
-            <div className="rounded-3xl border border-secondary/30 bg-gradient-to-r from-card to-secondary/10 p-6 md:p-8 space-y-3">
-              <span className="text-xs font-bold text-secondary uppercase tracking-wider">
+            <div className="rounded-3xl border border-border bg-gradient-to-r from-card to-primary/5 p-6 md:p-8 space-y-3">
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">
                 {t('patronSaint')}
               </span>
               <h3 className="text-xl font-bold text-foreground">

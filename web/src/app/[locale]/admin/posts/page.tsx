@@ -24,7 +24,6 @@ import {
   Trash2,
   RefreshCw,
   CheckCircle2,
-  AlertTriangle,
 } from 'lucide-react';
 
 const POST_TYPES: { value: PostType; labelAm: string; labelEn: string; icon: any }[] = [

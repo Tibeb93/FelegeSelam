@@ -12,26 +12,21 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Camera,
   Church,
-  Shield,
-  Phone,
-  Mail,
   MapPin,
-  Briefcase,
   Heart,
-  Calendar,
-  Building,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { apiRequest } from '@/lib/api-client';
 import { Member } from '@/types/api';
+import { useToast } from '@/providers/ToastProvider';
+import { SchoolLogo } from '@/components/common/SchoolLogo';
 
 export default function PortalProfilePage() {
   const t = useTranslations('Portal');
   const tMembers = useTranslations('Members');
-  const tCommon = useTranslations('Common');
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const [activeTab, setActiveTab] = useState<'profile' | 'idcard'>('profile');
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -143,7 +138,7 @@ export default function PortalProfilePage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err: any) {
-      alert(err.message || 'Error downloading ID card');
+      toast.error(err.message || 'Error downloading ID card');
     } finally {
       setDownloadingId(false);
     }
@@ -194,7 +189,7 @@ export default function PortalProfilePage() {
             onClick={() => setActiveTab('profile')}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === 'profile'
-                ? 'bg-primary text-secondary shadow-sm'
+                ? 'bg-primary text-white shadow-sm'
                 : 'bg-card text-foreground border border-border hover:bg-muted'
             }`}
           >
@@ -206,7 +201,7 @@ export default function PortalProfilePage() {
             onClick={() => setActiveTab('idcard')}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === 'idcard'
-                ? 'bg-primary text-secondary shadow-sm'
+                ? 'bg-primary text-white shadow-sm'
                 : 'bg-card text-foreground border border-border hover:bg-muted'
             }`}
           >
@@ -236,24 +231,22 @@ export default function PortalProfilePage() {
           {/* Card Container */}
           <div
             id="printable-id-card"
-            className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 border-[#C9A227] bg-[#FAF6EB] p-6 shadow-xl dark:bg-[#1a271c] dark:border-[#C9A227]/70"
+            className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 border-[#0F4C81] bg-white p-6 shadow-xl dark:bg-[#0A2644] dark:border-[#1E78C8]"
           >
             {/* Header / Brand */}
-            <div className="flex items-center justify-between border-b-2 border-[#1B5E20]/20 pb-3">
+            <div className="flex items-center justify-between border-b-2 border-[#0F4C81]/20 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1B5E20] text-[#FAF6EB] shadow-xs">
-                  <Church className="h-5 w-5" />
-                </div>
+                <SchoolLogo size={38} />
                 <div>
-                  <h4 className="font-bold text-xs text-[#1B5E20] dark:text-[#C9A227] uppercase tracking-wider">
+                  <h4 className="font-bold text-[11px] text-[#0F4C81] dark:text-[#F2B233] uppercase tracking-wider">
                     ደብረ ሰላም ቅዱስ እስጢፋኖስ
                   </h4>
-                  <p className="font-semibold text-xs text-foreground font-ethiopic">
+                  <p className="font-bold text-xs text-foreground font-ethiopic leading-tight">
                     አዕማደ ሰላም ሰንበት ት/ቤት
                   </p>
                 </div>
               </div>
-              <span className="rounded-full bg-[#1B5E20]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#1B5E20] dark:text-[#FAF6EB] uppercase tracking-wider border border-[#1B5E20]/30">
+              <span className="rounded-full bg-[#E8F7F0] px-2.5 py-0.5 text-[10px] font-bold text-[#136640] uppercase tracking-wider border border-[#A8E2C8]">
                 {profile.status}
               </span>
             </div>
@@ -262,7 +255,7 @@ export default function PortalProfilePage() {
             <div className="mt-5 grid grid-cols-3 gap-4 items-center">
               {/* Photo */}
               <div className="flex flex-col items-center justify-center">
-                <div className="relative h-28 w-24 overflow-hidden rounded-xl border-2 border-[#C9A227] bg-card shadow-sm">
+                <div className="relative h-28 w-24 overflow-hidden rounded-xl border-2 border-[#0F4C81] bg-card shadow-sm">
                   {profile.photoUrl ? (
                     <img
                       src={profile.photoUrl}
@@ -286,7 +279,7 @@ export default function PortalProfilePage() {
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                     Full Name / ሙሉ ስም
                   </span>
-                  <p className="font-bold text-sm text-[#1B5E20] dark:text-[#FAF6EB] font-ethiopic leading-tight">
+                  <p className="font-bold text-sm text-[#0F4C81] dark:text-[#F0F6FC] font-ethiopic leading-tight">
                     {profile.firstName} {profile.fatherName} {profile.grandfatherName || ''}
                   </p>
                 </div>
@@ -320,12 +313,12 @@ export default function PortalProfilePage() {
             </div>
 
             {/* QR Code and Footer */}
-            <div className="mt-5 flex items-center justify-between border-t border-[#C9A227]/30 pt-3">
+            <div className="mt-5 flex items-center justify-between border-t border-[#D7E3F1] dark:border-[#1A3E63] pt-3">
               <div className="text-[10px] text-muted-foreground leading-tight max-w-[200px]">
                 <p className="font-bold text-foreground">Official Sunday School ID</p>
                 <p>ደብረ ሰላም ቅዱስ እስጢፋኖስ ቤ/ክ - አዲስ አበባ</p>
               </div>
-              <div className="rounded-lg bg-white p-1.5 shadow-xs border border-border">
+              <div className="rounded-lg bg-white p-1.5 shadow-xs border border-[#D7E3F1]">
                 <QRCodeSVG value={qrData} size={64} level="M" />
               </div>
             </div>
@@ -337,7 +330,7 @@ export default function PortalProfilePage() {
               type="button"
               onClick={handleDownloadIdCard}
               disabled={downloadingId}
-              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-secondary shadow-md hover:bg-primary-hover disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-primary-hover disabled:opacity-50"
             >
               {downloadingId ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -616,7 +609,7 @@ export default function PortalProfilePage() {
             <button
               type="submit"
               disabled={updateMutation.isPending}
-              className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-secondary shadow-md hover:bg-primary-hover disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-primary-hover disabled:opacity-50"
             >
               {updateMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

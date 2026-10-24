@@ -79,8 +79,8 @@ export class CertificatesPdfService {
       margin: 1,
       width: 120,
       color: {
-        dark: '#2B1D0E',
-        light: '#FAF6EB',
+        dark: '#0F4C81',
+        light: '#FFFFFF',
       },
     });
 
@@ -96,8 +96,8 @@ export class CertificatesPdfService {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Noto Sans Ethiopic', 'Segoe UI', Arial, sans-serif;
-      background: #FAF6EB;
-      color: #2B1D0E;
+      background: #FFFFFF;
+      color: #0F2438;
       width: 297mm;
       height: 210mm;
       padding: 12mm;
@@ -108,14 +108,14 @@ export class CertificatesPdfService {
     .outer-frame {
       width: 100%;
       height: 100%;
-      border: 6px double #1B5E20;
+      border: 6px double #0F4C81;
       padding: 6px;
-      background: #FAF6EB;
+      background: #FFFFFF;
     }
     .inner-frame {
       width: 100%;
       height: 100%;
-      border: 3px solid #C9A227;
+      border: 2px solid #D7E3F1;
       padding: 24px 36px;
       display: flex;
       flex-direction: column;
@@ -124,29 +124,29 @@ export class CertificatesPdfService {
     }
     .header {
       text-align: center;
-      border-bottom: 2px solid #C9A227;
+      border-bottom: 2px solid #0F4C81;
       padding-bottom: 12px;
     }
     .cross {
       font-size: 34px;
-      color: #C9A227;
+      color: #F2B233;
       line-height: 1;
       margin-bottom: 4px;
     }
     .church-name {
       font-size: 18px;
       font-weight: 700;
-      color: #1B5E20;
+      color: #0F4C81;
     }
     .school-name {
       font-size: 22px;
       font-weight: 700;
-      color: #2B1D0E;
+      color: #0A2E52;
       margin-top: 2px;
     }
     .subtitle {
       font-size: 12px;
-      color: #71583D;
+      color: #5B6B7C;
       letter-spacing: 1px;
       margin-top: 2px;
     }
@@ -156,15 +156,15 @@ export class CertificatesPdfService {
     }
     .cert-badge h1 {
       font-size: 28px;
-      color: #1B5E20;
+      color: #0F4C81;
       font-weight: 700;
       display: inline-block;
       padding: 4px 28px;
-      border-bottom: 3px double #C9A227;
+      border-bottom: 3px double #F2B233;
     }
     .cert-badge p {
       font-size: 13px;
-      color: #71583D;
+      color: #5B6B7C;
       font-weight: 600;
       margin-top: 4px;
       text-transform: uppercase;
@@ -179,15 +179,15 @@ export class CertificatesPdfService {
     .student-name {
       font-size: 24px;
       font-weight: 700;
-      color: #1B5E20;
-      border-bottom: 1px dashed #C9A227;
+      color: #0F4C81;
+      border-bottom: 2px dashed #F2B233;
       padding: 0 18px;
       display: inline-block;
     }
     .course-title {
       font-size: 20px;
       font-weight: 700;
-      color: #2B1D0E;
+      color: #0A2E52;
     }
     .footer {
       display: flex;
@@ -195,14 +195,14 @@ export class CertificatesPdfService {
       align-items: flex-end;
       margin-top: 16px;
       padding-top: 12px;
-      border-top: 1px solid #E2D5B5;
+      border-top: 1px solid #D7E3F1;
     }
     .sig-box {
       text-align: center;
       width: 200px;
     }
     .sig-line {
-      border-top: 1px solid #2B1D0E;
+      border-top: 1px solid #0F2438;
       padding-top: 6px;
       font-size: 12px;
       font-weight: 600;
@@ -211,9 +211,9 @@ export class CertificatesPdfService {
       display: flex;
       align-items: center;
       gap: 12px;
-      background: #FFFFFF;
+      background: #E8F1FB;
       padding: 8px 14px;
-      border: 1px solid #C9A227;
+      border: 1px solid #D7E3F1;
       border-radius: 8px;
     }
     .qr-meta {

@@ -7,12 +7,8 @@ import { useTranslations } from 'next-intl';
 import {
   Newspaper,
   Search,
-  Filter,
   Calendar,
-  Sparkles,
-  AlertTriangle,
   ChevronRight,
-  BookOpen,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { PostItem, PaginatedResult } from '@/types/api';

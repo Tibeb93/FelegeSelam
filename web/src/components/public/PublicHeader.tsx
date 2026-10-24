@@ -23,6 +23,7 @@ import { LanguageSwitcher } from '../LanguageSwitcher';
 import { useTheme } from '../../providers/ThemeProvider';
 import { useAuth } from '../../providers/AuthProvider';
 import { DateDisplay } from '../DateDisplay';
+import { SchoolLogo } from '../common/SchoolLogo';
 
 interface PublicHeaderProps {
   locale: string;
@@ -54,21 +55,21 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-colors shadow-sm">
+    <header className="sticky top-0 z-40 w-full bg-[#0F4C81] text-white shadow-md border-b border-[#0A2E52] transition-colors">
       {/* Top micro-bar for church details & quick actions */}
-      <div className="hidden border-b border-border/40 bg-muted/40 py-1.5 px-4 sm:block">
-        <div className="container mx-auto flex items-center justify-between text-xs text-muted-foreground">
+      <div className="hidden border-b border-white/10 bg-[#0A2E52] py-1.5 px-4 sm:block text-white/80">
+        <div className="container mx-auto flex items-center justify-between text-xs">
           <div className="flex items-center gap-3">
-            <span className="font-medium text-foreground">
+            <span className="font-semibold text-white">
               {locale === 'am' ? 'ደብረ ሰላም ቅዱስ እስጢፋኖስ' : 'Debre Selam Saint Stephen'}
             </span>
-            <span aria-hidden="true">•</span>
+            <span aria-hidden="true" className="text-white/40">•</span>
             <span>{locale === 'am' ? 'ስልክ: +251 91 123 4567' : 'Tel: +251 91 123 4567'}</span>
           </div>
           <div className="flex items-center gap-4">
             <DateDisplay locale={locale as 'am' | 'en'} />
-            <span aria-hidden="true">•</span>
-            <span className="text-secondary font-semibold">
+            <span aria-hidden="true" className="text-white/40">•</span>
+            <span className="text-[#F2B233] font-bold">
               {locale === 'am' ? 'በሃይማኖት ጽኑ፥ በመልካም ምግባር አብሩ' : 'Firm in Faith, Shining in Good Deeds'}
             </span>
           </div>
@@ -76,20 +77,18 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
       </div>
 
       {/* Main Navigation Bar */}
-      <div className="container mx-auto flex items-center justify-between px-4 py-3">
+      <div className="container mx-auto flex items-center justify-between px-4 py-2.5">
         {/* Brand / Logo */}
         <Link
           href={`/${locale}`}
-          className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-primary rounded-xl p-1"
+          className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#F2B233] rounded-xl p-1"
         >
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-secondary shadow-md group-hover:scale-105 transition-transform">
-            <Church className="h-6 w-6" aria-hidden="true" />
-          </div>
+          <SchoolLogo size={42} />
           <div className="flex flex-col">
-            <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#F2B233]">
               {tCommon('churchName')}
             </span>
-            <span className="text-base font-bold text-foreground group-hover:text-primary transition-colors sm:text-lg">
+            <span className="text-base font-bold text-white group-hover:text-[#E8F1FB] transition-colors sm:text-lg leading-tight">
               {tCommon('schoolName')}
             </span>
           </div>
@@ -105,8 +104,8 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
                 href={link.href}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
                   active
-                    ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
-                    : 'text-foreground/85 hover:bg-muted hover:text-foreground'
+                    ? 'bg-[#1E78C8] text-white font-semibold shadow-xs'
+                    : 'text-white/85 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <link.icon className="h-4 w-4" aria-hidden="true" />
@@ -123,20 +122,20 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card text-foreground hover:bg-muted transition-colors shadow-xs"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-colors shadow-xs"
             aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
           >
             {theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-secondary" aria-hidden="true" />
+              <Sun className="h-4 w-4 text-[#F2B233]" aria-hidden="true" />
             ) : (
-              <Moon className="h-4 w-4 text-primary" aria-hidden="true" />
+              <Moon className="h-4 w-4 text-white" aria-hidden="true" />
             )}
           </button>
 
           {user ? (
             <Link
               href={`/${locale}/portal`}
-              className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-md hover:bg-primary/90 transition-all min-h-[44px]"
+              className="flex items-center gap-2 rounded-xl bg-[#F2B233] px-4 py-2 text-sm font-bold text-[#0F2438] shadow-md hover:bg-[#e0a42b] transition-all min-h-[44px]"
             >
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               <span>{t('navPortal')}</span>
@@ -145,14 +144,14 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
             <div className="flex items-center gap-2">
               <Link
                 href={`/${locale}/login`}
-                className="flex items-center gap-1.5 rounded-xl border border-primary/40 px-3.5 py-2 text-sm font-semibold text-foreground hover:bg-primary/10 transition-colors min-h-[44px]"
+                className="flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/5 px-3.5 py-2 text-sm font-semibold text-white hover:bg-white/15 transition-colors min-h-[44px]"
               >
-                <LogIn className="h-4 w-4 text-primary" aria-hidden="true" />
+                <LogIn className="h-4 w-4 text-white/90" aria-hidden="true" />
                 <span>{t('navLogin')}</span>
               </Link>
               <Link
                 href={`/${locale}/register`}
-                className="flex items-center gap-1.5 rounded-xl bg-secondary px-3.5 py-2 text-sm font-semibold text-secondary-foreground shadow-sm hover:bg-secondary/90 transition-colors min-h-[44px]"
+                className="flex items-center gap-1.5 rounded-xl bg-[#F2B233] px-3.5 py-2 text-sm font-bold text-[#0F2438] shadow-sm hover:bg-[#e0a42b] transition-colors min-h-[44px]"
               >
                 <span>{t('navRegister')}</span>
               </Link>
@@ -167,20 +166,20 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card text-foreground hover:bg-muted"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20"
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-secondary" />
+              <Sun className="h-4 w-4 text-[#F2B233]" />
             ) : (
-              <Moon className="h-4 w-4 text-primary" />
+              <Moon className="h-4 w-4 text-white" />
             )}
           </button>
 
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card text-foreground hover:bg-muted"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20"
             aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileMenuOpen}
           >
@@ -191,7 +190,7 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="border-b border-border bg-card p-4 lg:hidden shadow-lg animate-in slide-in-from-top-2">
+        <div className="border-b border-[#0A2E52] bg-[#0A2E52] p-4 lg:hidden shadow-xl animate-in slide-in-from-top-2 text-white">
           <nav className="flex flex-col gap-1.5">
             {navLinks.map((link) => {
               const active = isActive(link.href);
@@ -202,8 +201,8 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-base font-medium min-h-[48px] ${
                     active
-                      ? 'bg-primary text-primary-foreground font-semibold'
-                      : 'text-foreground hover:bg-muted'
+                      ? 'bg-[#1E78C8] text-white font-semibold'
+                      : 'text-white/85 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   <link.icon className="h-5 w-5" aria-hidden="true" />
@@ -212,12 +211,12 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
               );
             })}
 
-            <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2">
+            <div className="mt-3 pt-3 border-t border-white/15 flex flex-col gap-2">
               {user ? (
                 <Link
                   href={`/${locale}/portal`}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-base font-semibold text-primary-foreground min-h-[48px]"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-[#F2B233] px-4 py-3 text-base font-bold text-[#0F2438] min-h-[48px]"
                 >
                   <ShieldCheck className="h-5 w-5" />
                   <span>{t('navPortal')}</span>
@@ -227,15 +226,15 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
                   <Link
                     href={`/${locale}/login`}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-primary px-4 py-3 text-base font-semibold text-foreground min-h-[48px]"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-white/30 px-4 py-3 text-base font-semibold text-white min-h-[48px]"
                   >
-                    <LogIn className="h-5 w-5 text-primary" />
+                    <LogIn className="h-5 w-5 text-white/90" />
                     <span>{t('navLogin')}</span>
                   </Link>
                   <Link
                     href={`/${locale}/register`}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-secondary px-4 py-3 text-base font-semibold text-secondary-foreground min-h-[48px]"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[#F2B233] px-4 py-3 text-base font-bold text-[#0F2438] min-h-[48px]"
                   >
                     <span>{t('navRegister')}</span>
                   </Link>

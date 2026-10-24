@@ -35,7 +35,9 @@ describe('EventsService', () => {
       count: jest.fn().mockResolvedValue(10),
       findUnique: jest.fn().mockResolvedValue(null),
       upsert: jest.fn().mockResolvedValue({ id: 'r1', eventId: 'e1', status: 'going' }),
-      findMany: jest.fn().mockResolvedValue([{ id: 'r1', status: 'going', member: { firstName: 'John' } }]),
+      findMany: jest
+        .fn()
+        .mockResolvedValue([{ id: 'r1', status: 'going', member: { firstName: 'John' } }]),
     },
     member: {
       findFirst: jest.fn().mockResolvedValue({ id: 'm1' }),
@@ -45,10 +47,7 @@ describe('EventsService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        EventsService,
-        { provide: PrismaService, useValue: mockPrisma },
-      ],
+      providers: [EventsService, { provide: PrismaService, useValue: mockPrisma }],
     }).compile();
 
     service = module.get<EventsService>(EventsService);
@@ -89,7 +88,10 @@ describe('EventsService', () => {
   });
 
   it('should RSVP to event', async () => {
-    const res = await service.rsvpToEvent('e1', { status: 'going' } as any, { id: 'u1', memberId: 'm1' });
+    const res = await service.rsvpToEvent('e1', { status: 'going' } as any, {
+      id: 'u1',
+      memberId: 'm1',
+    });
     expect(res).toBeDefined();
     expect(mockPrisma.eventRsvp.upsert).toHaveBeenCalled();
   });

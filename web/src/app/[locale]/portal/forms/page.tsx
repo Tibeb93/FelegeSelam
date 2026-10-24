@@ -6,16 +6,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   FileText,
   Send,
-  Clock,
   CheckCircle2,
-  XCircle,
   AlertCircle,
   Loader2,
   Calendar,
   ChevronRight,
   Eye,
-  MessageSquare,
-  Sparkles,
   X,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
@@ -23,7 +19,6 @@ import { CustomForm, MemberFormSubmission } from '@/types/api';
 
 export default function PortalFormsPage() {
   const t = useTranslations('Portal');
-  const tForms = useTranslations('Forms');
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<'open' | 'submissions'>('open');

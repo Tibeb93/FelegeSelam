@@ -9,7 +9,6 @@ import {
   Clock,
   Send,
   CheckCircle2,
-  Church,
   Cross,
 } from 'lucide-react';
 import { PublicHeader } from '@/components/public/PublicHeader';
@@ -151,6 +150,12 @@ export default function ContactPage({ params: { locale } }: ContactPageProps) {
                 <h3 className="text-lg font-bold text-foreground">
                   {t('sendMessage')}
                 </h3>
+
+                {errorMessage && (
+                  <p className="rounded-lg bg-destructive/10 p-2.5 text-xs font-medium text-destructive">
+                    {errorMessage}
+                  </p>
+                )}
 
                 <div className="space-y-1.5">
                   <label htmlFor="contact-name" className="text-xs font-semibold text-foreground">

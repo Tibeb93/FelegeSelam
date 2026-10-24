@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,9 +20,7 @@ export default function RegisterPage({
   params: { locale: string };
 }) {
   const t = useTranslations('Auth');
-  const tCommon = useTranslations('Common');
   const tVal = useTranslations('Validation');
-  const router = useRouter();
   const toast = useToast();
 
   const [isSubmitting, setIsSubmitting] = useState(false);

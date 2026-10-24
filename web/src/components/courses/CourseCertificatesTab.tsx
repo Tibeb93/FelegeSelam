@@ -12,7 +12,6 @@ import {
   ExternalLink,
   CheckCircle,
   AlertCircle,
-  FileCheck,
   X,
   FileSpreadsheet,
 } from 'lucide-react';
@@ -24,7 +23,7 @@ interface CourseCertificatesTabProps {
 }
 
 export function CourseCertificatesTab({
-  course,
+  course: _course,
   report,
   onRefresh,
 }: CourseCertificatesTabProps) {
@@ -91,7 +90,6 @@ export function CourseCertificatesTab({
   };
 
   const unissuedStudents = students.filter((s) => !s.certificate?.issued);
-  const issuedStudents = students.filter((s) => s.certificate?.issued);
 
   return (
     <div className="space-y-6">

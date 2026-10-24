@@ -21,11 +21,18 @@ import { LetterType } from './dto/letter-member.dto';
 export class MembersExportService {
   private readonly logger = new Logger(MembersExportService.name);
 
-  // Common styles
-  private readonly brandGreen = '#1B5E20';
-  private readonly brandGold = '#C9A227';
-  private readonly brandCream = '#FAF6EB';
-  private readonly brandDark = '#2B1D0E';
+  // Blue & White Brand Design Tokens
+  private readonly brandPrimary700 = '#0F4C81'; // Deep Blue
+  private readonly brandPrimary900 = '#0A2E52'; // Navy
+  private readonly brandPrimary500 = '#1E78C8'; // Blue
+  private readonly brandPrimary100 = '#E8F1FB'; // Soft Blue
+  private readonly brandText = '#0F2438';       // Dark Text
+  private readonly brandMuted = '#5B6B7C';      // Muted Text
+  private readonly brandBorder = '#D7E3F1';     // Border
+  private readonly brandGold = '#F2B233';       // Accent Gold
+  private readonly brandGreen = '#0F4C81';      // Backward compatibility alias
+  private readonly brandCream = '#E8F1FB';      // Backward compatibility alias
+  private readonly brandDark = '#0A2E52';       // Backward compatibility alias
 
   /**
    * Helper to launch Puppeteer browser safely with auto-detected Chrome/Edge executable
@@ -95,7 +102,7 @@ export class MembersExportService {
     titleCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF1B5E20' }, // #1B5E20
+      fgColor: { argb: 'FF0F4C81' }, // Deep Blue #0F4C81
     };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
     sheet.getRow(1).height = 36;
@@ -104,11 +111,11 @@ export class MembersExportService {
     sheet.mergeCells('A2:L2');
     const subtitleCell = sheet.getCell('A2');
     subtitleCell.value = `ሪፖርት የተዘጋጀበት ቀን: ${new Date().toISOString().split('T')[0]} | ጠቅላላ አባላት: ${members.length}`;
-    subtitleCell.font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FFFAF6EB' } };
+    subtitleCell.font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FFE8F1FB' } };
     subtitleCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF2B1D0E' },
+      fgColor: { argb: 'FF0A2E52' }, // Navy #0A2E52
     };
     subtitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
     sheet.getRow(2).height = 20;
@@ -138,13 +145,13 @@ export class MembersExportService {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF1B5E20' },
+        fgColor: { argb: 'FF0F4C81' },
       };
       cell.alignment = { horizontal: 'center', vertical: 'middle' };
       cell.border = {
         top: { style: 'thin' },
         left: { style: 'thin' },
-        bottom: { style: 'medium', color: { argb: 'FFC9A227' } },
+        bottom: { style: 'medium', color: { argb: 'FFF2B233' } },
         right: { style: 'thin' },
       };
     });
@@ -232,7 +239,7 @@ export class MembersExportService {
     banner.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF1B5E20' },
+      fgColor: { argb: 'FF0F4C81' },
     };
     banner.alignment = { horizontal: 'center', vertical: 'middle' };
     sheet.getRow(1).height = 30;
@@ -266,7 +273,7 @@ export class MembersExportService {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF2B1D0E' },
+        fgColor: { argb: 'FF0A2E52' },
       };
       cell.alignment = { horizontal: 'center', vertical: 'middle' };
     });
@@ -319,7 +326,7 @@ export class MembersExportService {
                 children: [new TextRun({ text: 'ተ.ቁ', bold: true, color: 'FFFFFF' })],
               }),
             ],
-            shading: { fill: '1B5E20' },
+            shading: { fill: '0F4C81' },
           }),
           new TableCell({
             width: { size: 18, type: WidthType.PERCENTAGE },
@@ -328,7 +335,7 @@ export class MembersExportService {
                 children: [new TextRun({ text: 'የአባል ቁጥር', bold: true, color: 'FFFFFF' })],
               }),
             ],
-            shading: { fill: '1B5E20' },
+            shading: { fill: '0F4C81' },
           }),
           new TableCell({
             width: { size: 26, type: WidthType.PERCENTAGE },
@@ -337,7 +344,7 @@ export class MembersExportService {
                 children: [new TextRun({ text: 'ሙሉ ስም', bold: true, color: 'FFFFFF' })],
               }),
             ],
-            shading: { fill: '1B5E20' },
+            shading: { fill: '0F4C81' },
           }),
           new TableCell({
             width: { size: 10, type: WidthType.PERCENTAGE },
@@ -346,7 +353,7 @@ export class MembersExportService {
                 children: [new TextRun({ text: 'ጾታ', bold: true, color: 'FFFFFF' })],
               }),
             ],
-            shading: { fill: '1B5E20' },
+            shading: { fill: '0F4C81' },
           }),
           new TableCell({
             width: { size: 18, type: WidthType.PERCENTAGE },
@@ -355,7 +362,7 @@ export class MembersExportService {
                 children: [new TextRun({ text: 'ስልክ', bold: true, color: 'FFFFFF' })],
               }),
             ],
-            shading: { fill: '1B5E20' },
+            shading: { fill: '0F4C81' },
           }),
           new TableCell({
             width: { size: 20, type: WidthType.PERCENTAGE },
@@ -364,7 +371,7 @@ export class MembersExportService {
                 children: [new TextRun({ text: 'ክፍል', bold: true, color: 'FFFFFF' })],
               }),
             ],
-            shading: { fill: '1B5E20' },
+            shading: { fill: '0F4C81' },
           }),
         ],
       }),
@@ -469,7 +476,7 @@ export class MembersExportService {
             new TableCell({
               width: { size: 35, type: WidthType.PERCENTAGE },
               children: [new Paragraph({ children: [new TextRun({ text: label, bold: true })] })],
-              shading: { fill: 'FAF6EB' },
+              shading: { fill: 'E8F1FB' },
             }),
             new TableCell({
               width: { size: 65, type: WidthType.PERCENTAGE },
@@ -522,14 +529,14 @@ export class MembersExportService {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Noto Sans Ethiopic', 'Segoe UI', Arial, sans-serif;
-      color: #2B1D0E;
+      color: #0F2438;
       background: #FFFFFF;
       font-size: 13px;
       line-height: 1.5;
       padding: 24px;
     }
     .header {
-      border-bottom: 3px double #C9A227;
+      border-bottom: 3px double #F2B233;
       padding-bottom: 12px;
       margin-bottom: 20px;
       display: flex;
@@ -538,7 +545,7 @@ export class MembersExportService {
     }
     .cross-icon {
       font-size: 28px;
-      color: #C9A227;
+      color: #F2B233;
       line-height: 1;
     }
     .org-title {
@@ -546,18 +553,18 @@ export class MembersExportService {
       flex-grow: 1;
     }
     .org-title h1 {
-      color: #1B5E20;
+      color: #0F4C81;
       font-size: 18px;
       font-weight: 700;
       margin-bottom: 2px;
     }
     .org-title h2 {
-      color: #2B1D0E;
+      color: #0A2E52;
       font-size: 13px;
       font-weight: 600;
     }
     .org-title p {
-      color: #71583D;
+      color: #5B6B7C;
       font-size: 11px;
     }
     .footer {
@@ -565,12 +572,12 @@ export class MembersExportService {
       bottom: 20px;
       left: 24px;
       right: 24px;
-      border-top: 1px solid #C9A227;
+      border-top: 1px solid #D7E3F1;
       padding-top: 8px;
       display: flex;
       justify-content: space-between;
       font-size: 10px;
-      color: #71583D;
+      color: #5B6B7C;
     }
     ${content.includes('/* EXTRA_CSS */') ? '' : ''}
   </style>
@@ -585,16 +592,16 @@ export class MembersExportService {
     const rowsHtml = members
       .map(
         (m, idx) => `
-      <tr style="${idx % 2 === 1 ? 'background-color: #FAF6EB;' : ''}">
-        <td style="text-align: center; padding: 6px 8px; border: 1px solid #DDD;">${idx + 1}</td>
-        <td style="font-weight: 600; padding: 6px 8px; border: 1px solid #DDD;">${m.memberNo}</td>
-        <td style="padding: 6px 8px; border: 1px solid #DDD;">${m.firstName} ${m.fatherName} ${m.grandfatherName || ''}</td>
-        <td style="text-align: center; padding: 6px 8px; border: 1px solid #DDD;">${m.sex === 'male' ? 'ወንድ' : 'ሴት'}</td>
-        <td style="padding: 6px 8px; border: 1px solid #DDD;">${m.phone || '-'}</td>
-        <td style="padding: 6px 8px; border: 1px solid #DDD;">${m.department?.nameAm || '-'}</td>
-        <td style="text-align: center; padding: 6px 8px; border: 1px solid #DDD;">
+      <tr style="${idx % 2 === 1 ? 'background-color: #E8F1FB;' : ''}">
+        <td style="text-align: center; padding: 6px 8px; border: 1px solid #D7E3F1;">${idx + 1}</td>
+        <td style="font-weight: 600; padding: 6px 8px; border: 1px solid #D7E3F1;">${m.memberNo}</td>
+        <td style="padding: 6px 8px; border: 1px solid #D7E3F1;">${m.firstName} ${m.fatherName} ${m.grandfatherName || ''}</td>
+        <td style="text-align: center; padding: 6px 8px; border: 1px solid #D7E3F1;">${m.sex === 'male' ? 'ወንድ' : 'ሴት'}</td>
+        <td style="padding: 6px 8px; border: 1px solid #D7E3F1;">${m.phone || '-'}</td>
+        <td style="padding: 6px 8px; border: 1px solid #D7E3F1;">${m.department?.nameAm || '-'}</td>
+        <td style="text-align: center; padding: 6px 8px; border: 1px solid #D7E3F1;">
           <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; background: ${
-            m.status === 'active' ? '#E8F5E9; color: #1B5E20;' : '#FFF3E0; color: #E65100;'
+            m.status === 'active' ? '#E8F7F0; color: #136640;' : '#FEF6E6; color: #9E6500;'
           }">
             ${m.status}
           </span>
@@ -622,14 +629,14 @@ export class MembersExportService {
 
       <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
         <thead>
-          <tr style="background-color: #1B5E20; color: #FFFFFF;">
-            <th style="padding: 8px; border: 1px solid #1B5E20; width: 35px;">ተ.ቁ</th>
-            <th style="padding: 8px; border: 1px solid #1B5E20; width: 110px;">የአባል ቁጥር</th>
-            <th style="padding: 8px; border: 1px solid #1B5E20;">ሙሉ ስም</th>
-            <th style="padding: 8px; border: 1px solid #1B5E20; width: 55px;">ጾታ</th>
-            <th style="padding: 8px; border: 1px solid #1B5E20; width: 105px;">ስልክ</th>
-            <th style="padding: 8px; border: 1px solid #1B5E20;">ክፍል</th>
-            <th style="padding: 8px; border: 1px solid #1B5E20; width: 70px;">ሁኔታ</th>
+          <tr style="background-color: #0F4C81; color: #FFFFFF;">
+            <th style="padding: 8px; border: 1px solid #0F4C81; width: 35px;">ተ.ቁ</th>
+            <th style="padding: 8px; border: 1px solid #0F4C81; width: 110px;">የአባል ቁጥር</th>
+            <th style="padding: 8px; border: 1px solid #0F4C81;">ሙሉ ስም</th>
+            <th style="padding: 8px; border: 1px solid #0F4C81; width: 55px;">ጾታ</th>
+            <th style="padding: 8px; border: 1px solid #0F4C81; width: 105px;">ስልክ</th>
+            <th style="padding: 8px; border: 1px solid #0F4C81;">ክፍል</th>
+            <th style="padding: 8px; border: 1px solid #0F4C81; width: 70px;">ሁኔታ</th>
           </tr>
         </thead>
         <tbody>
@@ -663,8 +670,8 @@ export class MembersExportService {
     const fullName =
       `${member.firstName} ${member.fatherName} ${member.grandfatherName || ''}`.trim();
     const photoTag = member.photoUrl
-      ? `<img src="${member.photoUrl}" style="width: 110px; height: 110px; object-fit: cover; border-radius: 8px; border: 2px solid #C9A227;" alt="Photo" />`
-      : `<div style="width: 110px; height: 110px; background: #FAF6EB; border-radius: 8px; border: 2px dashed #C9A227; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #71583D; text-align: center; padding: 6px;">ፎቶ አልተጫነም</div>`;
+      ? `<img src="${member.photoUrl}" style="width: 110px; height: 110px; object-fit: cover; border-radius: 8px; border: 2px solid #0F4C81;" alt="Photo" />`
+      : `<div style="width: 110px; height: 110px; background: #E8F1FB; border-radius: 8px; border: 2px dashed #0F4C81; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #5B6B7C; text-align: center; padding: 6px;">ፎቶ አልተጫነም</div>`;
 
     const qrDataUrl = await QRCode.toDataURL(member.memberNo, { margin: 1, width: 100 });
 
@@ -679,13 +686,13 @@ export class MembersExportService {
         <div class="cross-icon">✝</div>
       </div>
 
-      <div style="display: flex; gap: 20px; margin-bottom: 24px; background: #FAF6EB; padding: 16px; border-radius: 8px; border-left: 4px solid #1B5E20;">
+      <div style="display: flex; gap: 20px; margin-bottom: 24px; background: #E8F1FB; padding: 16px; border-radius: 8px; border-left: 4px solid #0F4C81;">
         <div>${photoTag}</div>
         <div style="flex-grow: 1;">
-          <h2 style="color: #1B5E20; font-size: 20px; margin-bottom: 4px;">${fullName}</h2>
-          <p style="font-size: 13px; color: #71583D; margin-bottom: 8px;">የክርስትና ስም: <strong>${member.baptismalName || '-'}</strong></p>
+          <h2 style="color: #0F4C81; font-size: 20px; margin-bottom: 4px;">${fullName}</h2>
+          <p style="font-size: 13px; color: #5B6B7C; margin-bottom: 8px;">የክርስትና ስም: <strong>${member.baptismalName || '-'}</strong></p>
           <div style="display: flex; gap: 16px; font-size: 12px;">
-            <div><strong>የአባል ቁጥር:</strong> <span style="color: #1B5E20; font-weight: 700;">${member.memberNo}</span></div>
+            <div><strong>የአባል ቁጥር:</strong> <span style="color: #0F4C81; font-weight: 700;">${member.memberNo}</span></div>
             <div><strong>ጾታ:</strong> ${member.sex === 'male' ? 'ወንድ' : 'ሴት'}</div>
             <div><strong>ክፍል:</strong> ${member.department?.nameAm || '-'}</div>
             <div><strong>ሁኔታ:</strong> <span style="font-weight: 600;">${member.status}</span></div>
@@ -693,41 +700,41 @@ export class MembersExportService {
         </div>
         <div style="text-align: center;">
           <img src="${qrDataUrl}" style="width: 80px; height: 80px;" alt="QR" />
-          <div style="font-size: 9px; color: #71583D;">${member.memberNo}</div>
+          <div style="font-size: 9px; color: #5B6B7C;">${member.memberNo}</div>
         </div>
       </div>
 
-      <h3 style="color: #1B5E20; font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid #C9A227; padding-bottom: 4px;">ዝርዝር የግል እና የአድራሻ መረጃ</h3>
+      <h3 style="color: #0F4C81; font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid #D7E3F1; padding-bottom: 4px;">ዝርዝር የግል እና የአድራሻ መረጃ</h3>
       <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
         <tr>
-          <td style="width: 25%; font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">የትውልድ ቀን</td>
-          <td style="width: 25%; padding: 6px; border: 1px solid #E0E0E0;">${member.dateOfBirth ? new Date(member.dateOfBirth).toISOString().split('T')[0] : '-'}</td>
-          <td style="width: 25%; font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">ስልክ ቁጥር</td>
-          <td style="width: 25%; padding: 6px; border: 1px solid #E0E0E0;">${member.phone || '-'}</td>
+          <td style="width: 25%; font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">የትውልድ ቀን</td>
+          <td style="width: 25%; padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">${member.dateOfBirth ? new Date(member.dateOfBirth).toISOString().split('T')[0] : '-'}</td>
+          <td style="width: 25%; font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">ስልክ ቁጥር</td>
+          <td style="width: 25%; padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">${member.phone || '-'}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">ኢሜይል</td>
-          <td style="padding: 6px; border: 1px solid #E0E0E0;">${member.email || '-'}</td>
-          <td style="font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">አድራሻ (ክልል/ዞን)</td>
-          <td style="padding: 6px; border: 1px solid #E0E0E0;">${member.region || '-'} ${member.zone ? ', ' + member.zone : ''}</td>
+          <td style="font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">ኢሜይል</td>
+          <td style="padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">${member.email || '-'}</td>
+          <td style="font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">አድራሻ (ክልል/ዞን)</td>
+          <td style="padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">${member.region || '-'} ${member.zone ? ', ' + member.zone : ''}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">ወረዳ / ቀበሌ</td>
-          <td style="padding: 6px; border: 1px solid #E0E0E0;">ወረዳ ${member.woreda || '-'} ቀበሌ ${member.kebele || '-'}</td>
-          <td style="font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">የአጥቢያ ቤተክርስቲያን</td>
-          <td style="padding: 6px; border: 1px solid #E0E0E0;">${member.parish || '-'}</td>
+          <td style="font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">ወረዳ / ቀበሌ</td>
+          <td style="padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">ወረዳ ${member.woreda || '-'} ቀበሌ ${member.kebele || '-'}</td>
+          <td style="font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">የአጥቢያ ቤተክርስቲያን</td>
+          <td style="padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">${member.parish || '-'}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">የንስሐ አባት</td>
-          <td style="padding: 6px; border: 1px solid #E0E0E0;">${member.confessionFather || '-'}</td>
-          <td style="font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">የትምህርት ደረጃ</td>
-          <td style="padding: 6px; border: 1px solid #E0E0E0;">${member.educationLevel || '-'}</td>
+          <td style="font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">የንስሐ አባት</td>
+          <td style="padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">${member.confessionFather || '-'}</td>
+          <td style="font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">የትምህርት ደረጃ</td>
+          <td style="padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">${member.educationLevel || '-'}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">የሥራ መስክ</td>
-          <td style="padding: 6px; border: 1px solid #E0E0E0;">${member.occupation || '-'}</td>
-          <td style="font-weight: 600; padding: 6px; background: #FAF6EB; border: 1px solid #E0E0E0;">የአደጋ ጊዜ ተጠሪ</td>
-          <td style="padding: 6px; border: 1px solid #E0E0E0;">${member.emergencyName || '-'} (${member.emergencyPhone || '-'})</td>
+          <td style="font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">የሥራ መስክ</td>
+          <td style="padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">${member.occupation || '-'}</td>
+          <td style="font-weight: 600; padding: 6px; background: #E8F1FB; border: 1px solid #D7E3F1; color: #0F2438;">የአደጋ ጊዜ ተጠሪ</td>
+          <td style="padding: 6px; border: 1px solid #D7E3F1; color: #0F2438;">${member.emergencyName || '-'} (${member.emergencyPhone || '-'})</td>
         </tr>
       </table>
 
@@ -762,8 +769,8 @@ export class MembersExportService {
     const qrDataUrl = await QRCode.toDataURL(member.memberNo, { margin: 1, width: 140 });
 
     const photoTag = member.photoUrl
-      ? `<img src="${member.photoUrl}" style="width: 80px; height: 95px; object-fit: cover; border-radius: 6px; border: 2px solid #C9A227;" alt="Photo" />`
-      : `<div style="width: 80px; height: 95px; background: #FAF6EB; border-radius: 6px; border: 1px solid #C9A227; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #71583D; text-align: center;">ፎቶ</div>`;
+      ? `<img src="${member.photoUrl}" style="width: 80px; height: 95px; object-fit: cover; border-radius: 6px; border: 2px solid #0F4C81;" alt="Photo" />`
+      : `<div style="width: 80px; height: 95px; background: #E8F1FB; border-radius: 6px; border: 1px solid #0F4C81; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #5B6B7C; text-align: center;">ፎቶ</div>`;
 
     const html = `<!DOCTYPE html>
 <html lang="am">
@@ -787,20 +794,20 @@ export class MembersExportService {
       width: 340px;
       height: 215px;
       background: #FFFFFF;
-      border: 2px solid #1B5E20;
+      border: 2px solid #0F4C81;
       border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 10px rgba(15, 76, 129, 0.15);
       overflow: hidden;
       display: flex;
       flex-direction: column;
       position: relative;
     }
     .card-header {
-      background: #1B5E20;
-      color: #FAF6EB;
+      background: #0F4C81;
+      color: #FFFFFF;
       padding: 6px 10px;
       text-align: center;
-      border-bottom: 3px solid #C9A227;
+      border-bottom: 3px solid #F2B233;
     }
     .card-header h1 {
       font-size: 11px;
@@ -811,7 +818,7 @@ export class MembersExportService {
     .card-header h2 {
       font-size: 8.5px;
       font-weight: 500;
-      color: #C9A227;
+      color: #F2B233;
     }
     .card-body {
       flex-grow: 1;
@@ -819,7 +826,7 @@ export class MembersExportService {
       display: flex;
       gap: 12px;
       align-items: center;
-      background: #FCFAF6;
+      background: #FFFFFF;
     }
     .info-container {
       flex-grow: 1;
@@ -830,21 +837,21 @@ export class MembersExportService {
     .member-name {
       font-size: 13px;
       font-weight: 700;
-      color: #1B5E20;
+      color: #0F4C81;
       margin-bottom: 2px;
     }
     .baptismal-name {
       font-size: 10px;
-      color: #71583D;
+      color: #5B6B7C;
       margin-bottom: 4px;
     }
     .info-row {
       font-size: 9px;
-      color: #2B1D0E;
+      color: #0F2438;
       margin-bottom: 2px;
     }
     .info-row strong {
-      color: #1B5E20;
+      color: #0F4C81;
     }
     .qr-side {
       display: flex;
@@ -853,11 +860,11 @@ export class MembersExportService {
       justify-content: center;
     }
     .card-footer {
-      background: #2B1D0E;
-      color: #FAF6EB;
+      background: #0A2E52;
+      color: #E8F1FB;
       font-size: 8px;
       text-align: center;
-      padding: 3px;
+      padding: 4px;
       display: flex;
       justify-content: space-between;
       padding-left: 10px;
@@ -884,7 +891,7 @@ export class MembersExportService {
       </div>
       <div class="qr-side">
         <img src="${qrDataUrl}" style="width: 55px; height: 55px;" alt="QR" />
-        <span style="font-size: 7px; color: #71583D;">${member.memberNo}</span>
+        <span style="font-size: 7px; color: #5B6B7C;">${member.memberNo}</span>
       </div>
     </div>
     <div class="card-footer">
@@ -977,29 +984,29 @@ export class MembersExportService {
       </div>
 
       <div style="text-align: center; margin-bottom: 24px;">
-        <h2 style="color: #1B5E20; font-size: 16px; text-decoration: underline; text-underline-offset: 4px;">
+        <h2 style="color: #0F4C81; font-size: 16px; text-decoration: underline; text-underline-offset: 4px;">
           ጉዳዩ፡ ${titleAm}
         </h2>
       </div>
 
-      <div style="font-size: 13px; line-height: 1.8; color: #2B1D0E; margin-bottom: 40px;">
+      <div style="font-size: 13px; line-height: 1.8; color: #0F2438; margin-bottom: 40px;">
         ${bodyAm}
       </div>
 
       <div style="margin-top: 50px; display: flex; justify-content: space-between;">
         <div style="text-align: center;">
-          <div style="border-bottom: 1px dotted #2B1D0E; width: 180px; margin-bottom: 6px;"></div>
-          <div style="font-size: 12px; font-weight: 600;">ዋና ጸሐፊ</div>
-          <div style="font-size: 10px; color: #71583D;">አዕማደ ሰላም ሰንበት ትምህርት ቤት</div>
+          <div style="border-bottom: 1px dotted #0F2438; width: 180px; margin-bottom: 6px;"></div>
+          <div style="font-size: 12px; font-weight: 600; color: #0F2438;">ዋና ጸሐፊ</div>
+          <div style="font-size: 10px; color: #5B6B7C;">አዕማደ ሰላም ሰንበት ትምህርት ቤት</div>
         </div>
-        <div style="text-align: center; border: 2px dashed #C9A227; padding: 12px 20px; border-radius: 8px;">
-          <div style="color: #C9A227; font-size: 12px; font-weight: 700;">የሰንበት ትምህርት ቤቱ ማኅተም</div>
-          <div style="font-size: 9px; color: #71583D; margin-top: 4px;">Official Seal</div>
+        <div style="text-align: center; border: 2px dashed #F2B233; padding: 12px 20px; border-radius: 8px;">
+          <div style="color: #0F4C81; font-size: 12px; font-weight: 700;">የሰንበት ትምህርት ቤቱ ማኅተም</div>
+          <div style="font-size: 9px; color: #5B6B7C; margin-top: 4px;">Official Seal</div>
         </div>
         <div style="text-align: center;">
-          <div style="border-bottom: 1px dotted #2B1D0E; width: 180px; margin-bottom: 6px;"></div>
-          <div style="font-size: 12px; font-weight: 600;">ሊቀመንበር</div>
-          <div style="font-size: 10px; color: #71583D;">አዕማደ ሰላም ሰንበት ትምህርት ቤት</div>
+          <div style="border-bottom: 1px dotted #0F2438; width: 180px; margin-bottom: 6px;"></div>
+          <div style="font-size: 12px; font-weight: 600; color: #0F2438;">ሊቀመንበር</div>
+          <div style="font-size: 10px; color: #5B6B7C;">አዕማደ ሰላም ሰንበት ትምህርት ቤት</div>
         </div>
       </div>
 

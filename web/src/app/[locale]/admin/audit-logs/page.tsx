@@ -3,20 +3,16 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../../lib/api-client';
+import { logger } from '../../../../lib/logger';
 import { AuditLogItem } from '../../../../types/api';
 import { useAuth } from '../../../../providers/AuthProvider';
 import {
   ShieldAlert,
   FileSpreadsheet,
   Search,
-  Filter,
   Eye,
   Calendar,
   X,
-  Clock,
-  ArrowRight,
-  User,
-  Database,
 } from 'lucide-react';
 import { DataTable, Column } from '../../../../components/ui/DataTable';
 
@@ -112,7 +108,7 @@ export default function AuditLogsPage({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Failed to export audit logs:', error);
+      logger.error('Failed to export audit logs:', error);
     } finally {
       setIsExporting(false);
     }

@@ -28,7 +28,7 @@ interface TiptapEditorProps {
 export function TiptapEditor({
   content,
   onChange,
-  placeholder = 'Write content here...',
+  placeholder: _placeholder = 'Write content here...',
 }: TiptapEditorProps) {
   const [showImagePrompt, setShowImagePrompt] = useState(false);
   const [imageUrlInput, setImageUrlInput] = useState('');

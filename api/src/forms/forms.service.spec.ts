@@ -85,10 +85,13 @@ describe('FormsService', () => {
   });
 
   it('should create form', async () => {
-    const res = await service.createForm({
-      titleAm: 'የአባላት ምዝገባ ቅጽ',
-      schema: { fields: [] } as any,
-    } as any, 'u1');
+    const res = await service.createForm(
+      {
+        titleAm: 'የአባላት ምዝገባ ቅጽ',
+        schema: { fields: [] } as any,
+      } as any,
+      'u1',
+    );
     expect(res).toBeDefined();
     expect(mockPrisma.form.create).toHaveBeenCalled();
   });
@@ -110,7 +113,11 @@ describe('FormsService', () => {
   });
 
   it('should review response', async () => {
-    const res = await service.reviewResponse('r1', { status: 'approved', reviewNote: 'Good' } as any, 'admin-1');
+    const res = await service.reviewResponse(
+      'r1',
+      { status: 'approved', reviewNote: 'Good' } as any,
+      'admin-1',
+    );
     expect(res).toHaveProperty('status', 'approved');
     expect(mockPrisma.formResponse.update).toHaveBeenCalled();
   });

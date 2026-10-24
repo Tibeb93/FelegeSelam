@@ -15,7 +15,6 @@ import {
   Music,
   Upload,
   Play,
-  CheckCircle2,
   AlertCircle,
   Loader2,
   Video,

@@ -18,7 +18,11 @@ describe('FormsController', () => {
     findFormResponses: jest.fn().mockResolvedValue({ data: [], meta: { total: 0 } }),
     findMySubmissions: jest.fn().mockResolvedValue([]),
     reviewResponse: jest.fn().mockResolvedValue({ id: 'r1', status: 'approved' }),
-    exportResponses: jest.fn().mockResolvedValue({ buffer: Buffer.from('data'), mimeType: 'application/pdf', filename: 'file.pdf' }),
+    exportResponses: jest.fn().mockResolvedValue({
+      buffer: Buffer.from('data'),
+      mimeType: 'application/pdf',
+      filename: 'file.pdf',
+    }),
     uploadAttachment: jest.fn().mockResolvedValue({ fileUrl: '/uploads/forms/file.pdf' }),
   };
 
@@ -54,7 +58,11 @@ describe('FormsController', () => {
   });
 
   it('should submit response', async () => {
-    const res = await controller.submitResponse('f1', { answers: {} } as any, { user: { id: 'u1' } } as any);
+    const res = await controller.submitResponse(
+      'f1',
+      { answers: {} } as any,
+      { user: { id: 'u1' } } as any,
+    );
     expect(res).toHaveProperty('status', 'submitted');
     expect(service.submitResponse).toHaveBeenCalled();
   });

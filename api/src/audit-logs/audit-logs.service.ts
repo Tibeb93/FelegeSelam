@@ -134,7 +134,7 @@ export class AuditLogsService {
     titleCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF1B5E20' }, // Brand Green
+      fgColor: { argb: 'FF0F4C81' }, // Primary Deep Blue
     };
     titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
     worksheet.getRow(1).height = 36;
@@ -143,11 +143,11 @@ export class AuditLogsService {
     worksheet.mergeCells('A2', 'I2');
     const subCell = worksheet.getCell('A2');
     subCell.value = `የወጣበት ቀን፦ ${new Date().toISOString().replace('T', ' ').slice(0, 19)} | ጠቅላላ የተመዘገቡ ተግባራት፦ ${logs.length}`;
-    subCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF2B1D0E' } };
+    subCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF0F2438' } };
     subCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFFAF6EB' },
+      fgColor: { argb: 'FFE8F1FB' },
     };
     subCell.alignment = { vertical: 'middle', horizontal: 'center' };
     worksheet.getRow(2).height = 22;
@@ -174,12 +174,12 @@ export class AuditLogsService {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF1B5E20' },
+        fgColor: { argb: 'FF0F4C81' },
       };
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
       cell.border = {
-        top: { style: 'thin', color: { argb: 'FFC9A227' } },
-        bottom: { style: 'medium', color: { argb: 'FFC9A227' } },
+        top: { style: 'thin', color: { argb: 'FF0A2E52' } },
+        bottom: { style: 'medium', color: { argb: 'FF0A2E52' } },
       };
     });
 

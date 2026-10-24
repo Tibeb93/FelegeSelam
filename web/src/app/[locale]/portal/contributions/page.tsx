@@ -4,21 +4,17 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Wallet,
   Receipt,
   Download,
-  Calendar,
-  CreditCard,
-  Building2,
-  AlertCircle,
   Loader2,
-  TrendingUp,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { Member, Contribution } from '@/types/api';
+import { useToast } from '@/providers/ToastProvider';
 
 export default function PortalContributionsPage() {
   const t = useTranslations('Portal');
+  const toast = useToast();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   // 1. Query Member Profile
@@ -69,7 +65,7 @@ export default function PortalContributionsPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err: any) {
-      alert(err.message || 'Error downloading receipt');
+      toast.error(err.message || 'Error downloading receipt');
     } finally {
       setDownloadingId(null);
     }

@@ -36,73 +36,115 @@ const STATUS_CONFIG: Record<
     labelAm: 'ንቁ',
     labelEn: 'Active',
     classes:
-      'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800',
+      'bg-[#E8F7F0] text-[#136640] border-[#A8E2C8] dark:bg-[#0E3523] dark:text-[#6CE0A6] dark:border-[#1E5D3F]',
   },
-  pending: {
-    labelAm: 'በመጠባበቅ ላይ',
-    labelEn: 'Pending',
+  present: {
+    labelAm: 'ተገኝቷል',
+    labelEn: 'Present',
     classes:
-      'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800',
-  },
-  inactive: {
-    labelAm: 'የማይንቀሳቀስ',
-    labelEn: 'Inactive',
-    classes:
-      'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-900/60 dark:text-slate-300 dark:border-slate-800',
-  },
-  suspended: {
-    labelAm: 'የታገደ',
-    labelEn: 'Suspended',
-    classes:
-      'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800',
-  },
-  graduated: {
-    labelAm: 'የተመረቀ',
-    labelEn: 'Graduated',
-    classes:
-      'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800',
-  },
-  transferred: {
-    labelAm: 'የተዛወረ',
-    labelEn: 'Transferred',
-    classes:
-      'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800',
-  },
-  completed: {
-    labelAm: 'የተጠናቀቀ',
-    labelEn: 'Completed',
-    classes:
-      'bg-teal-100 text-teal-800 border-teal-300 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800',
-  },
-  open: {
-    labelAm: 'ክፍት',
-    labelEn: 'Open',
-    classes:
-      'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800',
-  },
-  draft: {
-    labelAm: 'ረቂቅ',
-    labelEn: 'Draft',
-    classes:
-      'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-900/60 dark:text-slate-300 dark:border-slate-700',
-  },
-  closed: {
-    labelAm: 'የተዘጋ',
-    labelEn: 'Closed',
-    classes:
-      'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800',
+      'bg-[#E8F7F0] text-[#136640] border-[#A8E2C8] dark:bg-[#0E3523] dark:text-[#6CE0A6] dark:border-[#1E5D3F]',
   },
   approved: {
     labelAm: 'የጸደቀ',
     labelEn: 'Approved',
     classes:
-      'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800',
+      'bg-[#E8F7F0] text-[#136640] border-[#A8E2C8] dark:bg-[#0E3523] dark:text-[#6CE0A6] dark:border-[#1E5D3F]',
+  },
+  paid: {
+    labelAm: 'የተከፈለ',
+    labelEn: 'Paid',
+    classes:
+      'bg-[#E8F7F0] text-[#136640] border-[#A8E2C8] dark:bg-[#0E3523] dark:text-[#6CE0A6] dark:border-[#1E5D3F]',
+  },
+  open: {
+    labelAm: 'ክፍት',
+    labelEn: 'Open',
+    classes:
+      'bg-[#E8F7F0] text-[#136640] border-[#A8E2C8] dark:bg-[#0E3523] dark:text-[#6CE0A6] dark:border-[#1E5D3F]',
+  },
+  pending: {
+    labelAm: 'በመጠባበቅ ላይ',
+    labelEn: 'Pending',
+    classes:
+      'bg-[#FEF6E6] text-[#9E6500] border-[#FBD793] dark:bg-[#3D2800] dark:text-[#FFCC66] dark:border-[#6B4700]',
+  },
+  late: {
+    labelAm: 'ዘግይቷል',
+    labelEn: 'Late',
+    classes:
+      'bg-[#FEF6E6] text-[#9E6500] border-[#FBD793] dark:bg-[#3D2800] dark:text-[#FFCC66] dark:border-[#6B4700]',
+  },
+  warning: {
+    labelAm: 'ማስጠንቀቂያ',
+    labelEn: 'Warning',
+    classes:
+      'bg-[#FEF6E6] text-[#9E6500] border-[#FBD793] dark:bg-[#3D2800] dark:text-[#FFCC66] dark:border-[#6B4700]',
+  },
+  inactive: {
+    labelAm: 'የማይንቀሳቀስ',
+    labelEn: 'Inactive',
+    classes:
+      'bg-[#F0F4F8] text-[#5B6B7C] border-[#D7E3F1] dark:bg-[#0E2033] dark:text-[#8EADC8] dark:border-[#1A3E63]',
+  },
+  draft: {
+    labelAm: 'ረቂቅ',
+    labelEn: 'Draft',
+    classes:
+      'bg-[#F0F4F8] text-[#5B6B7C] border-[#D7E3F1] dark:bg-[#0E2033] dark:text-[#8EADC8] dark:border-[#1A3E63]',
+  },
+  suspended: {
+    labelAm: 'የታገደ',
+    labelEn: 'Suspended',
+    classes:
+      'bg-[#FDECEB] text-[#931B1B] border-[#F6B2B0] dark:bg-[#3E1110] dark:text-[#F88D8B] dark:border-[#731E1C]',
+  },
+  absent: {
+    labelAm: 'ቀሪ',
+    labelEn: 'Absent',
+    classes:
+      'bg-[#FDECEB] text-[#931B1B] border-[#F6B2B0] dark:bg-[#3E1110] dark:text-[#F88D8B] dark:border-[#731E1C]',
   },
   rejected: {
     labelAm: 'ውድቅ የተደረገ',
     labelEn: 'Rejected',
     classes:
-      'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800',
+      'bg-[#FDECEB] text-[#931B1B] border-[#F6B2B0] dark:bg-[#3E1110] dark:text-[#F88D8B] dark:border-[#731E1C]',
+  },
+  closed: {
+    labelAm: 'የተዘጋ',
+    labelEn: 'Closed',
+    classes:
+      'bg-[#FDECEB] text-[#931B1B] border-[#F6B2B0] dark:bg-[#3E1110] dark:text-[#F88D8B] dark:border-[#731E1C]',
+  },
+  urgent: {
+    labelAm: 'አስቸኳይ',
+    labelEn: 'Urgent',
+    classes:
+      'bg-[#FDECEB] text-[#931B1B] border-[#F6B2B0] dark:bg-[#3E1110] dark:text-[#F88D8B] dark:border-[#731E1C]',
+  },
+  graduated: {
+    labelAm: 'የተመረቀ',
+    labelEn: 'Graduated',
+    classes:
+      'bg-[#E8F1FB] text-[#0F4C81] border-[#B8D5F2] dark:bg-[#0A2644] dark:text-[#68A7E0] dark:border-[#164875]',
+  },
+  transferred: {
+    labelAm: 'የተዛወረ',
+    labelEn: 'Transferred',
+    classes:
+      'bg-[#E8F1FB] text-[#0F4C81] border-[#B8D5F2] dark:bg-[#0A2644] dark:text-[#68A7E0] dark:border-[#164875]',
+  },
+  completed: {
+    labelAm: 'የተጠናቀቀ',
+    labelEn: 'Completed',
+    classes:
+      'bg-[#E8F1FB] text-[#0F4C81] border-[#B8D5F2] dark:bg-[#0A2644] dark:text-[#68A7E0] dark:border-[#164875]',
+  },
+  excused: {
+    labelAm: 'ፈቃድ',
+    labelEn: 'Excused',
+    classes:
+      'bg-[#E8F1FB] text-[#0F4C81] border-[#B8D5F2] dark:bg-[#0A2644] dark:text-[#68A7E0] dark:border-[#164875]',
   },
 };
 

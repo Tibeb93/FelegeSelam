@@ -4,65 +4,65 @@
 
 @layer base {
   :root {
-    --background: 44 53% 95%; /* Cream #FAF6EB */
-    --foreground: 29 51% 11%; /* Dark Brown #2B1D0E */
+    --background: 212 70% 97%; /* Soft Blue Page Background #F4F8FC */
+    --foreground: 209 58% 14%; /* Deep Dark Text #0F2438 */
 
-    --card: 44 50% 97%;
-    --card-foreground: 29 51% 11%;
+    --card: 0 0% 100%; /* Pure White Cards #FFFFFF */
+    --card-foreground: 209 58% 14%; /* Text #0F2438 */
 
-    --popover: 44 53% 95%;
-    --popover-foreground: 29 51% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 209 58% 14%;
 
-    --primary: 125 55% 24%; /* Church Green #1B5E20 */
-    --primary-foreground: 0 0% 100%;
+    --primary: 208 79% 28%; /* Primary 700 Deep Blue #0F4C81 */
+    --primary-foreground: 0 0% 100%; /* White #FFFFFF */
 
-    --secondary: 45 68% 47%; /* Church Gold #C9A227 */
-    --secondary-foreground: 29 51% 11%;
+    --secondary: 210 78% 18%; /* Primary 900 Navy #0A2E52 */
+    --secondary-foreground: 0 0% 100%; /* White #FFFFFF */
 
-    --muted: 40 25% 88%;
-    --muted-foreground: 29 30% 28%;
+    --muted: 212 70% 95%; /* Primary 100 Soft Blue #E8F1FB */
+    --muted-foreground: 211 15% 42%; /* Muted Text #5B6B7C */
 
-    --accent: 45 68% 47%;
-    --accent-foreground: 29 51% 11%;
+    --accent: 40 88% 57%; /* Accent Gold #F2B233 (CTA only) */
+    --accent-foreground: 209 58% 14%; /* Deep Text #0F2438 */
 
-    --destructive: 0 74% 41%; /* Church Red #B71C1C */
+    --destructive: 0 66% 47%; /* Danger #C62828 */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 20% 82%;
-    --input: 40 20% 82%;
-    --ring: 125 55% 24%;
+    --border: 212 48% 89%; /* Border #D7E3F1 */
+    --input: 212 48% 89%;
+    --ring: 208 74% 45%; /* Primary 500 Links & Focus Ring #1E78C8 */
 
-    --radius: 0.5rem;
+    --radius: 1rem; /* rounded-2xl */
   }
 
   .dark {
-    --background: 0 0% 8%; /* Deep Charcoal #141414 */
-    --foreground: 45 20% 95%; /* Off-white #F4F3F0 */
+    --background: 210 78% 8%; /* Navy Hero / Page Background #061B30 */
+    --foreground: 210 60% 96%; /* Light Text #F0F6FC (contrast > 14:1) */
 
-    --card: 0 0% 12%; /* #1F1F1F */
-    --card-foreground: 45 20% 95%;
+    --card: 210 75% 12%; /* Navy Card Surface #0A2644 */
+    --card-foreground: 210 60% 96%;
 
-    --popover: 0 0% 12%;
-    --popover-foreground: 45 20% 95%;
+    --popover: 210 75% 12%;
+    --popover-foreground: 210 60% 96%;
 
-    --primary: 125 48% 40%; /* Church Green #388E3C */
+    --primary: 208 74% 53%; /* Vibrant Blue in Dark Mode #2E8BE0 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 75% 55%; /* Church Gold #E5B833 */
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 210 60% 20%; /* Navy Elevation #143557 */
+    --secondary-foreground: 210 60% 96%;
 
-    --muted: 0 0% 18%; /* #2E2E2E */
-    --muted-foreground: 40 10% 70%; /* #B3B0AA */
+    --muted: 210 60% 16%; /* #102A45 */
+    --muted-foreground: 211 35% 72%; /* Light Muted Blue #99B7D5 (contrast > 5.5:1) */
 
-    --accent: 45 75% 55%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 40 88% 57%; /* Accent Gold #F2B233 */
+    --accent-foreground: 210 78% 8%; /* Dark Navy #061B30 for high contrast */
 
-    --destructive: 0 68% 50%; /* #D32F2F */
+    --destructive: 0 66% 55%; /* Danger #E53935 */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 22%; /* #383838 */
-    --input: 0 0% 22%;
-    --ring: 125 48% 40%;
+    --border: 210 50% 22%; /* Thin Navy Border #1A3E63 */
+    --input: 210 50% 22%;
+    --ring: 208 74% 53%; /* #2E8BE0 */
   }
 }
 

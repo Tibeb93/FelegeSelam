@@ -402,7 +402,7 @@ export function MemberForm({
             {/* 2. Residential Address */}
             <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="flex items-center gap-3 border-b border-border pb-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/60 dark:text-primary-300">
                   <MapPin className="h-5 w-5" />
                 </div>
                 <div>
@@ -449,7 +449,7 @@ export function MemberForm({
             {/* 3. Church Information */}
             <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="flex items-center gap-3 border-b border-border pb-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/60 dark:text-primary-300">
                   <Church className="h-5 w-5" />
                 </div>
                 <div>

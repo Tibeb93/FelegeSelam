@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
@@ -26,11 +25,9 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Download,
   FileSpreadsheet,
   FileText,
   Eye,
-  AlertCircle,
   Loader2,
   User,
   Paperclip,
@@ -39,6 +36,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useToast } from '@/providers/ToastProvider';
 
 export default function FormResponsesPage({
   params: { locale, id },
@@ -47,6 +45,7 @@ export default function FormResponsesPage({
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -175,7 +174,7 @@ export default function FormResponsesPage({
         a.remove();
       }
     } catch (err: any) {
-      alert(err.message || 'Export failed');
+      toast.error(err.message || 'Export failed');
     } finally {
       setIsExporting(null);
     }

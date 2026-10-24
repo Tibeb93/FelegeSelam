@@ -288,10 +288,6 @@ describe('Members Module & Exports (e2e)', () => {
         .get(`/api/v1/members/${createdMemberId}/export?format=pdf`)
         .set('Authorization', `Bearer ${superAdminToken}`);
 
-      if (res.status !== 200) {
-        console.error('DEBUG EXPORT PDF ERROR:', res.status, res.body, res.text);
-      }
-
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toBe('application/pdf');
       expect(res.headers['content-disposition']).toContain('attachment');

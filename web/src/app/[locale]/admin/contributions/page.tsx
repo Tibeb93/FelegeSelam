@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../../lib/api-client';
+import { logger } from '../../../../lib/logger';
 import {
   Contribution,
   ContributionSummary,
@@ -18,10 +19,8 @@ import {
   Download,
   FileText,
   Search,
-  Filter,
   Calendar,
   CreditCard,
-  User,
   CheckCircle2,
   Receipt,
   X,
@@ -183,7 +182,7 @@ export default function ContributionsPage({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Failed to download receipt PDF:', error);
+      logger.error('Failed to download receipt PDF:', error);
     }
   };
 
@@ -205,7 +204,7 @@ export default function ContributionsPage({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Failed to export contributions Excel:', error);
+      logger.error('Failed to export contributions Excel:', error);
     } finally {
       setIsExporting(false);
     }

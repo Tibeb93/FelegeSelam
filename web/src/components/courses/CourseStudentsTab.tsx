@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Course, CourseEnrollment, Department, Member, PaginatedResponse } from '@/types/api';
 import { apiClient } from '@/lib/api-client';
+import { logger } from '@/lib/logger';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
@@ -15,7 +16,6 @@ import {
   AlertCircle,
   CheckCircle2,
   X,
-  Phone,
 } from 'lucide-react';
 
 interface CourseStudentsTabProps {
@@ -78,7 +78,7 @@ export function CourseStudentsTab({
         const enrolledMemberIds = new Set(enrollments.map((e) => e.memberId));
         setSearchedMembers(items.filter((m) => !enrolledMemberIds.has(m.id)));
       } catch (err) {
-        console.error('Failed to search members', err);
+        logger.error('Failed to search members', err);
       } finally {
         setSearchingMembers(false);
       }
@@ -96,7 +96,7 @@ export function CourseStudentsTab({
           setDepartments(Array.isArray(res) ? res : res.data || res.items || []);
         }
       } catch (err) {
-        console.error('Failed to load departments', err);
+        logger.error('Failed to load departments', err);
       }
     }
     loadDepts();
@@ -161,7 +161,7 @@ export function CourseStudentsTab({
       setEnrollmentToDrop(null);
       onRefresh();
     } catch (err) {
-      console.error('Failed to drop enrollment', err);
+      logger.error('Failed to drop enrollment', err);
     } finally {
       setDropping(false);
     }

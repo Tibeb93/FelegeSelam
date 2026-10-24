@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { UploadCloud, X, File as FileIcon, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { UploadCloud, X, File as FileIcon, AlertCircle } from 'lucide-react';
 
 interface FileUploadProps {
   label?: string;
@@ -23,7 +23,7 @@ export function FileUpload({
   onChange,
   error,
   helperText,
-  previewType = 'image',
+  previewType: _previewType = 'image',
   disabled = false,
 }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);

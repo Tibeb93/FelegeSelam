@@ -6,11 +6,9 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Church,
   Cross,
   LayoutDashboard,
   User,
-  CreditCard,
   BookOpen,
   GraduationCap,
   Music,
@@ -24,13 +22,13 @@ import {
   Moon,
   Menu,
   X,
-  ChevronRight,
   ExternalLink,
 } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useTheme } from '@/providers/ThemeProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { apiRequest } from '@/lib/api-client';
+import { SchoolLogo } from '@/components/common/SchoolLogo';
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -39,7 +37,6 @@ interface PortalLayoutProps {
 
 export default function PortalLayout({ children, params: { locale } }: PortalLayoutProps) {
   const t = useTranslations('Portal');
-  const tWebsite = useTranslations('Website');
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -97,14 +94,12 @@ export default function PortalLayout({ children, params: { locale } }: PortalLay
             </button>
 
             <Link href={`/${locale}/portal`} className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-secondary shadow-sm">
-                <Cross className="h-6 w-6" aria-hidden="true" />
-              </div>
+              <SchoolLogo size={38} className="shrink-0" />
               <div className="hidden sm:block">
                 <h1 className="text-sm font-bold text-foreground">
                   {locale === 'am' ? 'የአባላት ፖርታል' : 'Member Portal'}
                 </h1>
-                <p className="text-[11px] text-secondary font-semibold">
+                <p className="text-[11px] text-primary-700 dark:text-primary-300 font-semibold">
                   {locale === 'am' ? 'አዕማደ ሰላም ሰንበት ትምህርት ቤት' : 'Aemade Selam Sunday School'}
                 </p>
               </div>

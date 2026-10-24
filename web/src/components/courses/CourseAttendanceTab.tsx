@@ -4,20 +4,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Course, CourseEnrollment, CourseAttendanceRecord } from '@/types/api';
 import { apiClient } from '@/lib/api-client';
+import { logger } from '@/lib/logger';
 import { EthiopianDatePicker } from '@/components/ui/EthiopianDatePicker';
 import {
   Calendar,
   CheckCircle,
-  XCircle,
-  Clock,
-  FileCheck,
   QrCode,
   Camera,
   Save,
-  RotateCcw,
   AlertCircle,
   History,
-  Check,
   X,
 } from 'lucide-react';
 
@@ -49,7 +45,6 @@ export function CourseAttendanceTab({
 
   // Past attendance records
   const [historyRecords, setHistoryRecords] = useState<CourseAttendanceRecord[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   // QR Scanner Modal State
@@ -88,7 +83,7 @@ export function CourseAttendanceTab({
           setAttendanceMap(map);
         }
       } catch (err) {
-        console.error('Failed to load session attendance', err);
+        logger.error('Failed to load session attendance', err);
       }
     }
 
@@ -100,7 +95,6 @@ export function CourseAttendanceTab({
   // Load overall attendance history
   const loadHistory = async () => {
     try {
-      setLoadingHistory(true);
       const res = await apiClient.get<any>(`/courses/${course.id}/attendance`, {
         params: { limit: 100 },
       });
@@ -108,9 +102,7 @@ export function CourseAttendanceTab({
       setHistoryRecords(items);
       setShowHistoryModal(true);
     } catch (err) {
-      console.error('Failed to load attendance history', err);
-    } finally {
-      setLoadingHistory(false);
+      logger.error('Failed to load attendance history', err);
     }
   };
 
@@ -179,7 +171,7 @@ export function CourseAttendanceTab({
         videoRef.current.srcObject = stream;
       }
     } catch (err) {
-      console.warn('Camera access error', err);
+      logger.warn('Camera access error', err);
       setCameraActive(false);
     }
   };
@@ -200,7 +192,7 @@ export function CourseAttendanceTab({
       setScanning(true);
       setScanResult(null);
 
-      const res = await apiClient.post<any>('/attendance/scan', {
+      await apiClient.post<any>('/attendance/scan', {
         courseId: course.id,
         memberNo: num,
         sessionDate: selectedDate,

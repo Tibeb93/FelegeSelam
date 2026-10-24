@@ -6,24 +6,21 @@ import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import {
   Heart,
-  Music,
   Play,
   Pause,
   Trash2,
   FileText,
-  Volume2,
   ExternalLink,
   Loader2,
-  Sparkles,
   ArrowRight,
   X,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
+import { logger } from '@/lib/logger';
 import { Mezmur } from '@/types/api';
 
 export default function PortalFavoritesPage({ params: { locale } }: { params: { locale: string } }) {
   const t = useTranslations('Portal');
-  const tWeb = useTranslations('Website');
 
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -38,7 +35,7 @@ export default function PortalFavoritesPage({ params: { locale } }: { params: { 
         setFavoriteIds(JSON.parse(stored));
       }
     } catch (e) {
-      console.error('Failed to parse favorites', e);
+      logger.error('Failed to parse favorites', e);
     }
   }, []);
 
@@ -60,7 +57,7 @@ export default function PortalFavoritesPage({ params: { locale } }: { params: { 
     try {
       localStorage.setItem('mezmur_favorites', JSON.stringify(updated));
     } catch (e) {
-      console.error(e);
+      logger.error('Failed to update favorites storage', e);
     }
     if (playingId === id && audioElement) {
       audioElement.pause();

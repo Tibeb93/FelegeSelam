@@ -16,7 +16,7 @@ export function DateDisplay({ locale }: { locale: 'am' | 'en' }) {
   if (!mounted) {
     return (
       <div className="flex items-center gap-2 text-sm font-medium text-foreground/80">
-        <Calendar className="h-4 w-4 text-secondary" aria-hidden="true" />
+        <Calendar className="h-4 w-4 text-primary" aria-hidden="true" />
         <span>...</span>
       </div>
     );
@@ -33,7 +33,7 @@ export function DateDisplay({ locale }: { locale: 'am' | 'en' }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/80 bg-card/60 px-3 py-1.5 text-sm font-medium text-foreground shadow-sm">
-      <Calendar className="h-4 w-4 text-secondary shrink-0" aria-hidden="true" />
+      <Calendar className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
       <span className="font-semibold text-primary">{ethFormatted}</span>
       <span className="text-muted-foreground">•</span>
       <span className="text-foreground/80">{gregFormatted} G.C.</span>

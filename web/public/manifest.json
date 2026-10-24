@@ -1,0 +1,17 @@
+{
+  "name": "አዕማደ ሰላም ሰንበት ትምህርት ቤት | Aemade Selam Sunday School",
+  "short_name": "አዕማደ ሰላም",
+  "description": "የደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን አዕማደ ሰላም ሰንበት ትምህርት ቤት",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0F4C81",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

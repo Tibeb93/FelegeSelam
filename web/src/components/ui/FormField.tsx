@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useFormContext, Controller } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 interface BaseFieldProps {

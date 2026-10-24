@@ -277,10 +277,7 @@ export class MembersService {
   async findMyProfile(user: any): Promise<any> {
     const member = await this.prisma.member.findFirst({
       where: {
-        OR: [
-          { userId: user.id },
-          ...(user.member?.id ? [{ id: user.member.id }] : []),
-        ],
+        OR: [{ userId: user.id }, ...(user.member?.id ? [{ id: user.member.id }] : [])],
         deletedAt: null,
       },
     });
@@ -298,10 +295,7 @@ export class MembersService {
   async updateMyProfile(user: any, dto: UpdateMemberDto): Promise<Member> {
     const member = await this.prisma.member.findFirst({
       where: {
-        OR: [
-          { userId: user.id },
-          ...(user.member?.id ? [{ id: user.member.id }] : []),
-        ],
+        OR: [{ userId: user.id }, ...(user.member?.id ? [{ id: user.member.id }] : [])],
         deletedAt: null,
       },
     });
@@ -759,10 +753,7 @@ export class MembersService {
   async exportMyData(user: any): Promise<any> {
     const member = await this.prisma.member.findFirst({
       where: {
-        OR: [
-          { userId: user.id },
-          ...(user.member?.id ? [{ id: user.member.id }] : []),
-        ],
+        OR: [{ userId: user.id }, ...(user.member?.id ? [{ id: user.member.id }] : [])],
         deletedAt: null,
       },
       include: {
@@ -814,10 +805,7 @@ export class MembersService {
   async deleteMyAccount(user: any): Promise<{ message: string }> {
     const member = await this.prisma.member.findFirst({
       where: {
-        OR: [
-          { userId: user.id },
-          ...(user.member?.id ? [{ id: user.member.id }] : []),
-        ],
+        OR: [{ userId: user.id }, ...(user.member?.id ? [{ id: user.member.id }] : [])],
         deletedAt: null,
       },
     });

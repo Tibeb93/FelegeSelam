@@ -15,7 +15,6 @@ import { CourseGradesTab } from '@/components/courses/CourseGradesTab';
 import { CourseCertificatesTab } from '@/components/courses/CourseCertificatesTab';
 import { FormSkeleton } from '@/components/ui/SkeletonLoaders';
 import {
-  BookOpen,
   ArrowLeft,
   Edit,
   LayoutDashboard,

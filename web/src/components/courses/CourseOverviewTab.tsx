@@ -11,8 +11,6 @@ import {
   Clock,
   BookOpen,
   Calendar,
-  AlertCircle,
-  CheckCircle,
 } from 'lucide-react';
 
 interface CourseOverviewTabProps {

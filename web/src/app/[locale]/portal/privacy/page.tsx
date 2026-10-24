@@ -8,7 +8,6 @@ import {
   Lock,
   Eye,
   Bell,
-  Smartphone,
   Save,
   CheckCircle2,
   AlertCircle,
@@ -16,7 +15,6 @@ import {
   KeyRound,
   Download,
   Trash2,
-  AlertTriangle,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 
@@ -337,7 +335,7 @@ export default function PortalPrivacyPage() {
             <button
               type="submit"
               disabled={passwordMutation.isPending}
-              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2 text-xs font-bold text-secondary shadow-md hover:bg-primary-hover disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-primary-hover disabled:opacity-50"
             >
               {passwordMutation.isPending ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

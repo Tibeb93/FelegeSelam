@@ -41,14 +41,14 @@ import {
 } from 'recharts';
 
 const DEPARTMENT_COLORS = [
-  '#1E4D2B', // Deep Ethiopian Forest Green
-  '#D4AF37', // Church Gold
-  '#8B0000', // Church Crimson
-  '#2563EB', // Royal Blue
-  '#0D9488', // Teal
-  '#9333EA', // Purple
-  '#EA580C', // Orange
-  '#64748B', // Slate
+  '#0F4C81', // Primary 700 Deep Blue
+  '#1E78C8', // Primary 500 Blue
+  '#0A2E52', // Primary 900 Navy
+  '#1B8E5A', // Status Success
+  '#C62828', // Status Danger
+  '#F2B233', // Accent Gold
+  '#5CA4E2', // Sky Blue
+  '#5B6B7C', // Muted Slate
 ];
 
 export default function AdminDashboardPage({
@@ -379,8 +379,8 @@ export default function AdminDashboardPage({
                 >
                   <defs>
                     <linearGradient id="colorMembers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1E4D2B" stopOpacity={0.6} />
-                      <stop offset="95%" stopColor="#1E4D2B" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="#0F4C81" stopOpacity={0.6} />
+                      <stop offset="95%" stopColor="#0F4C81" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -402,7 +402,7 @@ export default function AdminDashboardPage({
                     type="monotone"
                     dataKey="count"
                     name={locale === 'am' ? 'አባላት' : 'Members'}
-                    stroke="#1E4D2B"
+                    stroke="#0F4C81"
                     strokeWidth={2.5}
                     fillOpacity={1}
                     fill="url(#colorMembers)"
@@ -515,7 +515,7 @@ export default function AdminDashboardPage({
                   <Bar
                     dataKey="count"
                     name={locale === 'am' ? 'የአባላት ብዛት' : 'Members'}
-                    fill="#D4AF37"
+                    fill="#1E78C8"
                     radius={[6, 6, 0, 0]}
                   />
                 </BarChart>
@@ -539,7 +539,7 @@ export default function AdminDashboardPage({
                 {locale === 'am' ? 'በእያንዳንዱ የትምህርት ክፍል የተማሪዎች መገኘት (%)' : 'Student attendance % per course'}
               </p>
             </div>
-            <CalendarCheck className="h-5 w-5 text-emerald-600" />
+            <CalendarCheck className="h-5 w-5 text-[#1B8E5A]" />
           </div>
 
           <div className="h-72 w-full">
@@ -573,7 +573,7 @@ export default function AdminDashboardPage({
                   />
                   <Bar
                     dataKey="attendanceRate"
-                    fill="#10B981"
+                    fill="#1B8E5A"
                     radius={[6, 6, 0, 0]}
                   />
                 </BarChart>

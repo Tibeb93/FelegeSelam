@@ -16,7 +16,6 @@ export default function ForgotPasswordPage({
   params: { locale: string };
 }) {
   const t = useTranslations('Auth');
-  const tCommon = useTranslations('Common');
   const tVal = useTranslations('Validation');
   const toast = useToast();
 

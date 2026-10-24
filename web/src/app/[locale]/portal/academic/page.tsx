@@ -5,25 +5,16 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import {
-  GraduationCap,
-  Calendar,
-  CheckCircle2,
-  XCircle,
-  Clock,
   Award,
   Download,
   AlertCircle,
   Loader2,
-  TrendingUp,
-  FileBadge,
-  Percent,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { Member } from '@/types/api';
 
 export default function PortalAcademicPage() {
   const t = useTranslations('Portal');
-  const tCourses = useTranslations('Courses');
 
   const [activeTab, setActiveTab] = useState<'attendance' | 'grades' | 'certificates'>('attendance');
 
@@ -330,10 +321,10 @@ export default function PortalAcademicPage() {
               {certificates.map((cert: any) => (
                 <div
                   key={cert.id}
-                  className="flex flex-col justify-between rounded-2xl border border-[#C9A227] bg-[#FAF6EB] p-5 shadow-sm dark:bg-[#1f281e] dark:border-[#C9A227]/50"
+                  className="flex flex-col justify-between rounded-2xl border border-[#D7E3F1] bg-white p-5 shadow-sm dark:bg-[#0A2644] dark:border-[#1A3E63]"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-primary shadow-xs">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F1FB] text-[#0F4C81] dark:bg-[#061B30] dark:text-[#68A7E0] shadow-xs">
                       <Award className="h-5 w-5" />
                     </div>
                     <span className="font-mono text-xs font-bold text-foreground">
@@ -350,7 +341,7 @@ export default function PortalAcademicPage() {
                     </p>
                   </div>
 
-                  <div className="mt-5 pt-3 border-t border-[#C9A227]/30 flex items-center justify-between">
+                  <div className="mt-5 pt-3 border-t border-[#D7E3F1] dark:border-[#1A3E63] flex items-center justify-between">
                     <Link
                       href={`/verify/${cert.certificateCode}`}
                       target="_blank"

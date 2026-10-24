@@ -105,11 +105,14 @@ describe('MezmursService', () => {
   });
 
   it('should create mezmur', async () => {
-    const res = await service.createMezmur({
-      titleAm: 'ክርስቶስ ተንስአ',
-      categoryId: 1,
-      lyricsAm: 'ክርስቶስ ተንስአ...',
-    } as any, 'u1');
+    const res = await service.createMezmur(
+      {
+        titleAm: 'ክርስቶስ ተንስአ',
+        categoryId: 1,
+        lyricsAm: 'ክርስቶስ ተንስአ...',
+      } as any,
+      'u1',
+    );
     expect(res).toBeDefined();
     expect(mockPrisma.mezmur.create).toHaveBeenCalled();
   });

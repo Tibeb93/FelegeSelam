@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Lesson } from '@/types/api';
 import { apiClient } from '@/lib/api-client';
+import { logger } from '@/lib/logger';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
   Plus,
@@ -20,7 +21,6 @@ import {
   Play,
   Download,
   X,
-  CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
 
@@ -138,7 +138,7 @@ export function CourseLessonsTab({
       );
       onRefresh();
     } catch (err) {
-      console.error('Failed to toggle publish', err);
+      logger.error('Failed to toggle publish', err);
     }
   };
 
@@ -149,7 +149,7 @@ export function CourseLessonsTab({
       setLessonToDelete(null);
       onRefresh();
     } catch (err) {
-      console.error('Failed to delete lesson', err);
+      logger.error('Failed to delete lesson', err);
     }
   };
 
@@ -158,7 +158,7 @@ export function CourseLessonsTab({
     setDraggedIndex(index);
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent, _index: number) => {
     e.preventDefault();
   };
 
@@ -188,7 +188,7 @@ export function CourseLessonsTab({
       });
       onRefresh();
     } catch (err) {
-      console.error('Failed to reorder lessons', err);
+      logger.error('Failed to reorder lessons', err);
     }
   };
 

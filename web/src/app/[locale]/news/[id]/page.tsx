@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { ChevronLeft, Calendar, User, Share2, AlertTriangle, BookOpen } from 'lucide-react';
+import { ChevronLeft, Calendar, AlertTriangle } from 'lucide-react';
 import { PublicHeader } from '@/components/public/PublicHeader';
 import { PublicFooter } from '@/components/public/PublicFooter';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +24,7 @@ async function getPost(id: string) {
   }
 }
 
-export async function generateMetadata({ params: { locale, id } }: PostDetailProps): Promise<Metadata> {
+export async function generateMetadata({ params: { locale: _locale, id } }: PostDetailProps): Promise<Metadata> {
   const post = await getPost(id);
   if (!post) {
     return { title: 'Post Not Found' };

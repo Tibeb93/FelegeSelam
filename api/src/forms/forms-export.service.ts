@@ -20,11 +20,14 @@ export type FormWithResponses = Form & {
 export class FormsExportService {
   private readonly logger = new Logger(FormsExportService.name);
 
-  private readonly brandGreen = '#1B5E20';
-  private readonly brandGold = '#C9A227';
-  private readonly brandCream = '#FAF6EB';
-  private readonly brandDark = '#2B1D0E';
-  private readonly brandRed = '#B71C1C';
+  private readonly brandPrimary = '#0F4C81';
+  private readonly brandNavy = '#0A2E52';
+  private readonly brandGold = '#F2B233';
+  private readonly brandSoftBlue = '#E8F1FB';
+  private readonly brandDark = '#0F2438';
+  private readonly brandDanger = '#C62828';
+  private readonly brandSuccess = '#1B8E5A';
+  private readonly brandWarning = '#E39B00';
 
   /**
    * Helper to launch Puppeteer browser safely with auto-detected Chrome/Edge executable
@@ -111,7 +114,7 @@ export class FormsExportService {
     titleCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF1B5E20' }, // #1B5E20 Brand Green
+      fgColor: { argb: 'FF0F4C81' }, // Primary Deep Blue
     };
     titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
     worksheet.getRow(1).height = 40;
@@ -120,11 +123,11 @@ export class FormsExportService {
     worksheet.mergeCells('A2', 'H2');
     const infoCell = worksheet.getCell('A2');
     infoCell.value = `ቅጽ መለያ፦ ${form.id} | ሁኔታ፦ ${form.status} | የተዘጋጀበት ቀን፦ ${new Date().toISOString().split('T')[0]}`;
-    infoCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF2B1D0E' } };
+    infoCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF0F2438' } };
     infoCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFFAF6EB' }, // #FAF6EB Cream
+      fgColor: { argb: 'FFE8F1FB' }, // Soft Blue
     };
     infoCell.alignment = { vertical: 'middle', horizontal: 'center' };
     worksheet.getRow(2).height = 24;
@@ -137,7 +140,7 @@ export class FormsExportService {
     const rejected = form.responses.filter((r) => r.status === 'rejected').length;
     const submitted = form.responses.filter((r) => r.status === 'submitted').length;
     statsCell.value = `ድምር ምላሾች (Total)፦ ${total}  |  የጸደቁ (Approved)፦ ${approved}  |  ውድቅ የተደረጉ (Rejected)፦ ${rejected}  |  በመጠባበቅ ላይ (Pending)፦ ${submitted}`;
-    statsCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF1B5E20' } };
+    statsCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF0F4C81' } };
     statsCell.alignment = { vertical: 'middle', horizontal: 'center' };
     worksheet.getRow(3).height = 24;
 
@@ -173,14 +176,14 @@ export class FormsExportService {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF1B5E20' },
+        fgColor: { argb: 'FF0F4C81' },
       };
       cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
       cell.border = {
-        top: { style: 'thin', color: { argb: 'FFC9A227' } },
-        bottom: { style: 'medium', color: { argb: 'FFC9A227' } },
-        left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-        right: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+        top: { style: 'thin', color: { argb: 'FF0A2E52' } },
+        bottom: { style: 'medium', color: { argb: 'FF0A2E52' } },
+        left: { style: 'thin', color: { argb: 'FFD7E3F1' } },
+        right: { style: 'thin', color: { argb: 'FFD7E3F1' } },
       };
     });
 
@@ -220,16 +223,16 @@ export class FormsExportService {
         cell.font = { name: 'Calibri', size: 10 };
         cell.alignment = { vertical: 'middle', horizontal: colNumber === 1 ? 'center' : 'left' };
         cell.border = {
-          bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-          left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-          right: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+          bottom: { style: 'thin', color: { argb: 'FFD7E3F1' } },
+          left: { style: 'thin', color: { argb: 'FFD7E3F1' } },
+          right: { style: 'thin', color: { argb: 'FFD7E3F1' } },
         };
 
         if (isEven) {
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFFDFBF7' },
+            fgColor: { argb: 'FFF0F6FC' },
           };
         }
 
@@ -237,11 +240,11 @@ export class FormsExportService {
         if (colNumber === 7) {
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
           if (resp.status === 'approved') {
-            cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF1B5E20' } };
+            cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF1B8E5A' } };
           } else if (resp.status === 'rejected') {
-            cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFB71C1C' } };
+            cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFC62828' } };
           } else {
-            cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFC9A227' } };
+            cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFE39B00' } };
           }
         }
       });
@@ -351,20 +354,20 @@ export class FormsExportService {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 2px solid #C9A227;
+            border-bottom: 2px solid #0F4C81;
             padding-bottom: 10px;
             margin-bottom: 12px;
           }
 
           .header-title h1 {
-            color: #1B5E20;
+            color: #0F4C81;
             margin: 0 0 4px 0;
             font-size: 18px;
             font-weight: 700;
           }
 
           .header-title h2 {
-            color: #2B1D0E;
+            color: #0A2E52;
             margin: 0;
             font-size: 14px;
             font-weight: 600;
@@ -380,24 +383,24 @@ export class FormsExportService {
             flex: 1;
             padding: 8px 12px;
             border-radius: 4px;
-            background-color: #FAF6EB;
-            border-left: 4px solid #1B5E20;
+            background-color: #E8F1FB;
+            border-left: 4px solid #0F4C81;
           }
 
-          .stat-card.approved { border-left-color: #1B5E20; }
-          .stat-card.rejected { border-left-color: #B71C1C; }
-          .stat-card.submitted { border-left-color: #C9A227; }
+          .stat-card.approved { border-left-color: #1B8E5A; }
+          .stat-card.rejected { border-left-color: #C62828; }
+          .stat-card.submitted { border-left-color: #E39B00; }
 
           .stat-label {
             font-size: 10px;
-            color: #666;
+            color: #5B6B7C;
             text-transform: uppercase;
           }
 
           .stat-value {
             font-size: 16px;
             font-weight: 700;
-            color: #2B1D0E;
+            color: #0F2438;
           }
 
           table {
@@ -408,22 +411,22 @@ export class FormsExportService {
           }
 
           th, td {
-            border: 1px solid #ddd;
+            border: 1px solid #D7E3F1;
             padding: 6px 8px;
             text-align: left;
             vertical-align: middle;
           }
 
           th {
-            background-color: #1B5E20;
+            background-color: #0F4C81;
             color: #ffffff;
             font-weight: 600;
-            border-color: #154a19;
+            border-color: #0A2E52;
             white-space: nowrap;
           }
 
           tr:nth-child(even) {
-            background-color: #FDFBF7;
+            background-color: #F0F6FC;
           }
 
           .badge {
@@ -436,30 +439,30 @@ export class FormsExportService {
           }
 
           .badge.approved {
-            background-color: #E8F5E9;
-            color: #1B5E20;
-            border: 1px solid #C8E6C9;
+            background-color: #E8F8F0;
+            color: #1B8E5A;
+            border: 1px solid #A3E0C1;
           }
 
           .badge.rejected {
-            background-color: #FFEBEE;
-            color: #B71C1C;
-            border: 1px solid #FFCDD2;
+            background-color: #FDE8E8;
+            color: #C62828;
+            border: 1px solid #F8B4B4;
           }
 
           .badge.submitted {
-            background-color: #FFF8E1;
-            color: #8D6E1C;
-            border: 1px solid #FFE082;
+            background-color: #FEF3C7;
+            color: #B45309;
+            border: 1px solid #FCD34D;
           }
 
           .footer-note {
             margin-top: 15px;
             font-size: 9px;
-            color: #888;
+            color: #5B6B7C;
             display: flex;
             justify-content: space-between;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #D7E3F1;
             padding-top: 6px;
           }
         </style>
@@ -470,7 +473,7 @@ export class FormsExportService {
             <h1>አዕማደ ሰላም ሰንበት ትምህርት ቤት</h1>
             <h2>${this.escapeHtml(form.title)} - የምላሾች ሪፖርት</h2>
           </div>
-          <div style="text-align: right; font-size: 10px; color: #555;">
+          <div style="text-align: right; font-size: 10px; color: #5B6B7C;">
             <div>ቅጽ ቁጥር፦ <code>${form.id.slice(0, 8)}</code></div>
             <div>የወጣበት ቀን፦ ${new Date().toISOString().split('T')[0]}</div>
           </div>
@@ -483,15 +486,15 @@ export class FormsExportService {
           </div>
           <div class="stat-card approved">
             <div class="stat-label">የጸደቁ (Approved)</div>
-            <div class="stat-value" style="color: #1B5E20;">${approved}</div>
+            <div class="stat-value" style="color: #1B8E5A;">${approved}</div>
           </div>
           <div class="stat-card rejected">
             <div class="stat-label">ውድቅ የተደረጉ (Rejected)</div>
-            <div class="stat-value" style="color: #B71C1C;">${rejected}</div>
+            <div class="stat-value" style="color: #C62828;">${rejected}</div>
           </div>
           <div class="stat-card submitted">
             <div class="stat-label">በመጠባበቅ ላይ (Pending)</div>
-            <div class="stat-value" style="color: #C9A227;">${submitted}</div>
+            <div class="stat-value" style="color: #E39B00;">${submitted}</div>
           </div>
         </div>
 

@@ -654,10 +654,7 @@ export class FormsService {
     if (!user) return [];
     const member = await this.prisma.member.findFirst({
       where: {
-        OR: [
-          { userId: user.id },
-          ...(user.member?.id ? [{ id: user.member.id }] : []),
-        ],
+        OR: [{ userId: user.id }, ...(user.member?.id ? [{ id: user.member.id }] : [])],
         deletedAt: null,
       },
     });

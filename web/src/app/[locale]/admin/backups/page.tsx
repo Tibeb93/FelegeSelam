@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../../lib/api-client';
+import { logger } from '../../../../lib/logger';
 import { BackupFileInfo } from '../../../../types/api';
 import { useAuth } from '../../../../providers/AuthProvider';
 import {
   Database,
-  Plus,
   Download,
   Trash2,
   ShieldAlert,
@@ -91,7 +91,7 @@ export default function BackupsPage({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Download failed:', error);
+      logger.error('Download failed:', error);
     }
   };
 

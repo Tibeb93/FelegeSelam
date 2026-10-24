@@ -3,26 +3,20 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../../lib/api-client';
+import { logger } from '../../../../lib/logger';
 import {
   Member,
   Course,
   Contribution,
-  ContributionType,
-  PaymentMethod,
 } from '../../../../types/api';
 import {
-  BarChart3,
   Users,
   CalendarCheck,
   DollarSign,
   FileSpreadsheet,
-  FileText,
   Download,
   Filter,
   Eye,
-  Search,
-  CheckCircle2,
-  Calendar,
 } from 'lucide-react';
 import { Skeleton } from '../../../../components/ui/SkeletonLoaders';
 
@@ -43,9 +37,6 @@ export default function ReportsPage({
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [contributionType, setContributionType] = useState<string>('all');
   const [contributionMethod, setContributionMethod] = useState<string>('all');
-
-  const [fromDate, setFromDate] = useState<string>('');
-  const [toDate, setToDate] = useState<string>('');
 
   const [isExporting, setIsExporting] = useState<string | null>(null);
 
@@ -130,7 +121,7 @@ export default function ReportsPage({
       const filename = `Members_Report_${new Date().toISOString().split('T')[0]}.${ext}`;
       downloadBlob(blob, filename);
     } catch (err) {
-      console.error('Export failed:', err);
+      logger.error('Export failed:', err);
     } finally {
       setIsExporting(null);
     }
@@ -147,7 +138,7 @@ export default function ReportsPage({
       const filename = `Contributions_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
       downloadBlob(blob, filename);
     } catch (err) {
-      console.error('Export failed:', err);
+      logger.error('Export failed:', err);
     } finally {
       setIsExporting(null);
     }
@@ -168,7 +159,7 @@ export default function ReportsPage({
       const blob = new Blob([csvHeader + rows], { type: 'text/csv;charset=utf-8;' });
       downloadBlob(blob, `Course_Attendance_${courseReportData.course.titleAm}_${new Date().toISOString().split('T')[0]}.csv`);
     } catch (err) {
-      console.error('Export attendance failed:', err);
+      logger.error('Export attendance failed:', err);
     } finally {
       setIsExporting(null);
     }

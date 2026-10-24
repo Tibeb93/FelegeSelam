@@ -7,6 +7,7 @@ import {
   QueryCache,
   MutationCache,
 } from '@tanstack/react-query';
+import { logger } from '../lib/logger';
 
 interface QueryProviderProps {
   children: React.ReactNode;
@@ -18,12 +19,12 @@ export function QueryProvider({ children }: QueryProviderProps) {
       new QueryClient({
         queryCache: new QueryCache({
           onError: (error) => {
-            console.error('Global Query Error:', error);
+            logger.error('Global Query Error:', error);
           },
         }),
         mutationCache: new MutationCache({
           onError: (error) => {
-            console.error('Global Mutation Error:', error);
+            logger.error('Global Mutation Error:', error);
           },
         }),
         defaultOptions: {

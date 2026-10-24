@@ -14,7 +14,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('light');
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     // Read stored theme from cookie or localStorage or prefers-color-scheme
@@ -30,7 +29,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     setThemeState(initialTheme);
     applyThemeClass(initialTheme);
-    setMounted(true);
   }, []);
 
   const applyThemeClass = (newTheme: Theme) => {

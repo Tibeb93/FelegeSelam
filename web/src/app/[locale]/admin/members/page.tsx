@@ -12,12 +12,10 @@ import { GenerateLetterDialog } from '../../../../components/members/GenerateLet
 import { useToast } from '../../../../providers/ToastProvider';
 import {
   Download,
-  Filter,
   UserPlus,
   FileSpreadsheet,
   FileText,
   CreditCard,
-  User,
   ChevronDown,
   Upload,
   Clock,
@@ -69,7 +67,7 @@ export default function MembersAdminPage({
   });
 
   // Query members from NestJS API
-  const { data, isLoading, refetch } = useQuery<PaginatedResponse<Member>>({
+  const { data, isLoading } = useQuery<PaginatedResponse<Member>>({
     queryKey: [
       'admin-members-list',
       page,

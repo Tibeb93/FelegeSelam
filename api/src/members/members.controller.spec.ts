@@ -11,7 +11,11 @@ describe('MembersController', () => {
     findAll: jest.fn().mockResolvedValue({ data: [], meta: { total: 0 } }),
     getImportTemplate: jest.fn().mockResolvedValue(Buffer.from('template')),
     importMembers: jest.fn().mockResolvedValue({ inserted: 5, errors: [] }),
-    exportMembers: jest.fn().mockResolvedValue({ buffer: Buffer.from('data'), mimeType: 'application/pdf', filename: 'export.pdf' }),
+    exportMembers: jest.fn().mockResolvedValue({
+      buffer: Buffer.from('data'),
+      mimeType: 'application/pdf',
+      filename: 'export.pdf',
+    }),
     getDepartments: jest.fn().mockResolvedValue([{ id: 1, nameAm: 'መዝሙር' }]),
     findMyProfile: jest.fn().mockResolvedValue({ id: 'm1', memberNo: 'AS-0001' }),
     updateMyProfile: jest.fn().mockResolvedValue({ id: 'm1', memberNo: 'AS-0001' }),
@@ -22,9 +26,15 @@ describe('MembersController', () => {
     approveMember: jest.fn().mockResolvedValue({ id: 'm1', status: 'active' }),
     softDelete: jest.fn().mockResolvedValue({ message: 'Deleted' }),
     uploadPhoto: jest.fn().mockResolvedValue({ photoUrl: '/uploads/photos/p.webp' }),
-    exportSingleMember: jest.fn().mockResolvedValue({ buffer: Buffer.from('data'), mimeType: 'application/pdf', filename: 'profile.pdf' }),
+    exportSingleMember: jest.fn().mockResolvedValue({
+      buffer: Buffer.from('data'),
+      mimeType: 'application/pdf',
+      filename: 'profile.pdf',
+    }),
     generateIdCard: jest.fn().mockResolvedValue({ buffer: Buffer.from('pdf'), filename: 'id.pdf' }),
-    generateLetter: jest.fn().mockResolvedValue({ buffer: Buffer.from('pdf'), filename: 'letter.pdf' }),
+    generateLetter: jest
+      .fn()
+      .mockResolvedValue({ buffer: Buffer.from('pdf'), filename: 'letter.pdf' }),
   };
 
   beforeEach(async () => {

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import {
@@ -13,19 +13,15 @@ import {
   Printer,
   CheckCircle2,
   XCircle,
-  FileSpreadsheet,
   Download,
   Calendar,
   User,
   MapPin,
   Church,
   GraduationCap,
-  PhoneCall,
   BookOpen,
   DollarSign,
   History,
-  Clock,
-  ShieldCheck,
   ChevronDown,
   Loader2,
 } from 'lucide-react';
@@ -46,7 +42,6 @@ export default function MemberProfilePage() {
   const params = useParams();
   const id = params?.id as string;
   const locale = (params?.locale as string) || 'am';
-  const router = useRouter();
   const toast = useToast();
   const queryClient = useQueryClient();
   const t = useTranslations('Members');

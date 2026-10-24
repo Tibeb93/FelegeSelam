@@ -3,7 +3,6 @@ import { CoursesService } from './courses.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { CertificatesPdfService } from './certificates-pdf.service';
-import { NotFoundException } from '@nestjs/common';
 
 describe('CoursesService', () => {
   let service: CoursesService;
@@ -18,7 +17,11 @@ describe('CoursesService', () => {
     status: 'published',
     createdAt: new Date(),
     updatedAt: new Date(),
-    teacher: { id: 'u1', email: 'teacher@aemade.org', member: { firstName: 'Teacher', fatherName: 'One' } },
+    teacher: {
+      id: 'u1',
+      email: 'teacher@aemade.org',
+      member: { firstName: 'Teacher', fatherName: 'One' },
+    },
     lessons: [],
     enrollments: [],
   };
@@ -39,7 +42,13 @@ describe('CoursesService', () => {
     enrollmentId: 'e1',
     issueDate: new Date(),
     enrollment: mockEnrollment,
-    member: { id: 'm1', memberNo: 'AS-0001', firstName: 'Student', fatherName: 'One', grandfatherName: 'Two' },
+    member: {
+      id: 'm1',
+      memberNo: 'AS-0001',
+      firstName: 'Student',
+      fatherName: 'One',
+      grandfatherName: 'Two',
+    },
     course: mockCourse,
   };
 
@@ -67,8 +76,18 @@ describe('CoursesService', () => {
       update: jest.fn().mockResolvedValue(mockEnrollment),
     },
     member: {
-      findUnique: jest.fn().mockResolvedValue({ id: 'm1', memberNo: 'AS-0001', firstName: 'Student', status: 'active' }),
-      findFirst: jest.fn().mockResolvedValue({ id: 'm1', memberNo: 'AS-0001', firstName: 'Student', status: 'active' }),
+      findUnique: jest.fn().mockResolvedValue({
+        id: 'm1',
+        memberNo: 'AS-0001',
+        firstName: 'Student',
+        status: 'active',
+      }),
+      findFirst: jest.fn().mockResolvedValue({
+        id: 'm1',
+        memberNo: 'AS-0001',
+        firstName: 'Student',
+        status: 'active',
+      }),
     },
     grade: {
       create: jest.fn().mockResolvedValue({ id: 'g1', score: 95, assessmentName: 'Quiz' }),
@@ -140,7 +159,9 @@ describe('CoursesService', () => {
   });
 
   it('should add grade to enrollment', async () => {
-    const res = await service.addGrade('e1', { assessmentName: 'Quiz', score: 95 } as any, { role: 'admin' });
+    const res = await service.addGrade('e1', { assessmentName: 'Quiz', score: 95 } as any, {
+      role: 'admin',
+    });
     expect(res).toBeDefined();
     expect(mockPrisma.grade.create).toHaveBeenCalled();
   });

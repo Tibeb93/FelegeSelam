@@ -12,13 +12,8 @@ import {
   FormStatus,
   FormItem,
 } from '@/types/api';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/Dialog';
+
+
 import {
   Type,
   AlignLeft,
@@ -33,17 +28,14 @@ import {
   ArrowUp,
   ArrowDown,
   Settings,
-  Sparkles,
   Eye,
   Save,
   ArrowLeft,
   Loader2,
   AlertCircle,
-  CheckCircle2,
-  Lock,
-  Clock,
   Layers,
 } from 'lucide-react';
+import { useToast } from '@/providers/ToastProvider';
 
 const FIELD_PALETTE: {
   type: FormFieldType;
@@ -127,6 +119,7 @@ export default function FormBuilderPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const existingFormId = searchParams.get('id');
 
   // Form Meta State
@@ -141,7 +134,6 @@ export default function FormBuilderPage({
   // Tab state for mobile: 'builder' vs 'preview'
   const [activeTab, setActiveTab] = useState<'builder' | 'preview'>('builder');
   const [errorMsg, setErrorMsg] = useState('');
-  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
   // Helper for datetime-local
   const formatDatetimeLocal = (isoString?: string | null) => {
@@ -153,7 +145,7 @@ export default function FormBuilderPage({
   };
 
   // Fetch existing form if editing
-  const { data: existingForm, isLoading: isLoadingForm } = useQuery<FormItem>({
+  const { data: existingForm } = useQuery<FormItem>({
     queryKey: ['admin-form-details', existingFormId],
     queryFn: async () => {
       if (!existingFormId) return null;
@@ -777,7 +769,7 @@ export default function FormBuilderPage({
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  alert(locale === 'am' ? 'ይህ የቅድመ-ዕይታ መሞከሪያ ነው!' : 'This is a live preview test!');
+                  toast.info(locale === 'am' ? 'ይህ የቅድመ-ዕይታ መሞከሪያ ነው!' : 'This is a live preview test!');
                 }}
                 className="mt-4 space-y-4 max-h-[60vh] overflow-y-auto pr-1"
               >

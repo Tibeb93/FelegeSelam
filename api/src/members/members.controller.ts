@@ -139,14 +139,18 @@ export class MembersController {
 
   @Get('me/data-export')
   @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
-  @ApiOperation({ summary: 'Export all personal data belonging to current member (GDPR data safety)' })
+  @ApiOperation({
+    summary: 'Export all personal data belonging to current member (GDPR data safety)',
+  })
   async exportMyData(@CurrentUser() user: any) {
     return this.membersService.exportMyData(user);
   }
 
   @Delete('me/account')
   @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
-  @ApiOperation({ summary: 'Deactivate own account and soft-delete member record (GDPR data safety)' })
+  @ApiOperation({
+    summary: 'Deactivate own account and soft-delete member record (GDPR data safety)',
+  })
   async deleteMyAccount(@CurrentUser() user: any) {
     return this.membersService.deleteMyAccount(user);
   }

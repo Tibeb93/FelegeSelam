@@ -4,7 +4,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 describe('SettingsService', () => {
   let service: SettingsService;
-  let prisma: PrismaService;
 
   const mockPrisma = {
     setting: {
@@ -29,12 +28,14 @@ describe('SettingsService', () => {
       { settingKey: 'school_profile', settingValue: DEFAULT_SETTINGS.school_profile },
       { settingKey: 'contact_details', settingValue: DEFAULT_SETTINGS.contact_details },
     ]);
-    mockPrisma.setting.findUnique.mockImplementation(async ({ where }: { where: { settingKey: string } }) => {
-      return {
-        settingKey: where.settingKey,
-        settingValue: (DEFAULT_SETTINGS as any)[where.settingKey] || null,
-      };
-    });
+    mockPrisma.setting.findUnique.mockImplementation(
+      async ({ where }: { where: { settingKey: string } }) => {
+        return {
+          settingKey: where.settingKey,
+          settingValue: (DEFAULT_SETTINGS as any)[where.settingKey] || null,
+        };
+      },
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -47,7 +48,6 @@ describe('SettingsService', () => {
     }).compile();
 
     service = module.get<SettingsService>(SettingsService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined', () => {

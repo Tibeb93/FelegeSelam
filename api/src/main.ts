@@ -59,37 +59,43 @@ async function bootstrap() {
   // Global exception filter for unified JSON error format
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Swagger Documentation setup at /api/docs
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Aemade Selam Sunday School Management System API')
-    .setDescription(
-      'አዕማደ ሰላም ሰንበት ትምህርት ቤት - Core REST API documentation for web portals and mobile applications.',
-    )
-    .setVersion('1.0')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter your JWT access token',
-        in: 'header',
-      },
-      'JWT-auth',
-    )
-    .build();
+  // Swagger Documentation setup (enabled in development or via ENABLE_SWAGGER=true)
+  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
+  const enableSwagger =
+    configService.get<string>('ENABLE_SWAGGER', 'false') === 'true' || nodeEnv !== 'production';
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document, {
-    customSiteTitle: 'Aemade Selam API Docs',
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
-  });
+  if (enableSwagger) {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Aemade Selam Sunday School Management System API')
+      .setDescription(
+        'አዕማደ ሰላም ሰንበት ትምህርት ቤት - Core REST API documentation for web portals and mobile applications.',
+      )
+      .setVersion('1.0')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'JWT',
+          description: 'Enter your JWT access token',
+          in: 'header',
+        },
+        'JWT-auth',
+      )
+      .build();
+
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document, {
+      customSiteTitle: 'Aemade Selam API Docs',
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    });
+    logger.log(`Swagger documentation available at: http://localhost:${port}/api/docs`);
+  }
 
   await app.listen(port);
   logger.log(`Aemade Selam API is running on: http://localhost:${port}/${apiPrefix}`);
-  logger.log(`Swagger documentation available at: http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

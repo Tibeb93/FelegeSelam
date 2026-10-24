@@ -8,9 +8,10 @@ import * as z from 'zod';
 import { useLocale, useTranslations } from 'next-intl';
 import { Course, Member, PaginatedResponse } from '@/types/api';
 import { apiClient } from '@/lib/api-client';
+import { logger } from '@/lib/logger';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EthiopianDatePicker } from '@/components/ui/EthiopianDatePicker';
-import { BookOpen, Calendar, Clock, Users, ArrowLeft, Save } from 'lucide-react';
+import { BookOpen, Users, ArrowLeft, Save } from 'lucide-react';
 
 function FormField({
   label,
@@ -112,7 +113,7 @@ export function CourseForm({ initialData, courseId, isTeacher = false }: CourseF
         const items = res?.items || res?.data || [];
         setTeachers(items);
       } catch (err) {
-        console.error('Failed to load teachers', err);
+        logger.error('Failed to load teachers', err);
       }
     }
     loadTeachers();

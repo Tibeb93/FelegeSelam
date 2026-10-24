@@ -6,13 +6,11 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '../../providers/AuthProvider';
 import { useTheme } from '../../providers/ThemeProvider';
 import { LanguageSwitcher } from '../LanguageSwitcher';
-import { StatusBadge } from '../ui/StatusBadge';
 import {
   Menu,
   Sun,
   Moon,
   ChevronRight,
-  User,
   LogOut,
   Shield,
 } from 'lucide-react';
@@ -123,9 +121,9 @@ export function AdminTopBar({ onToggleMobileMenu, locale }: AdminTopBarProps) {
           title={theme === 'dark' ? 'ቀይር ወደ ብሩህ ገጽታ (Light Mode)' : 'ቀይር ወደ ጨለማ ገጽታ (Dark Mode)'}
         >
           {theme === 'dark' ? (
-            <Sun className="h-4 w-4 text-secondary" />
+            <Sun className="h-4 w-4 text-[#F2B233]" />
           ) : (
-            <Moon className="h-4 w-4 text-primary" />
+            <Moon className="h-4 w-4 text-[#0F4C81]" />
           )}
         </button>
 
@@ -137,14 +135,14 @@ export function AdminTopBar({ onToggleMobileMenu, locale }: AdminTopBarProps) {
             className="flex items-center gap-2 rounded-full border border-border p-1 hover:bg-muted/50 transition-colors"
             aria-label="User profile menu"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-xs text-primary-foreground">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0F4C81] font-bold text-xs text-white">
               {initials}
             </div>
             <div className="hidden text-left lg:block pr-1">
               <p className="max-w-[120px] truncate text-xs font-semibold text-foreground">
                 {user?.email || user?.phone || 'Administrator'}
               </p>
-              <p className="text-[10px] text-secondary font-medium uppercase">
+              <p className="text-[10px] text-[#0F4C81] dark:text-[#F2B233] font-bold uppercase tracking-wider">
                 {user?.role?.name || 'admin'}
               </p>
             </div>
@@ -162,7 +160,7 @@ export function AdminTopBar({ onToggleMobileMenu, locale }: AdminTopBarProps) {
                     {user?.email || user?.phone || 'Administrator'}
                   </p>
                   <div className="mt-1 flex items-center gap-1.5">
-                    <Shield className="h-3 w-3 text-secondary" />
+                    <Shield className="h-3 w-3 text-[#0F4C81] dark:text-[#F2B233]" />
                     <span className="text-[11px] text-muted-foreground uppercase font-medium">
                       {user?.role?.name || 'admin'}
                     </span>

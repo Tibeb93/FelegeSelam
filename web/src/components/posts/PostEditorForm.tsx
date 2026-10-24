@@ -7,9 +7,7 @@ import { apiClient } from '@/lib/api-client';
 import { Post, PostType } from '@/types/api';
 import { TiptapEditor } from './TiptapEditor';
 import {
-  FileText,
   Flame,
-  Clock,
   Sparkles,
   BookOpen,
   Calendar,
@@ -17,7 +15,6 @@ import {
   GraduationCap,
   Upload,
   Eye,
-  CheckCircle2,
   AlertCircle,
   Loader2,
   ArrowLeft,

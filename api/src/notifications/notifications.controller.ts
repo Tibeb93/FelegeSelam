@@ -42,7 +42,8 @@ export class NotificationsController {
   @Get('history')
   @Roles('super_admin', 'admin', 'content_manager')
   @ApiOperation({
-    summary: 'List notification dispatch history with pagination and search (Admin/Content Manager)',
+    summary:
+      'List notification dispatch history with pagination and search (Admin/Content Manager)',
   })
   async findNotificationHistory(@Query() query: QueryNotificationDto) {
     return this.notificationsService.findNotificationHistory(query);

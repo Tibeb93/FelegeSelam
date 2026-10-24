@@ -80,21 +80,21 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <div
               key={t.id}
               role="alert"
-              className={`pointer-events-auto flex w-full items-start gap-3 rounded-lg border p-4 shadow-lg transition-all animate-in slide-in-from-bottom-5 duration-200 ${
+              className={`pointer-events-auto flex w-full items-start gap-3 rounded-xl border p-4 shadow-lg transition-all animate-in slide-in-from-bottom-5 duration-200 ${
                 isSuccess
-                  ? 'bg-card text-foreground border-emerald-600/30 dark:border-emerald-500/40'
+                  ? 'bg-card text-foreground border-[#1B8E5A]/40'
                   : isError
-                    ? 'bg-card text-foreground border-rose-600/30 dark:border-rose-500/40'
+                    ? 'bg-card text-foreground border-[#C62828]/40'
                     : isWarning
-                      ? 'bg-card text-foreground border-amber-600/30 dark:border-amber-500/40'
-                      : 'bg-card text-foreground border-blue-600/30 dark:border-blue-500/40'
+                      ? 'bg-card text-foreground border-[#E39B00]/40'
+                      : 'bg-card text-foreground border-[#1E78C8]/40'
               }`}
             >
               <div className="shrink-0 mt-0.5">
-                {isSuccess && <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />}
-                {isError && <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400" />}
-                {isWarning && <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />}
-                {isInfo && <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
+                {isSuccess && <CheckCircle2 className="h-5 w-5 text-[#1B8E5A]" />}
+                {isError && <AlertCircle className="h-5 w-5 text-[#C62828]" />}
+                {isWarning && <AlertTriangle className="h-5 w-5 text-[#E39B00]" />}
+                {isInfo && <Info className="h-5 w-5 text-[#1E78C8]" />}
               </div>
 
               <div className="flex-1 text-sm">

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../../lib/api-client';
-import { UserItem, RoleItem, UserRoleName } from '../../../../types/api';
+import { UserItem, RoleItem } from '../../../../types/api';
 import { useAuth } from '../../../../providers/AuthProvider';
 import {
   UserCog,
@@ -19,7 +19,6 @@ import {
   Phone,
   Clock,
   X,
-  AlertTriangle,
 } from 'lucide-react';
 import { DataTable, Column } from '../../../../components/ui/DataTable';
 

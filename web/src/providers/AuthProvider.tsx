@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { User, UserRoleName } from '../types/api';
 import { setAccessToken, refreshAccessToken } from '../lib/api-client';
+import { logger } from '../lib/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -89,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await refreshSession();
         }
       } catch (err) {
-        console.error('Failed to initialize auth session:', err);
+        logger.error('Failed to initialize auth session:', err);
       } finally {
         if (isMounted) {
           setIsLoading(false);

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ContributionsService } from './contributions.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ContributionsReceiptService } from './contributions-receipt.service';
-import { NotFoundException } from '@nestjs/common';
 
 describe('ContributionsService', () => {
   let service: ContributionsService;
@@ -33,7 +32,9 @@ describe('ContributionsService', () => {
         return mockContribution;
       }),
       aggregate: jest.fn().mockResolvedValue({ _sum: { amount: 5000 }, _count: { id: 10 } }),
-      groupBy: jest.fn().mockResolvedValue([{ type: 'monthly', _sum: { amount: 5000 }, _count: { id: 10 } }]),
+      groupBy: jest
+        .fn()
+        .mockResolvedValue([{ type: 'monthly', _sum: { amount: 5000 }, _count: { id: 10 } }]),
     },
     member: {
       findUnique: jest.fn().mockResolvedValue({ id: 'm1', firstName: 'John' }),
@@ -42,7 +43,9 @@ describe('ContributionsService', () => {
   };
 
   const mockReceiptService = {
-    generateReceiptPdf: jest.fn().mockResolvedValue({ buffer: Buffer.from('pdf'), filename: 'receipt.pdf' }),
+    generateReceiptPdf: jest
+      .fn()
+      .mockResolvedValue({ buffer: Buffer.from('pdf'), filename: 'receipt.pdf' }),
     exportContributionsExcel: jest.fn().mockResolvedValue(Buffer.from('excel')),
   };
 
@@ -69,12 +72,15 @@ describe('ContributionsService', () => {
   });
 
   it('should create contribution', async () => {
-    const res = await service.createContribution({
-      memberId: 'm1',
-      amount: 500,
-      type: 'monthly',
-      paymentMethod: 'telebirr',
-    } as any, 'u1');
+    const res = await service.createContribution(
+      {
+        memberId: 'm1',
+        amount: 500,
+        type: 'monthly',
+        paymentMethod: 'telebirr',
+      } as any,
+      'u1',
+    );
     expect(res).toBeDefined();
     expect(mockPrisma.contribution.create).toHaveBeenCalled();
   });

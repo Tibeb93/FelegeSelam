@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { QueryProvider } from '../../providers/QueryProvider';
@@ -6,6 +6,13 @@ import { ThemeProvider } from '../../providers/ThemeProvider';
 import { ToastProvider } from '../../providers/ToastProvider';
 import { AuthProvider } from '../../providers/AuthProvider';
 import '../globals.css';
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#0F4C81' },
+    { media: '(prefers-color-scheme: dark)', color: '#0A2E52' },
+  ],
+};
 
 export const metadata: Metadata = {
   title: {
@@ -29,6 +36,12 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Aemade Selam Sunday School' }],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'),
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
+  },
   openGraph: {
     title: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት | Aemade Selam Sunday School',
     description:

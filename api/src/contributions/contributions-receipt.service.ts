@@ -16,10 +16,11 @@ export type ContributionWithMember = Contribution & {
 export class ContributionsReceiptService {
   private readonly logger = new Logger(ContributionsReceiptService.name);
 
-  private readonly brandGreen = '#1B5E20';
-  private readonly brandGold = '#C9A227';
-  private readonly brandCream = '#FAF6EB';
-  private readonly brandDark = '#2B1D0E';
+  private readonly brandPrimary = '#0F4C81';
+  private readonly brandNavy = '#0A2E52';
+  private readonly brandGold = '#F2B233';
+  private readonly brandSoftBlue = '#E8F1FB';
+  private readonly brandDark = '#0F2438';
 
   /**
    * Helper to launch Puppeteer browser safely with auto-detected Chrome/Edge executable
@@ -95,7 +96,7 @@ export class ContributionsReceiptService {
     const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
       width: 140,
       margin: 1,
-      color: { dark: '#1B5E20', light: '#FFFFFF' },
+      color: { dark: '#0F4C81', light: '#FFFFFF' },
     });
 
     const dateStr = new Date(contribution.paidAt).toISOString().replace('T', ' ').slice(0, 16);
@@ -120,7 +121,7 @@ export class ContributionsReceiptService {
           
           body {
             font-family: 'Noto Sans Ethiopic', 'Segoe UI', Tahoma, sans-serif;
-            color: #2B1D0E;
+            color: #0F2438;
             margin: 0;
             padding: 0;
             background-color: #ffffff;
@@ -128,7 +129,7 @@ export class ContributionsReceiptService {
           }
 
           .receipt-border {
-            border: 2px solid #1B5E20;
+            border: 2px solid #0F4C81;
             border-radius: 6px;
             padding: 16px;
             background-color: #FFFFFF;
@@ -139,28 +140,28 @@ export class ContributionsReceiptService {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 2px solid #C9A227;
+            border-bottom: 2px solid #0F4C81;
             padding-bottom: 10px;
             margin-bottom: 12px;
           }
 
           .header-left h1 {
-            color: #1B5E20;
+            color: #0F4C81;
             font-size: 16px;
             margin: 0 0 4px 0;
             font-weight: 700;
           }
 
           .header-left h2 {
-            color: #C9A227;
+            color: #F2B233;
             font-size: 13px;
             margin: 0;
             font-weight: 600;
           }
 
           .receipt-badge {
-            background-color: #FAF6EB;
-            border: 1px solid #C9A227;
+            background-color: #E8F1FB;
+            border: 1px solid #D7E3F1;
             border-radius: 4px;
             padding: 6px 12px;
             text-align: right;
@@ -169,7 +170,7 @@ export class ContributionsReceiptService {
           .receipt-badge .num {
             font-size: 14px;
             font-weight: 700;
-            color: #1B5E20;
+            color: #0F4C81;
           }
 
           .content-grid {
@@ -185,24 +186,24 @@ export class ContributionsReceiptService {
 
           .info-table td {
             padding: 5px 4px;
-            border-bottom: 1px solid #F0ECE1;
+            border-bottom: 1px solid #D7E3F1;
             font-size: 11px;
           }
 
           .info-table td.label {
-            color: #666;
+            color: #5B6B7C;
             width: 38%;
             font-weight: 600;
           }
 
           .info-table td.val {
-            color: #2B1D0E;
+            color: #0F2438;
             font-weight: 600;
           }
 
           .amount-box {
-            background-color: #FAF6EB;
-            border: 2px solid #1B5E20;
+            background-color: #E8F1FB;
+            border: 2px solid #0F4C81;
             border-radius: 6px;
             padding: 10px;
             text-align: center;
@@ -211,14 +212,14 @@ export class ContributionsReceiptService {
 
           .amount-box .title {
             font-size: 10px;
-            color: #666;
+            color: #5B6B7C;
             text-transform: uppercase;
           }
 
           .amount-box .val {
             font-size: 20px;
             font-weight: 700;
-            color: #1B5E20;
+            color: #0F4C81;
             margin: 4px 0;
           }
 
@@ -233,7 +234,7 @@ export class ContributionsReceiptService {
           .qr-side img {
             width: 110px;
             height: 110px;
-            border: 1px solid #ddd;
+            border: 1px solid #D7E3F1;
             border-radius: 4px;
             padding: 2px;
             background: #fff;
@@ -244,14 +245,14 @@ export class ContributionsReceiptService {
             justify-content: space-between;
             margin-top: 14px;
             padding-top: 10px;
-            border-top: 1px dashed #C9A227;
+            border-top: 1px dashed #D7E3F1;
             font-size: 9px;
-            color: #666;
+            color: #5B6B7C;
           }
 
           .sign-line {
             width: 140px;
-            border-top: 1px solid #999;
+            border-top: 1px solid #0F2438;
             margin-top: 25px;
             text-align: center;
           }
@@ -374,7 +375,7 @@ export class ContributionsReceiptService {
     titleCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF1B5E20' },
+      fgColor: { argb: 'FF0F4C81' },
     };
     titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
     worksheet.getRow(1).height = 36;
@@ -383,11 +384,11 @@ export class ContributionsReceiptService {
     worksheet.mergeCells('A2', 'J2');
     const subCell = worksheet.getCell('A2');
     subCell.value = `ጠቅላላ የተሰበሰበ ገቢ፦ ${summary.totalAmount.toLocaleString()} ብር  |  ጠቅላላ ደረሰኞች፦ ${summary.totalCount}  |  ቀን፦ ${new Date().toISOString().split('T')[0]}`;
-    subCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF2B1D0E' } };
+    subCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF0F2438' } };
     subCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFFAF6EB' },
+      fgColor: { argb: 'FFE8F1FB' },
     };
     subCell.alignment = { vertical: 'middle', horizontal: 'center' };
     worksheet.getRow(2).height = 24;
@@ -418,12 +419,12 @@ export class ContributionsReceiptService {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF1B5E20' },
+        fgColor: { argb: 'FF0F4C81' },
       };
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
       cell.border = {
-        top: { style: 'thin', color: { argb: 'FFC9A227' } },
-        bottom: { style: 'medium', color: { argb: 'FFC9A227' } },
+        top: { style: 'thin', color: { argb: 'FF0A2E52' } },
+        bottom: { style: 'medium', color: { argb: 'FF0A2E52' } },
       };
     });
 
@@ -461,13 +462,13 @@ export class ContributionsReceiptService {
         };
         if (colNumber === 10) {
           cell.numFmt = '#,##0.00';
-          cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF1B5E20' } };
+          cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF0F4C81' } };
         }
         if (isEven) {
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFFDFBF7' },
+            fgColor: { argb: 'FFF0F6FC' },
           };
         }
       });
@@ -480,11 +481,11 @@ export class ContributionsReceiptService {
     totalRow.values = ['', '', '', '', '', '', '', '', 'ድምር (TOTAL):', summary.totalAmount];
     totalRow.height = 24;
     totalRow.eachCell((cell, colNumber) => {
-      cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF1B5E20' } };
+      cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF0F4C81' } };
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FFFAF6EB' },
+        fgColor: { argb: 'FFE8F1FB' },
       };
       if (colNumber === 10) {
         cell.numFmt = '#,##0.00';

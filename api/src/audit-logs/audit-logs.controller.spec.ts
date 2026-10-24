@@ -49,8 +49,8 @@ describe('AuditLogsController', () => {
 
   it('should reject invalid format', async () => {
     const mockRes: any = { set: jest.fn() };
-    await expect(
-      controller.exportToExcel({ format: 'pdf' } as any, mockRes),
-    ).rejects.toThrow(BadRequestException);
+    await expect(controller.exportToExcel({ format: 'pdf' } as any, mockRes)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 });

@@ -16,7 +16,6 @@ import {
   Play,
   Pause,
   Video,
-  FileAudio,
   Globe,
   Lock,
   Edit2,

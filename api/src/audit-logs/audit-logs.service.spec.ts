@@ -4,7 +4,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 describe('AuditLogsService', () => {
   let service: AuditLogsService;
-  let prisma: PrismaService;
 
   const mockLogs = [
     {
@@ -46,7 +45,6 @@ describe('AuditLogsService', () => {
     }).compile();
 
     service = module.get<AuditLogsService>(AuditLogsService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined', () => {

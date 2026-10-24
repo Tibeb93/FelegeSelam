@@ -14,16 +14,11 @@ import {
   FileText,
   ChevronRight,
   ShieldCheck,
-  CheckCircle2,
-  Clock,
-  ArrowRight,
-  UserCheck,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 interface PortalDashboardProps {
   params: { locale: string };
@@ -35,7 +30,7 @@ export default function MemberPortalDashboard({ params: { locale } }: PortalDash
   const queryClient = useQueryClient();
 
   // Load member full profile with enrollments & attendance
-  const { data: memberProfile, isLoading: profileLoading } = useQuery({
+  const { data: memberProfile } = useQuery({
     queryKey: ['members', 'me', 'profile'],
     queryFn: () => apiRequest('/members/me/profile'),
     enabled: !!user,
@@ -56,7 +51,6 @@ export default function MemberPortalDashboard({ params: { locale } }: PortalDash
   const todayPost = postsData?.data?.[0];
   const upcomingEvents = eventsData?.data || [];
   const enrollments = memberProfile?.enrollments || [];
-  const attendances = memberProfile?.attendances || [];
 
   // RSVP mutation
   const rsvpMutation = useMutation({
@@ -122,23 +116,23 @@ export default function MemberPortalDashboard({ params: { locale } }: PortalDash
       </div>
 
       {/* 2. Today's Spiritual Feed Widget */}
-      <Card className="border-secondary/40 bg-gradient-to-r from-card to-secondary/10 shadow-xs">
+      <Card className="border-border bg-gradient-to-r from-card to-primary/5 shadow-xs">
         <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary/20 text-secondary">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
               <CardTitle className="text-base font-bold text-foreground">
                 {locale === 'am' ? 'የዕለቱ መንፈሳዊ ማስታወሻ' : "Today's Spiritual Reflection"}
               </CardTitle>
-              <CardDescription className="text-xs text-secondary font-semibold">
+              <CardDescription className="text-xs text-primary font-semibold">
                 {todayPost ? todayPost.type : locale === 'am' ? 'ስንክሳርና ቃል' : 'Daily Word'}
               </CardDescription>
             </div>
           </div>
 
-          <Button asChild variant="ghost" size="sm" className="text-xs text-secondary gap-1">
+          <Button asChild variant="ghost" size="sm" className="text-xs text-primary gap-1">
             <Link href={`/${locale}/news`}>
               <span>{locale === 'am' ? 'ሁሉንም አንብብ' : 'View All'}</span>
               <ChevronRight className="h-4 w-4" />
@@ -234,7 +228,7 @@ export default function MemberPortalDashboard({ params: { locale } }: PortalDash
         <Card className="border-border bg-card shadow-xs flex flex-col justify-between">
           <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0 border-b border-border">
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-secondary" />
+              <Calendar className="h-5 w-5 text-primary" />
               <div>
                 <CardTitle className="text-base font-bold text-foreground">
                   {t('events')}
@@ -332,7 +326,7 @@ export default function MemberPortalDashboard({ params: { locale } }: PortalDash
           href={`/${locale}/portal/academic`}
           className="p-4 rounded-2xl border border-border bg-card shadow-xs hover:border-primary transition-colors flex flex-col justify-between space-y-2 group"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15 text-secondary group-hover:scale-105 transition-transform">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-105 transition-transform">
             <GraduationCap className="h-5 w-5" />
           </div>
           <div>
@@ -358,7 +352,7 @@ export default function MemberPortalDashboard({ params: { locale } }: PortalDash
           href={`/${locale}/portal/forms`}
           className="p-4 rounded-2xl border border-border bg-card shadow-xs hover:border-primary transition-colors flex flex-col justify-between space-y-2 group"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15 text-secondary group-hover:scale-105 transition-transform">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-105 transition-transform">
             <FileText className="h-5 w-5" />
           </div>
           <div>

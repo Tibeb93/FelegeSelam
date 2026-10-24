@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Course, PaginatedResponse, UserRoleName } from '@/types/api';
 import { apiClient } from '@/lib/api-client';
+import { logger } from '@/lib/logger';
 import { useAuth } from '@/providers/AuthProvider';
 import { DataTable, ColumnDef } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -17,10 +17,7 @@ import {
   Eye,
   Edit,
   Trash2,
-  Users,
-  Calendar,
   Clock,
-  Filter,
 } from 'lucide-react';
 
 const ACADEMIC_LEVELS = [
@@ -38,7 +35,6 @@ export default function CoursesPage() {
   const locale = useLocale();
   const t = useTranslations('Courses');
   const tCommon = useTranslations('Common');
-  const router = useRouter();
   const { user } = useAuth();
   const userRole = (user?.role?.name as UserRoleName) || 'super_admin';
   const isTeacher = userRole === 'teacher';
@@ -77,7 +73,7 @@ export default function CoursesPage() {
         setTotal(res.total ?? items.length);
       }
     } catch (err) {
-      console.error('Failed to load courses', err);
+      logger.error('Failed to load courses', err);
     } finally {
       setLoading(false);
     }
@@ -95,7 +91,7 @@ export default function CoursesPage() {
       setCourseToDelete(null);
       fetchCourses();
     } catch (err) {
-      console.error('Failed to delete course', err);
+      logger.error('Failed to delete course', err);
     } finally {
       setDeleting(false);
     }

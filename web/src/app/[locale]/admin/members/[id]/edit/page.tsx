@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { apiClient } from '../../../../../../lib/api-client';
 import { Member } from '../../../../../../types/api';
@@ -14,7 +13,6 @@ export default function EditMemberPage() {
   const params = useParams();
   const id = params?.id as string;
   const locale = (params?.locale as string) || 'am';
-  const t = useTranslations('Members');
   const isAm = locale === 'am';
 
   const { data: member, isLoading, error } = useQuery<Member>({

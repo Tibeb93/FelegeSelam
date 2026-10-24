@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Church, Cross, Mail, Phone, MapPin, Heart, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, Heart } from 'lucide-react';
+import { SchoolLogo } from '../common/SchoolLogo';
 
 interface PublicFooterProps {
   locale: string;
@@ -14,17 +15,15 @@ export function PublicFooter({ locale }: PublicFooterProps) {
   const tCommon = useTranslations('Common');
 
   return (
-    <footer className="border-t border-border bg-card text-foreground" aria-label="Website Footer">
+    <footer className="border-t border-[#D7E3F1] dark:border-[#1A3E63] bg-white dark:bg-[#0A2644] text-foreground" aria-label="Website Footer">
       <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Column 1: School Profile & Motto */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-secondary shadow-md">
-                <Cross className="h-6 w-6" aria-hidden="true" />
-              </div>
+              <SchoolLogo size={46} />
               <div>
-                <p className="text-xs font-semibold tracking-wider text-secondary uppercase">
+                <p className="text-xs font-semibold tracking-wider text-[#0F4C81] dark:text-[#68A7E0] uppercase">
                   {tCommon('churchName')}
                 </p>
                 <h3 className="text-base font-bold text-foreground">
@@ -39,7 +38,7 @@ export function PublicFooter({ locale }: PublicFooterProps) {
                 : 'Aemade Selam Sunday School at Debre Selam St. Stephen Church, fostering faith, divine knowledge, and holy tradition.'}
             </p>
 
-            <div className="inline-block rounded-lg bg-secondary/15 px-3 py-1.5 text-xs font-semibold text-secondary">
+            <div className="inline-block rounded-xl bg-[#E8F1FB] dark:bg-[#061B30] border border-[#D7E3F1] dark:border-[#1A3E63] px-3 py-1.5 text-xs font-semibold text-[#0F4C81] dark:text-[#F2B233]">
               {locale === 'am'
                 ? 'መሪ ቃል: በሃይማኖት ጽኑ፥ በመልካም ምግባር አብሩ'
                 : 'Motto: Firm in Faith, Shining in Good Deeds'}

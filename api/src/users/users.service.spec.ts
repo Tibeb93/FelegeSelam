@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConflictException, NotFoundException } from '@nestjs/common';
-import * as argon2 from 'argon2';
 
 jest.mock('argon2', () => ({
   hash: jest.fn().mockResolvedValue('hashed_pwd'),
@@ -11,7 +10,6 @@ jest.mock('argon2', () => ({
 
 describe('UsersService', () => {
   let service: UsersService;
-  let prisma: PrismaService;
 
   const mockUser = {
     id: 'u1',
@@ -58,7 +56,6 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined', () => {
@@ -75,7 +72,9 @@ describe('UsersService', () => {
   it('should findOne user by ID', async () => {
     const res = await service.findOne('u1');
     expect(res).toHaveProperty('id', 'u1');
-    expect(mockPrisma.user.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'u1' } }));
+    expect(mockPrisma.user.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'u1' } }),
+    );
   });
 
   it('should throw NotFoundException if user not found', async () => {

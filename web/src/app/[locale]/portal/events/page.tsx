@@ -11,17 +11,16 @@ import {
   CheckCircle,
   HelpCircle,
   XCircle,
-  AlertCircle,
   Loader2,
-  Sparkles,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { EventItem } from '@/types/api';
+import { useToast } from '@/providers/ToastProvider';
 
 export default function PortalEventsPage() {
   const t = useTranslations('Portal');
-  const tEvents = useTranslations('Events');
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const [activeFilter, setActiveFilter] = useState<'upcoming' | 'past'>('upcoming');
   const [rsvpMsg, setRsvpMsg] = useState<{ id: string; text: string } | null>(null);
@@ -61,7 +60,7 @@ export default function PortalEventsPage() {
       setTimeout(() => setRsvpMsg(null), 3000);
     },
     onError: (err: any) => {
-      alert(err.message || 'Failed to update RSVP');
+      toast.error(err.message || 'Failed to update RSVP');
     },
   });
 

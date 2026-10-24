@@ -79,9 +79,12 @@ export class PostsService {
 
   private validateAndSanitizeHtml(content: string): string {
     if (!content) return '';
-    const unsafeRegex = /<script\b|<iframe\b|<object\b|<embed\b|<applet\b|javascript:\s*|\son\w+\s*=/i;
+    const unsafeRegex =
+      /<script\b|<iframe\b|<object\b|<embed\b|<applet\b|javascript:\s*|\son\w+\s*=/i;
     if (unsafeRegex.test(content)) {
-      throw new BadRequestException('Unsafe HTML detected: script, iframe, and inline event handlers are prohibited');
+      throw new BadRequestException(
+        'Unsafe HTML detected: script, iframe, and inline event handlers are prohibited',
+      );
     }
     return content;
   }

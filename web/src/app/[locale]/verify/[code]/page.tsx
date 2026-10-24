@@ -6,14 +6,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { CertificateVerification } from '@/types/api';
 import { apiClient } from '@/lib/api-client';
+import { SchoolLogo } from '@/components/common/SchoolLogo';
 import {
   ShieldCheck,
   ShieldAlert,
   Download,
   Calendar,
-  Award,
-  CheckCircle2,
-  Cross,
   ArrowLeft,
   Search,
   BookOpen,
@@ -69,8 +67,8 @@ export default function CertificateVerifyPage() {
       <div className="w-full max-w-2xl space-y-8">
         {/* Church Branding Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-secondary shadow-lg ring-4 ring-primary/20">
-            <Cross className="h-8 w-8 text-secondary" />
+          <div className="inline-flex items-center justify-center mb-1">
+            <SchoolLogo size={64} />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
             {locale === 'am' ? 'አዕማደ ሰላም ሰንበት ትምህርት ቤት' : 'Aemade Selam Sunday School'}

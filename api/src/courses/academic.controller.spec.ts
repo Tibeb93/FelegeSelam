@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AttendanceController, GradesController, CertificatesController } from './academic.controller';
+import {
+  AttendanceController,
+  GradesController,
+  CertificatesController,
+} from './academic.controller';
 import { CoursesService } from './courses.service';
 
 describe('AcademicControllers', () => {
@@ -14,8 +18,12 @@ describe('AcademicControllers', () => {
     updateGrade: jest.fn().mockResolvedValue({ id: 'g1', score: 98 }),
     deleteGrade: jest.fn().mockResolvedValue({ message: 'Deleted' }),
     issueCertificate: jest.fn().mockResolvedValue({ id: 'cert1', certificateNo: 'CERT-001' }),
-    generateCertificatePdf: jest.fn().mockResolvedValue({ buffer: Buffer.from('pdf'), filename: 'cert.pdf' }),
-    verifyCertificateByCode: jest.fn().mockResolvedValue({ valid: true, certificateNo: 'CERT-001' }),
+    generateCertificatePdf: jest
+      .fn()
+      .mockResolvedValue({ buffer: Buffer.from('pdf'), filename: 'cert.pdf' }),
+    verifyCertificateByCode: jest
+      .fn()
+      .mockResolvedValue({ valid: true, certificateNo: 'CERT-001' }),
   };
 
   beforeEach(async () => {
@@ -42,13 +50,20 @@ describe('AcademicControllers', () => {
   });
 
   it('should scan attendance via QR', async () => {
-    const res = await attendanceController.scanAttendance({ memberNo: 'AS-0001', courseId: 'c1' } as any, { role: 'teacher' });
+    const res = await attendanceController.scanAttendance(
+      { memberNo: 'AS-0001', courseId: 'c1' } as any,
+      { role: 'teacher' },
+    );
     expect(res).toHaveProperty('status', 'present');
     expect(service.scanAttendanceQr).toHaveBeenCalled();
   });
 
   it('should add grade', async () => {
-    const res = await gradesController.addGrade('e1', { assessmentName: 'Exam', score: 95 } as any, { role: 'teacher' });
+    const res = await gradesController.addGrade(
+      'e1',
+      { assessmentName: 'Exam', score: 95 } as any,
+      { role: 'teacher' },
+    );
     expect(res).toHaveProperty('score', 95);
     expect(service.addGrade).toHaveBeenCalled();
   });

@@ -2,16 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Course, CourseEnrollment, Grade, GradeSummary } from '@/types/api';
+import { Course, CourseEnrollment } from '@/types/api';
 import { apiClient } from '@/lib/api-client';
+import { logger } from '@/lib/logger';
 import {
   Award,
   Plus,
   Save,
   CheckCircle2,
-  XCircle,
-  AlertCircle,
-  HelpCircle,
   X,
 } from 'lucide-react';
 
@@ -29,13 +27,10 @@ interface StudentGradeRow {
   grades: Record<string, { id?: string; score: number; maxScore: number }>;
 }
 
-export function CourseGradesTab({ course, enrollments, onRefresh }: CourseGradesTabProps) {
+export function CourseGradesTab({ course: _course, enrollments, onRefresh }: CourseGradesTabProps) {
   const locale = useLocale();
   const t = useTranslations('Courses');
   const tCommon = useTranslations('Common');
-
-  // Active students only for grading
-  const activeStudents = enrollments.filter((e) => e.status !== 'dropped');
 
   // Assessments list across the course
   const [assessmentNames, setAssessmentNames] = useState<
@@ -150,7 +145,7 @@ export function CourseGradesTab({ course, enrollments, onRefresh }: CourseGrades
       setSaveSuccessMsg(`${t('gradeAverage')}: ${row.fullName}`);
       onRefresh();
     } catch (err) {
-      console.error('Failed to save grade', err);
+      logger.error('Failed to save grade', err);
     } finally {
       setSavingRowId(null);
     }

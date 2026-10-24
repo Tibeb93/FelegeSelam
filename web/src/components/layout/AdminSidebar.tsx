@@ -25,8 +25,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Cross,
 } from 'lucide-react';
+import { SchoolLogo } from '../common/SchoolLogo';
 
 interface SidebarItem {
   titleAm: string;
@@ -175,26 +175,24 @@ export function AdminSidebar({
 
   return (
     <aside
-      className={`relative flex h-full flex-col border-r border-border bg-card transition-all duration-300 ${
+      className={`relative flex h-full flex-col border-r border-[#071E36] bg-[#0A2E52] text-white transition-all duration-300 ${
         collapsed ? 'w-20' : 'w-64'
       }`}
     >
-      {/* Sidebar Header with Church Logo & Name */}
-      <div className="flex h-16 items-center justify-between border-b border-border px-4">
+      {/* Sidebar Header with School Logo & Name */}
+      <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
         <Link
           href={`/${locale}/admin`}
           className="flex items-center gap-3 overflow-hidden"
           onClick={onNavigate}
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
-            <Cross className="h-5 w-5 text-secondary" />
-          </div>
+          <SchoolLogo size={36} />
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className="truncate text-sm font-bold text-foreground">
+              <h1 className="truncate text-sm font-bold text-white">
                 {locale === 'am' ? 'አዕማደ ሰላም' : 'Aemade Selam'}
               </h1>
-              <p className="truncate text-xs text-secondary font-medium">
+              <p className="truncate text-xs text-[#F2B233] font-semibold">
                 {locale === 'am' ? 'ሰንበት ትምህርት ቤት' : 'Sunday School'}
               </p>
             </div>
@@ -218,15 +216,15 @@ export function AdminSidebar({
               href={itemHref}
               onClick={onNavigate}
               title={collapsed ? (locale === 'am' ? item.titleAm : item.titleEn) : undefined}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-primary text-primary-foreground shadow-sm font-semibold'
-                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  ? 'bg-[#0F4C81] text-white shadow-sm font-semibold'
+                  : 'text-white/75 hover:bg-white/10 hover:text-white'
               }`}
             >
               <Icon
                 className={`h-5 w-5 shrink-0 ${
-                  isActive ? 'text-secondary' : 'text-muted-foreground'
+                  isActive ? 'text-[#F2B233]' : 'text-white/60'
                 }`}
               />
               {!collapsed && (
@@ -240,13 +238,13 @@ export function AdminSidebar({
       </nav>
 
       {/* Sidebar Footer with Role Indicator and Collapse Button */}
-      <div className="border-t border-border p-3 space-y-2">
+      <div className="border-t border-white/10 p-3 space-y-2">
         {!collapsed && user && (
-          <div className="rounded-lg bg-muted/40 p-2.5 text-xs">
-            <p className="truncate font-semibold text-foreground">
+          <div className="rounded-xl bg-white/10 p-2.5 text-xs text-white">
+            <p className="truncate font-semibold text-white">
               {user.email || user.phone || 'Admin User'}
             </p>
-            <p className="text-secondary font-medium uppercase tracking-wide">
+            <p className="text-[#F2B233] font-bold uppercase tracking-wide">
               {user.role?.name || userRole}
             </p>
           </div>
@@ -256,7 +254,7 @@ export function AdminSidebar({
           <button
             type="button"
             onClick={logout}
-            className="flex items-center gap-2 rounded-lg p-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+            className="flex items-center gap-2 rounded-lg p-2 text-xs font-semibold text-red-300 hover:bg-red-500/20 transition-colors"
             title="ውጣ (Sign out)"
           >
             <LogOut className="h-4 w-4" />
@@ -266,7 +264,7 @@ export function AdminSidebar({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors"
+            className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? (

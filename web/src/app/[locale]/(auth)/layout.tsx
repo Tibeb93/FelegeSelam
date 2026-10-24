@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Cross } from 'lucide-react';
 import { LanguageSwitcher } from '../../../components/LanguageSwitcher';
 import { useTheme } from '../../../providers/ThemeProvider';
+import { SchoolLogo } from '../../../components/common/SchoolLogo';
 import { Sun, Moon } from 'lucide-react';
 
 export default function AuthLayout({
@@ -41,9 +41,9 @@ export default function AuthLayout({
           <Link
             href={`/${locale}`}
             aria-label="Home"
-            className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg ring-4 ring-primary/20"
+            className="flex items-center justify-center transition-transform hover:scale-105"
           >
-            <Cross className="h-8 w-8 text-secondary" />
+            <SchoolLogo size={68} />
           </Link>
         </div>
       </div>

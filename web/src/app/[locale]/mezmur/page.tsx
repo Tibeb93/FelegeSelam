@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import {
@@ -12,9 +12,7 @@ import {
   VolumeX,
   FileText,
   Heart,
-  ChevronRight,
   Disc,
-  Share2,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
 import { MezmurItem, MezmurCategory, PaginatedResult } from '@/types/api';
@@ -23,7 +21,7 @@ import { PublicFooter } from '@/components/public/PublicFooter';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/providers/AuthProvider';
 
 interface MezmurPageProps {

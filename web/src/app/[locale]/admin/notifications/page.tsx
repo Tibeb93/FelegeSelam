@@ -20,7 +20,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Clock,
   Search,
   History,
 } from 'lucide-react';
@@ -57,7 +56,7 @@ export default function NotificationsAdminPage({
   });
 
   // Search members with user accounts when target is 'user'
-  const { data: membersResult, isLoading: isSearchingUsers } = useQuery<
+  const { data: membersResult } = useQuery<
     PaginatedResponse<Member>
   >({
     queryKey: ['members-search-users', userSearchTerm],

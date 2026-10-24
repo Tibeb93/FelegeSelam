@@ -6,8 +6,6 @@ import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import {
   BookOpen,
-  GraduationCap,
-  Calendar,
   Clock,
   User,
   CheckCircle,
@@ -17,10 +15,8 @@ import {
   Download,
   ChevronRight,
   Loader2,
-  AlertCircle,
   ArrowRight,
   PlayCircle,
-  Eye,
   X,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
@@ -28,7 +24,6 @@ import { Member, Course, Lesson } from '@/types/api';
 
 export default function PortalCoursesPage({ params: { locale } }: { params: { locale: string } }) {
   const t = useTranslations('Portal');
-  const tCourses = useTranslations('Courses');
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
@@ -128,7 +123,7 @@ export default function PortalCoursesPage({ params: { locale } }: { params: { lo
                     <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
                       {c.level || 'All Levels'}
                     </span>
-                    <span className="rounded-full bg-secondary/15 px-2.5 py-0.5 text-xs font-bold text-secondary-dark uppercase tracking-wider">
+                    <span className="rounded-full bg-status-success/15 px-2.5 py-0.5 text-xs font-bold text-status-success uppercase tracking-wider">
                       {c.enrollmentStatus || 'Active'}
                     </span>
                   </div>
@@ -163,7 +158,7 @@ export default function PortalCoursesPage({ params: { locale } }: { params: { lo
                       setSelectedCourse(c);
                       setSelectedLesson(null);
                     }}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary/10 hover:bg-primary hover:text-secondary px-4 py-2 text-xs font-bold text-primary transition-colors"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary/10 hover:bg-primary hover:text-white px-4 py-2 text-xs font-bold text-primary transition-colors"
                   >
                     <span>View Lessons & Materials</span>
                     <ChevronRight className="h-3.5 w-3.5" />
@@ -289,7 +284,7 @@ export default function PortalCoursesPage({ params: { locale } }: { params: { lo
                       onClick={() => toggleLessonComplete(selectedLesson.id)}
                       className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors ${
                         completedLessons[selectedLesson.id]
-                          ? 'bg-primary text-secondary'
+                          ? 'bg-primary text-white'
                           : 'border border-border bg-card text-foreground hover:bg-muted'
                       }`}
                     >
@@ -309,8 +304,8 @@ export default function PortalCoursesPage({ params: { locale } }: { params: { lo
 
                   {/* Audio Player */}
                   {(selectedLesson.audioUrl || (selectedLesson.mediaType === 'audio' && selectedLesson.fileUrl)) && (
-                    <div className="rounded-xl border border-secondary/30 bg-secondary/10 p-4 space-y-2">
-                      <div className="flex items-center gap-2 text-xs font-bold text-secondary-dark">
+                    <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-bold text-primary">
                         <Music className="h-4 w-4" />
                         <span>Spiritual Chants & Hymn Lesson Audio</span>
                       </div>

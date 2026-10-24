@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { EventItem, EventRsvp, EventRsvpStatus, PaginatedResponse } from '@/types/api';
+import { EventItem, EventRsvp, PaginatedResponse } from '@/types/api';
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,6 @@ import {
   XCircle,
   Download,
   Search,
-  Filter,
   Loader2,
   Calendar,
   MapPin,
@@ -40,7 +39,7 @@ export function EventRsvpsModal({
 }: EventRsvpsModalProps) {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const pageSize = 50;
 
   const { data, isLoading } = useQuery<PaginatedResponse<EventRsvp>>({
@@ -61,7 +60,6 @@ export function EventRsvpsModal({
   });
 
   const attendees = data?.items || data?.data || [];
-  const total = data?.total || 0;
 
   // Export to Excel function using xlsx
   const handleExportExcel = () => {
