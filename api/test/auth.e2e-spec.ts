@@ -111,22 +111,19 @@ describe('Auth & RBAC Module (e2e)', () => {
   });
 
   // -------------------------------------------------------------
-  // 2. LOGIN & GET /me
+  // 2. MEMBER LOGIN (POST /api/v1/auth/login)
   // -------------------------------------------------------------
-  describe('POST /api/v1/auth/login', () => {
-    it('should log in super_admin successfully', async () => {
+  describe('POST /api/v1/auth/login (Member Portal Entry)', () => {
+    it('should reject staff role attempting to use member login (403 Forbidden)', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
           identifier: 'admin@aemade.org',
           password: 'Admin@123456!',
         })
-        .expect(200);
+        .expect(403);
 
-      expect(res.body.accessToken).toBeDefined();
-      expect(res.body.refreshToken).toBeDefined();
-      expect(res.body.user.role).toBe('super_admin');
-      superAdminToken = res.body.accessToken;
+      expect(res.body.message).toContain('ይህ መግቢያ ለአባላት ብቻ ነው');
     });
 
     it('should log in registered member and return member role', async () => {
@@ -157,6 +154,51 @@ describe('Auth & RBAC Module (e2e)', () => {
 
     it('should fail GET /auth/me without bearer token', async () => {
       await request(app.getHttpServer()).get('/api/v1/auth/me').expect(401);
+    });
+  });
+
+  // -------------------------------------------------------------
+  // 2b. ADMIN LOGIN (POST /api/v1/auth/admin/login)
+  // -------------------------------------------------------------
+  describe('POST /api/v1/auth/admin/login (Staff Entry)', () => {
+    it('should reject member credentials on admin login with generic 401', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/auth/admin/login')
+        .send({
+          identifier: 'test_reg_member@aemade.org',
+          password: 'Password@123',
+        })
+        .expect(401);
+
+      expect(res.body.message).toBe('Invalid credentials');
+    });
+
+    it('should log in super_admin successfully and provide redirectPath', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/auth/admin/login')
+        .send({
+          identifier: 'admin@aemade.org',
+          password: 'Admin@123456!',
+        })
+        .expect(200);
+
+      expect(res.body.accessToken).toBeDefined();
+      expect(res.body.refreshToken).toBeDefined();
+      expect(res.body.user.role).toBe('super_admin');
+      expect(res.body.redirectPath).toBe('/admin');
+      superAdminToken = res.body.accessToken;
+    });
+
+    it('should reject invalid password for admin with generic 401', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/auth/admin/login')
+        .send({
+          identifier: 'admin@aemade.org',
+          password: 'WrongAdminPassword123!',
+        })
+        .expect(401);
+
+      expect(res.body.message).toBe('Invalid credentials');
     });
   });
 
@@ -315,13 +357,42 @@ describe('Auth & RBAC Module (e2e)', () => {
   });
 
   // -------------------------------------------------------------
-  // 7. AUDIT LOG WRITES VERIFICATION
+  // 7. SIGN OUT EVERYWHERE (POST /auth/admin/logout-all)
   // -------------------------------------------------------------
-  describe('Audit Log Interceptor', () => {
-    it('should have written audit logs for login and user creation events', async () => {
+  describe('POST /api/v1/auth/admin/logout-all', () => {
+    it('should revoke all refresh tokens and write LOGOUT_ALL_DEVICES audit log', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/auth/admin/logout-all')
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .expect(200);
+
+      expect(res.body.message).toContain('ወጥተዋል');
+
+      const audit = await prisma.auditLog.findFirst({
+        where: { action: 'LOGOUT_ALL_DEVICES' },
+        orderBy: { createdAt: 'desc' },
+      });
+      expect(audit).toBeDefined();
+    });
+  });
+
+  // -------------------------------------------------------------
+  // 8. AUDIT LOG WRITES VERIFICATION
+  // -------------------------------------------------------------
+  describe('Audit Log Writes Verification', () => {
+    it('should have written audit logs for login, admin login, and user events', async () => {
       const logs = await prisma.auditLog.findMany({
         where: {
-          action: { in: ['LOGIN_SUCCESS', 'POST_USERS', 'REGISTER_MEMBER'] },
+          action: {
+            in: [
+              'LOGIN_SUCCESS',
+              'ADMIN_LOGIN_SUCCESS',
+              'ADMIN_LOGIN_FAILURE',
+              'POST_USERS',
+              'REGISTER_MEMBER',
+              'LOGOUT_ALL_DEVICES',
+            ],
+          },
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -329,6 +400,8 @@ describe('Auth & RBAC Module (e2e)', () => {
       expect(logs.length).toBeGreaterThan(0);
       const actions = logs.map((l) => l.action);
       expect(actions).toContain('LOGIN_SUCCESS');
+      expect(actions).toContain('ADMIN_LOGIN_SUCCESS');
+      expect(actions).toContain('ADMIN_LOGIN_FAILURE');
       expect(actions).toContain('REGISTER_MEMBER');
     });
   });

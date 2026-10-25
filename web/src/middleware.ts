@@ -25,56 +25,78 @@ export default async function middleware(request: NextRequest) {
     ? '/' + segments.slice(1).join('/')
     : pathname;
 
-  // Check session cookie
-  const sessionCookie = request.cookies.get('fs_session')?.value;
-  const refreshTokenCookie = request.cookies.get('fs_refresh_token')?.value;
+  // Check separate Admin session cookies (fs_admin_session, fs_admin_refresh_token)
+  const adminSessionCookie = request.cookies.get('fs_admin_session')?.value;
+  const adminRefreshCookie = request.cookies.get('fs_admin_refresh_token')?.value;
 
-  let session: { role?: string; status?: string } | null = null;
-  if (sessionCookie) {
+  let adminSession: { role?: string; status?: string } | null = null;
+  if (adminSessionCookie) {
     try {
-      session = JSON.parse(sessionCookie);
+      adminSession = JSON.parse(adminSessionCookie);
     } catch {
-      session = null;
+      adminSession = null;
     }
   }
 
-  const isAuthenticated = Boolean(session || refreshTokenCookie);
-  const userRole = session?.role || (refreshTokenCookie ? 'member' : null);
+  const isAdminAuthenticated = Boolean(
+    (adminSession && adminSession.role && ADMIN_ROLES.includes(adminSession.role)) ||
+      adminRefreshCookie,
+  );
+  const adminRole = adminSession?.role || (adminRefreshCookie ? 'admin' : null);
 
-  // 1. Protect Admin routes: /admin/*
+  // Check separate Member session cookies (fs_session, fs_refresh_token)
+  const memberSessionCookie = request.cookies.get('fs_session')?.value;
+  const memberRefreshCookie = request.cookies.get('fs_refresh_token')?.value;
+
+  let memberSession: { role?: string; status?: string } | null = null;
+  if (memberSessionCookie) {
+    try {
+      memberSession = JSON.parse(memberSessionCookie);
+    } catch {
+      memberSession = null;
+    }
+  }
+
+  const isMemberAuthenticated = Boolean(memberSession || memberRefreshCookie);
+
+  // 1. Staff Admin Login Page: /admin/login
+  if (pathWithoutLocale === '/admin/login') {
+    if (isAdminAuthenticated && adminRole) {
+      if (adminRole === 'teacher') {
+        return NextResponse.redirect(new URL(`/${currentLocale}/admin/attendance`, request.url));
+      } else if (adminRole === 'content_manager') {
+        return NextResponse.redirect(new URL(`/${currentLocale}/admin/posts`, request.url));
+      }
+      return NextResponse.redirect(new URL(`/${currentLocale}/admin`, request.url));
+    }
+    // Allow unauthenticated staff to access /admin/login
+    return intlMiddleware(request);
+  }
+
+  // 2. Protect Admin routes: /admin/* (Staff door only)
   if (pathWithoutLocale.startsWith('/admin')) {
-    if (!isAuthenticated) {
-      const loginUrl = new URL(`/${currentLocale}/login`, request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    if (userRole && !ADMIN_ROLES.includes(userRole)) {
-      // Member trying to access admin dashboard -> redirect to portal
-      return NextResponse.redirect(new URL(`/${currentLocale}/portal`, request.url));
+    if (!isAdminAuthenticated || !adminRole || !ADMIN_ROLES.includes(adminRole)) {
+      const adminLoginUrl = new URL(`/${currentLocale}/admin/login`, request.url);
+      adminLoginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(adminLoginUrl);
     }
   }
 
-  // 2. Protect Member Portal routes: /portal/*
+  // 3. Protect Member Portal routes: /portal/* (Member door)
   if (pathWithoutLocale.startsWith('/portal')) {
-    if (!isAuthenticated) {
+    if (!isMemberAuthenticated) {
       const loginUrl = new URL(`/${currentLocale}/login`, request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
 
-  // 3. Auth pages (login, register): redirect already authenticated users to appropriate area
+  // 4. Member auth pages (login, register): redirect already authenticated members to portal
   if (
     (pathWithoutLocale === '/login' || pathWithoutLocale === '/register') &&
-    isAuthenticated &&
-    userRole
+    isMemberAuthenticated
   ) {
-    if (ADMIN_ROLES.includes(userRole)) {
-      return NextResponse.redirect(new URL(`/${currentLocale}/admin`, request.url));
-    } else {
-      return NextResponse.redirect(new URL(`/${currentLocale}/portal`, request.url));
-    }
+    return NextResponse.redirect(new URL(`/${currentLocale}/portal`, request.url));
   }
 
   // Continue through next-intl localization middleware

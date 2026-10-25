@@ -11,7 +11,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/Dialog';
-import { Calendar, MapPin, Users, AlertCircle, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Users, AlertCircle } from 'lucide-react';
+import {
+  TextField,
+  TextArea,
+  PrimaryButton,
+  SecondaryButton,
+} from '@/components/forms';
 
 interface EventFormModalProps {
   open: boolean;
@@ -103,10 +109,12 @@ export function EventFormModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl bg-card p-6">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-            <Calendar className="h-5 w-5 text-primary" />
+      <DialogContent className="max-w-2xl bg-card p-6 md:p-8 rounded-2xl border border-border shadow-xl">
+        <DialogHeader className="border-b border-border pb-4">
+          <DialogTitle className="flex items-center gap-2.5 text-xl font-bold text-foreground">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300">
+              <Calendar className="h-5 w-5" />
+            </div>
             <span>
               {eventToEdit
                 ? locale === 'am'
@@ -120,138 +128,118 @@ export function EventFormModal({
         </DialogHeader>
 
         {errorMsg && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+          <div className="mt-4 flex items-center gap-2 rounded-xl bg-destructive/10 p-3.5 text-xs font-medium text-destructive animate-fadeIn">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         <div className="mt-4 space-y-4">
-          <div>
-            <label className="text-xs font-semibold text-foreground">
-              {locale === 'am' ? 'የመርሐ-ግብሩ ርዕስ *' : 'Event Title *'}
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+          <TextField
+            name="eventTitle"
+            label={locale === 'am' ? 'የመርሐ-ግብሩ ርዕስ' : 'Event Title'}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={
+              locale === 'am'
+                ? 'ምሳሌ፦ የበዓለ ጥምቀት ልዩ መንፈሳዊ ጉባኤ'
+                : 'Event title...'
+            }
+            required
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <TextField
+              name="location"
+              label={locale === 'am' ? 'ቦታ / አዳራሽ' : 'Location / Venue'}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
               placeholder={
                 locale === 'am'
-                  ? 'ምሳሌ፦ የበዓለ ጥምቀት ልዩ መንፈሳዊ ጉባኤ'
-                  : 'Event title...'
+                  ? 'ምሳሌ፦ ዋናው የሰ/ት/ቤት አዳራሽ'
+                  : 'Main Auditorium'
               }
-              className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-xs md:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+              startIcon={<MapPin className="h-4 w-4" />}
+            />
+
+            <TextField
+              name="capacity"
+              type="number"
+              min="1"
+              label={locale === 'am' ? 'የተሳታፊዎች ጣሪያ (Capacity)' : 'Max Capacity'}
+              value={capacity}
+              onChange={(e) =>
+                setCapacity(e.target.value ? Number(e.target.value) : '')
+              }
+              placeholder={locale === 'am' ? 'ገደብ የሌለው ከሆነ ባዶ ይተውት' : 'Unlimited'}
+              startIcon={<Users className="h-4 w-4" />}
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 text-secondary" />
-                <span>{locale === 'am' ? 'ቦታ / አዳራሽ' : 'Location / Venue'}</span>
-              </label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder={
-                  locale === 'am'
-                    ? 'ምሳሌ፦ ዋናው የሰ/ት/ቤት አዳራሽ'
-                    : 'Main Auditorium'
-                }
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Users className="h-3.5 w-3.5 text-primary" />
-                <span>{locale === 'am' ? 'የተሳታፊዎች ጣሪያ (Capacity)' : 'Max Capacity'}</span>
-              </label>
-              <input
-                type="number"
-                min="1"
-                value={capacity}
-                onChange={(e) =>
-                  setCapacity(e.target.value ? Number(e.target.value) : '')
-                }
-                placeholder={locale === 'am' ? 'ገደብ የሌለው ከሆነ ባዶ ይተውት' : 'Leave empty for unlimited'}
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-semibold text-foreground">
-                {locale === 'am' ? 'የሚጀመርበት ቀንና ሰዓት *' : 'Start Date & Time *'}
+              <label className="block text-sm font-semibold text-foreground mb-1.5 select-none">
+                {locale === 'am' ? 'የሚጀመርበት ቀንና ሰዓት' : 'Start Date & Time'}{' '}
+                <span className="text-destructive">*</span>
               </label>
               <input
                 type="datetime-local"
                 value={startAt}
                 onChange={(e) => setStartAt(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-foreground">
+              <label className="block text-sm font-semibold text-foreground mb-1.5 select-none">
                 {locale === 'am' ? 'የሚጠናቀቅበት ቀንና ሰዓት' : 'End Date & Time'}
               </label>
               <input
                 type="datetime-local"
                 value={endAt}
                 onChange={(e) => setEndAt(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
           </div>
 
-          <div>
-            <label className="text-xs font-semibold text-foreground">
-              {locale === 'am' ? 'ዝርዝር መግለጫ' : 'Description'}
-            </label>
-            <textarea
-              rows={4}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={
-                locale === 'am'
-                  ? 'የመርሐ-ግብሩ ዝርዝር ዓላማ፣ ተጋባዥ መምህራንና መመሪያዎች...'
-                  : 'Event description, agenda, guest speakers...'
-              }
-              className="mt-1 w-full rounded-lg border border-input bg-background p-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
+          <TextArea
+            name="description"
+            label={locale === 'am' ? 'ዝርዝር መግለጫ' : 'Description'}
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={
+              locale === 'am'
+                ? 'የመርሐ-ግብሩ ዝርዝር ዓላማ፣ ተጋባዥ መምህራንና መመሪያዎች...'
+                : 'Event description, agenda, guest speakers...'
+            }
+          />
         </div>
 
-        <DialogFooter className="mt-6 flex justify-end gap-2">
-          <button
+        <DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border">
+          <SecondaryButton
             type="button"
             onClick={() => onOpenChange(false)}
-            className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-muted"
+            className="w-full sm:w-auto h-11"
           >
             {locale === 'am' ? 'ሰርዝ' : 'Cancel'}
-          </button>
-          <button
+          </SecondaryButton>
+          <PrimaryButton
             type="button"
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+            loading={saveMutation.isPending}
+            className="w-full sm:w-auto h-11"
           >
-            {saveMutation.isPending && (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            )}
-            <span>
-              {eventToEdit
-                ? locale === 'am'
-                  ? 'ለውጦችን አድስ'
-                  : 'Save Changes'
-                : locale === 'am'
-                ? 'መዝግብ'
-                : 'Create Event'}
-            </span>
-          </button>
+            {eventToEdit
+              ? locale === 'am'
+                ? 'ለውጦችን አድስ'
+                : 'Save Changes'
+              : locale === 'am'
+              ? 'መዝግብ'
+              : 'Create Event'}
+          </PrimaryButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

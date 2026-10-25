@@ -8,11 +8,8 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '../../../../providers/ToastProvider';
-import {
-  InputField,
-  PasswordField,
-} from '../../../../components/ui/FormField';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { TextField, PrimaryButton, FormSuccessScreen } from '../../../../components/forms';
+import { KeyRound } from 'lucide-react';
 import { FormSkeleton } from '../../../../components/ui/SkeletonLoaders';
 
 function ResetPasswordForm({ locale }: { locale: string }) {
@@ -88,47 +85,37 @@ function ResetPasswordForm({ locale }: { locale: string }) {
 
   if (isSuccess) {
     return (
-      <div className="space-y-5 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-          <CheckCircle2 className="h-8 w-8" />
-        </div>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          {locale === 'am' ? 'የይለፍ ቃል ተቀይሯል!' : 'Password Reset Successfully!'}
-        </h2>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          {t('resetSuccess')}
-        </p>
-
-        <Link
-          href={`/${locale}/login`}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
-        >
-          {t('loginButton')}
-        </Link>
-      </div>
+      <FormSuccessScreen
+        title={locale === 'am' ? 'የይለፍ ቃል ተቀይሯል!' : 'Password Reset Successfully!'}
+        description={t('resetSuccess')}
+        primaryAction={{
+          label: t('loginLink'),
+          href: `/${locale}/login`,
+        }}
+      />
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
+      <div className="text-center space-y-1.5">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">
           {t('resetPasswordTitle')}
         </h2>
-        <p className="mt-1.5 text-xs text-muted-foreground">
+        <p className="text-xs md:text-sm text-muted-foreground">
           {t('resetPasswordDesc')}
         </p>
       </div>
 
       {errorMessage && (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs font-medium text-destructive animate-fadeIn">
           {errorMessage}
         </div>
       )}
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-          <InputField
+          <TextField
             name="email"
             type="email"
             label={t('email')}
@@ -136,48 +123,46 @@ function ResetPasswordForm({ locale }: { locale: string }) {
             required
           />
 
-          <InputField
+          <TextField
             name="code"
             label={t('resetCode')}
             placeholder="123456"
             required
           />
 
-          <PasswordField
+          <TextField
             name="newPassword"
+            type="password"
             label={t('newPassword')}
             placeholder="••••••••"
             required
           />
 
-          <PasswordField
+          <TextField
             name="confirmPassword"
+            type="password"
             label={t('confirmPassword')}
             placeholder="••••••••"
             required
           />
 
-          <button
+          <PrimaryButton
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+            loading={isSubmitting}
+            loadingText={t('resetting')}
+            startIcon={<KeyRound className="h-4 w-4" />}
+            className="w-full mt-2"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>{locale === 'am' ? 'በመቀየር ላይ...' : 'Resetting...'}</span>
-              </>
-            ) : (
-              <span>{t('resetButton')}</span>
-            )}
-          </button>
+            {t('resetButton')}
+          </PrimaryButton>
         </form>
       </FormProvider>
 
       <div className="text-center pt-2">
         <Link
           href={`/${locale}/login`}
-          className="text-xs text-primary font-medium hover:underline"
+          className="font-semibold text-xs text-primary hover:underline"
         >
           {t('loginLink')}
         </Link>

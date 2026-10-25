@@ -116,9 +116,9 @@ export class AuthService {
   }
 
   // -------------------------------------------------------------
-  // 2. LOGIN (with 5 failed attempts lockout, optional TOTP)
+  // 2. LOGIN (Member portal login - restricted to member accounts)
   // -------------------------------------------------------------
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, ip?: string) {
     const user = await this.prisma.user.findFirst({
       where: {
         OR: [{ email: dto.identifier }, { phone: dto.identifier }],
@@ -131,6 +131,14 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Restrict member portal to members only: staff accounts must use /admin/login
+    const STAFF_ROLES = ['super_admin', 'admin', 'teacher', 'content_manager'];
+    if (STAFF_ROLES.includes(user.role.name)) {
+      throw new ForbiddenException(
+        'ይህ መግቢያ ለአባላት ብቻ ነው። እባክዎ የአስተዳደር መግቢያ ይጠቀሙ (This portal is for members only. Please use the Admin Sign In portal)',
+      );
     }
 
     // Check account status
@@ -223,6 +231,253 @@ export class AuthService {
   }
 
   // -------------------------------------------------------------
+  // 2b. ADMIN LOGIN (Restricted to staff: super_admin, admin, teacher, content_manager)
+  // -------------------------------------------------------------
+  async adminLogin(dto: LoginDto, ip?: string) {
+    // 1. IP Allow-list validation (stored in settings, off/empty by default)
+    const ipSetting = await this.prisma.setting.findUnique({
+      where: { settingKey: 'admin_ip_allowlist' },
+    });
+
+    if (ipSetting && ipSetting.settingValue) {
+      let allowlist: string[] = [];
+      const val = ipSetting.settingValue as any;
+      if (Array.isArray(val)) {
+        allowlist = val;
+      } else if (val && typeof val === 'object' && val.enabled && Array.isArray(val.ips)) {
+        allowlist = val.ips;
+      }
+
+      if (allowlist.length > 0) {
+        const normalizedIp = (ip || '').replace(/^::ffff:/, '').trim();
+        const isAllowed = allowlist.some((allowed) => {
+          const normAllowed = allowed.trim().replace(/^::ffff:/, '');
+          return (
+            normAllowed === normalizedIp ||
+            normAllowed === ip ||
+            (normAllowed === '127.0.0.1' && (normalizedIp === 'localhost' || normalizedIp === '::1'))
+          );
+        });
+
+        if (!isAllowed) {
+          await this.prisma.auditLog.create({
+            data: {
+              action: 'ADMIN_LOGIN_BLOCKED_IP',
+              entity: 'AUTH',
+              entityId: dto.identifier,
+              ip: ip || null,
+              newValue: { identifier: dto.identifier, ip, reason: 'IP address not in allow-list' },
+            },
+          });
+          throw new ForbiddenException('Access denied from this IP address / ከዚህ አይ ፒ አድራሻ መግባት አይፈቀድም');
+        }
+      }
+    }
+
+    // 2. Fetch user with role and member details
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: dto.identifier }, { phone: dto.identifier }],
+      },
+      include: {
+        role: true,
+        member: true,
+      },
+    });
+
+    const STAFF_ROLES = ['super_admin', 'admin', 'teacher', 'content_manager'];
+
+    // 3. User check and Staff role enforcement
+    // Requirement: A member who tries gets the same generic message as a wrong password (do not reveal which)
+    if (!user || !STAFF_ROLES.includes(user.role.name)) {
+      if (user) {
+        // Track failed login attempt on member account trying to access admin
+        const newFailedLogins = user.failedLogins + 1;
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: { failedLogins: newFailedLogins },
+        });
+
+        await this.prisma.auditLog.create({
+          data: {
+            userId: user.id,
+            action: 'ADMIN_LOGIN_FAILURE',
+            entity: 'AUTH',
+            entityId: user.id,
+            ip: ip || null,
+            newValue: {
+              identifier: dto.identifier,
+              role: user.role.name,
+              reason: 'Member role attempted admin login',
+            },
+          },
+        });
+      } else {
+        await this.prisma.auditLog.create({
+          data: {
+            userId: null,
+            action: 'ADMIN_LOGIN_FAILURE',
+            entity: 'AUTH',
+            entityId: dto.identifier,
+            ip: ip || null,
+            newValue: {
+              identifier: dto.identifier,
+              reason: 'User not found',
+            },
+          },
+        });
+      }
+
+      // Generic message: exact same as wrong password
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // 4. Account suspension check
+    if (user.status === UserStatus.suspended) {
+      await this.prisma.auditLog.create({
+        data: {
+          userId: user.id,
+          action: 'ADMIN_LOGIN_FAILURE',
+          entity: 'AUTH',
+          entityId: user.id,
+          ip: ip || null,
+          newValue: { identifier: dto.identifier, reason: 'Suspended account' },
+        },
+      });
+      throw new ForbiddenException('Account has been suspended. Please contact admin.');
+    }
+
+    // 5. Account lockout check
+    const now = new Date();
+    if (user.lockedUntil && user.lockedUntil > now) {
+      const minutesRemaining = Math.ceil(
+        (user.lockedUntil.getTime() - now.getTime()) / (60 * 1000),
+      );
+      throw new ForbiddenException(
+        `Account is locked due to multiple failed login attempts. Try again in ${minutesRemaining} minutes.`,
+      );
+    }
+
+    // 6. Verify password
+    const passwordValid = await argon2.verify(user.passwordHash, dto.password);
+    if (!passwordValid) {
+      const newFailedLogins = user.failedLogins + 1;
+      let lockedUntil: Date | null = null;
+
+      if (newFailedLogins >= 5) {
+        lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes lockout
+      }
+
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLogins: newFailedLogins,
+          lockedUntil,
+        },
+      });
+
+      await this.prisma.auditLog.create({
+        data: {
+          userId: user.id,
+          action: 'ADMIN_LOGIN_FAILURE',
+          entity: 'AUTH',
+          entityId: user.id,
+          ip: ip || null,
+          newValue: {
+            identifier: dto.identifier,
+            failedAttempts: newFailedLogins,
+            reason: 'Invalid password',
+          },
+        },
+      });
+
+      if (newFailedLogins >= 5) {
+        throw new ForbiddenException(
+          'Maximum login attempts exceeded. Account is locked for 15 minutes.',
+        );
+      }
+
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // 7. Check 2FA if enabled
+    if (user.twoFactorSecret) {
+      if (!dto.twoFactorToken) {
+        return {
+          requiresTwoFactor: true,
+          message: 'Two-factor authentication code required',
+        };
+      }
+
+      const isValidToken = authenticator.verify({
+        token: dto.twoFactorToken,
+        secret: user.twoFactorSecret,
+      });
+
+      if (!isValidToken) {
+        await this.prisma.auditLog.create({
+          data: {
+            userId: user.id,
+            action: 'ADMIN_LOGIN_FAILURE',
+            entity: 'AUTH',
+            entityId: user.id,
+            ip: ip || null,
+            newValue: { identifier: dto.identifier, reason: 'Invalid 2FA code' },
+          },
+        });
+        throw new UnauthorizedException('Invalid two-factor authentication code');
+      }
+    }
+
+    // 8. Reset failed logins & update last login
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        failedLogins: 0,
+        lockedUntil: null,
+        lastLogin: new Date(),
+      },
+    });
+
+    // 9. Record success in audit log
+    await this.prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: 'ADMIN_LOGIN_SUCCESS',
+        entity: 'AUTH',
+        entityId: user.id,
+        ip: ip || null,
+        newValue: { identifier: dto.identifier, role: user.role.name },
+      },
+    });
+
+    // 10. Generate tokens
+    const tokens = await this.generateTokens(user.id, user.email, user.role.name);
+
+    // 11. Role-based redirect target
+    let redirectPath = '/admin';
+    if (user.role.name === 'teacher') {
+      redirectPath = '/admin/attendance';
+    } else if (user.role.name === 'content_manager') {
+      redirectPath = '/admin/posts';
+    }
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        status: user.status,
+        role: user.role.name,
+        permissions: user.role.permissions,
+        member: user.member,
+      },
+      ...tokens,
+      redirectPath,
+    };
+  }
+
+  // -------------------------------------------------------------
   // 3. REFRESH TOKEN (rotate refresh token, store hashed)
   // -------------------------------------------------------------
   async refreshToken(dto: RefreshTokenDto) {
@@ -290,6 +545,28 @@ export class AuthService {
     }
 
     return { message: 'Logged out successfully' };
+  }
+
+  // -------------------------------------------------------------
+  // 4b. LOGOUT ALL DEVICES (Revoke all active refresh tokens for user)
+  // -------------------------------------------------------------
+  async logoutAll(userId: string, ip?: string) {
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId,
+        action: 'LOGOUT_ALL_DEVICES',
+        entity: 'AUTH',
+        entityId: userId,
+        ip: ip || null,
+        newValue: { reason: 'User revoked all sessions on all devices' },
+      },
+    });
+
+    return { message: 'Successfully signed out from all devices / ከሁሉም መሳሪያዎች በተሳካ ሁኔታ ወጥተዋል' };
   }
 
   // -------------------------------------------------------------

@@ -46,7 +46,7 @@ describe('Phase 7: Reports, Contributions, Settings & Backup (e2e)', () => {
     prisma = app.get<PrismaService>(PrismaService);
 
     // 1. Super Admin login
-    const superAdminRes = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+    const superAdminRes = await request(app.getHttpServer()).post('/api/v1/auth/admin/login').send({
       identifier: 'admin@aemade.org',
       password: 'Admin@123456!',
     });
@@ -72,7 +72,7 @@ describe('Phase 7: Reports, Contributions, Settings & Backup (e2e)', () => {
         status: 'active',
       },
     });
-    const resAdm = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+    const resAdm = await request(app.getHttpServer()).post('/api/v1/auth/admin/login').send({
       identifier: adminUser.email,
       password: 'Pass123456!',
     });

@@ -210,12 +210,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      const isStaff = role && ['super_admin', 'admin', 'teacher', 'content_manager'].includes(role);
+      const endpoint = isStaff ? '/api/auth/admin/logout' : '/api/auth/logout';
+      await fetch(endpoint, { method: 'POST' });
     } finally {
       setAccessToken(null);
       setUser(null);
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        const isStaff = role && ['super_admin', 'admin', 'teacher', 'content_manager'].includes(role);
+        window.location.href = isStaff ? '/admin/login' : '/login';
       }
     }
   };

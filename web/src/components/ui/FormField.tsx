@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 
-interface BaseFieldProps {
+export interface BaseFieldProps {
   name: string;
   label?: string;
   placeholder?: string;
@@ -36,9 +36,9 @@ export function InputField({
       {label && (
         <label
           htmlFor={name}
-          className="block text-sm font-semibold text-foreground"
+          className="block text-sm font-semibold text-foreground tracking-tight select-none"
         >
-          {label} {required && <span className="text-destructive">*</span>}
+          {label} {required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
         </label>
       )}
 
@@ -47,21 +47,33 @@ export function InputField({
         type={type}
         placeholder={placeholder}
         disabled={disabled}
+        aria-invalid={Boolean(error)}
+        aria-describedby={
+          error ? `${name}-error` : helperText ? `${name}-helper` : undefined
+        }
         {...register(name, {
           valueAsNumber: type === 'number',
         })}
-        className={`w-full rounded-lg border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 transition-colors ${
-          error ? 'border-destructive focus:ring-destructive' : 'border-input'
+        className={`h-12 min-h-[48px] w-full rounded-xl border bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50 ${
+          error
+            ? 'border-destructive focus:border-destructive focus:ring-destructive/30'
+            : 'border-input hover:border-muted-foreground/40'
         }`}
       />
 
       {helperText && !error && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
+        <p id={`${name}-helper`} className="text-xs text-muted-foreground leading-normal">
+          {helperText}
+        </p>
       )}
 
       {error && (
-        <div className="flex items-center gap-1.5 text-xs text-destructive">
-          <AlertCircle className="h-3.5 w-3.5" />
+        <div
+          id={`${name}-error`}
+          className="flex items-center gap-1.5 text-xs text-destructive font-medium leading-normal animate-fadeIn"
+          role="alert"
+        >
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
@@ -91,9 +103,9 @@ export function PasswordField({
       {label && (
         <label
           htmlFor={name}
-          className="block text-sm font-semibold text-foreground"
+          className="block text-sm font-semibold text-foreground tracking-tight select-none"
         >
-          {label} {required && <span className="text-destructive">*</span>}
+          {label} {required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
         </label>
       )}
 
@@ -103,9 +115,15 @@ export function PasswordField({
           type={showPassword ? 'text' : 'password'}
           placeholder={placeholder}
           disabled={disabled}
+          aria-invalid={Boolean(error)}
+          aria-describedby={
+            error ? `${name}-error` : helperText ? `${name}-helper` : undefined
+          }
           {...register(name)}
-          className={`w-full rounded-lg border bg-background px-3.5 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 transition-colors ${
-            error ? 'border-destructive focus:ring-destructive' : 'border-input'
+          className={`h-12 min-h-[48px] w-full rounded-xl border bg-background px-4 pr-11 text-sm text-foreground placeholder:text-muted-foreground transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50 ${
+            error
+              ? 'border-destructive focus:border-destructive focus:ring-destructive/30'
+              : 'border-input hover:border-muted-foreground/40'
           }`}
         />
 
@@ -113,7 +131,7 @@ export function PasswordField({
           type="button"
           tabIndex={-1}
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute right-3.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           aria-label={showPassword ? 'Hide password' : 'Show password'}
         >
           {showPassword ? (
@@ -125,12 +143,18 @@ export function PasswordField({
       </div>
 
       {helperText && !error && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
+        <p id={`${name}-helper`} className="text-xs text-muted-foreground leading-normal">
+          {helperText}
+        </p>
       )}
 
       {error && (
-        <div className="flex items-center gap-1.5 text-xs text-destructive">
-          <AlertCircle className="h-3.5 w-3.5" />
+        <div
+          id={`${name}-error`}
+          className="flex items-center gap-1.5 text-xs text-destructive font-medium leading-normal animate-fadeIn"
+          role="alert"
+        >
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
@@ -160,9 +184,9 @@ export function TextareaField({
       {label && (
         <label
           htmlFor={name}
-          className="block text-sm font-semibold text-foreground"
+          className="block text-sm font-semibold text-foreground tracking-tight select-none"
         >
-          {label} {required && <span className="text-destructive">*</span>}
+          {label} {required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
         </label>
       )}
 
@@ -171,19 +195,31 @@ export function TextareaField({
         rows={rows}
         placeholder={placeholder}
         disabled={disabled}
+        aria-invalid={Boolean(error)}
+        aria-describedby={
+          error ? `${name}-error` : helperText ? `${name}-helper` : undefined
+        }
         {...register(name)}
-        className={`w-full rounded-lg border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 transition-colors ${
-          error ? 'border-destructive focus:ring-destructive' : 'border-input'
+        className={`w-full rounded-xl border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground transition-all duration-150 resize-y focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50 ${
+          error
+            ? 'border-destructive focus:border-destructive focus:ring-destructive/30'
+            : 'border-input hover:border-muted-foreground/40'
         }`}
       />
 
       {helperText && !error && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
+        <p id={`${name}-helper`} className="text-xs text-muted-foreground leading-normal">
+          {helperText}
+        </p>
       )}
 
       {error && (
-        <div className="flex items-center gap-1.5 text-xs text-destructive">
-          <AlertCircle className="h-3.5 w-3.5" />
+        <div
+          id={`${name}-error`}
+          className="flex items-center gap-1.5 text-xs text-destructive font-medium leading-normal animate-fadeIn"
+          role="alert"
+        >
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
@@ -218,18 +254,24 @@ export function SelectField({
       {label && (
         <label
           htmlFor={name}
-          className="block text-sm font-semibold text-foreground"
+          className="block text-sm font-semibold text-foreground tracking-tight select-none"
         >
-          {label} {required && <span className="text-destructive">*</span>}
+          {label} {required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
         </label>
       )}
 
       <select
         id={name}
         disabled={disabled}
+        aria-invalid={Boolean(error)}
+        aria-describedby={
+          error ? `${name}-error` : helperText ? `${name}-helper` : undefined
+        }
         {...register(name)}
-        className={`w-full rounded-lg border bg-background px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 transition-colors ${
-          error ? 'border-destructive focus:ring-destructive' : 'border-input'
+        className={`h-12 min-h-[48px] w-full rounded-xl border bg-background px-4 text-sm text-foreground transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50 ${
+          error
+            ? 'border-destructive focus:border-destructive focus:ring-destructive/30'
+            : 'border-input hover:border-muted-foreground/40'
         }`}
       >
         {placeholder && <option value="">{placeholder}</option>}
@@ -241,12 +283,18 @@ export function SelectField({
       </select>
 
       {helperText && !error && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
+        <p id={`${name}-helper`} className="text-xs text-muted-foreground leading-normal">
+          {helperText}
+        </p>
       )}
 
       {error && (
-        <div className="flex items-center gap-1.5 text-xs text-destructive">
-          <AlertCircle className="h-3.5 w-3.5" />
+        <div
+          id={`${name}-error`}
+          className="flex items-center gap-1.5 text-xs text-destructive font-medium leading-normal animate-fadeIn"
+          role="alert"
+        >
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
@@ -275,20 +323,23 @@ export function CheckboxField({
         type="checkbox"
         disabled={disabled}
         {...register(name)}
-        className="mt-1 h-4 w-4 rounded border-input text-primary focus:ring-primary"
+        className="mt-1 h-5 w-5 rounded-md border-input text-primary focus:ring-primary-500 transition-colors cursor-pointer"
       />
       <div>
         <label
           htmlFor={name}
-          className="text-sm font-medium text-foreground cursor-pointer select-none"
+          className="text-sm font-semibold text-foreground cursor-pointer select-none"
         >
           {label}
         </label>
         {helperText && !error && (
-          <p className="text-xs text-muted-foreground">{helperText}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{helperText}</p>
         )}
         {error && (
-          <p className="text-xs text-destructive mt-0.5">{error}</p>
+          <div className="flex items-center gap-1 text-xs text-destructive font-medium mt-1">
+            <AlertCircle className="h-3 w-3 shrink-0" />
+            <span>{error}</span>
+          </div>
         )}
       </div>
     </div>

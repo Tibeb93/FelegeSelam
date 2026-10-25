@@ -35,7 +35,7 @@ describe('Members Module & Exports (e2e)', () => {
     prisma = app.get<PrismaService>(PrismaService);
 
     // 1. Login as Super Admin
-    const adminRes = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+    const adminRes = await request(app.getHttpServer()).post('/api/v1/auth/admin/login').send({
       identifier: 'admin@aemade.org',
       password: 'Admin@123456!',
     });

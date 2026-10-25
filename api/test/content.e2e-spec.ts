@@ -52,7 +52,7 @@ describe('Phase 5: Mezmur, Daily Posts, Events & Notifications (e2e)', () => {
     prisma = app.get<PrismaService>(PrismaService);
 
     // 1. Login as Super Admin
-    const adminRes = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+    const adminRes = await request(app.getHttpServer()).post('/api/v1/auth/admin/login').send({
       identifier: 'admin@aemade.org',
       password: 'Admin@123456!',
     });
@@ -87,7 +87,7 @@ describe('Phase 5: Mezmur, Daily Posts, Events & Notifications (e2e)', () => {
     });
 
     const cmLogin = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
+      .post('/api/v1/auth/admin/login')
       .send({
         identifier: `cm_${ts}@aemade.org`,
         password: 'Pass123456!',

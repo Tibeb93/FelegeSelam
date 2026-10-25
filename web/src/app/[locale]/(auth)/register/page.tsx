@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useForm, FormProvider } from 'react-hook-form';
@@ -8,24 +8,32 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '../../../../providers/ToastProvider';
 import {
-  InputField,
-  PasswordField,
+  TextField,
+  PhoneField,
   SelectField,
-} from '../../../../components/ui/FormField';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+  PrimaryButton,
+  FormSuccessScreen,
+} from '../../../../components/forms';
+import { UserPlus } from 'lucide-react';
 
 export default function RegisterPage({
   params: { locale },
 }: {
   params: { locale: string };
 }) {
+  const [mounted, setMounted] = useState(false);
   const t = useTranslations('Auth');
   const tVal = useTranslations('Validation');
   const toast = useToast();
+  const isAm = locale === 'am';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const registerSchema = z
     .object({
@@ -110,55 +118,57 @@ export default function RegisterPage({
 
   if (isSuccess) {
     return (
-      <div className="space-y-5 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-          <CheckCircle2 className="h-8 w-8" />
-        </div>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          {locale === 'am' ? 'ምዝገባዎ በተሳካ ሁኔታ ተልኳል!' : 'Registration Submitted!'}
-        </h2>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          {locale === 'am'
+      <FormSuccessScreen
+        title={isAm ? 'ምዝገባዎ በተሳካ ሁኔታ ተልኳል!' : 'Registration Submitted!'}
+        description={
+          isAm
             ? 'የአባልነት ማመልከቻዎ በሰንበት ትምህርት ቤቱ አስተዳደር ተገምግሞ ሲጸድቅ መለያዎ ገቢር ይሆናል።'
-            : 'Your membership application is pending administrator review and approval.'}
-        </p>
-        <Link
-          href={`/${locale}/login`}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
-        >
-          {t('loginLink')}
-        </Link>
-      </div>
+            : 'Your membership application has been submitted and is pending administrator review and approval.'
+        }
+        primaryAction={{
+          label: t('loginLink'),
+          href: `/${locale}/login`,
+        }}
+      />
     );
   }
 
+  const sexOptions = [
+    { label: t('male'), value: 'male' },
+    { label: t('female'), value: 'female' },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="text-center">
+      <div className="text-center space-y-1.5">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">
           {t('registerTitle')}
         </h2>
-        <p className="mt-1.5 text-xs text-muted-foreground">
+        <p className="text-xs md:text-sm text-muted-foreground">
           {t('registerSubtitle')}
         </p>
       </div>
 
       {errorMessage && (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs font-medium text-destructive animate-fadeIn">
           {errorMessage}
         </div>
       )}
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-3.5">
-          <div className="grid grid-cols-2 gap-3">
-            <InputField
+        <form
+          action="javascript:void(0);"
+          onSubmit={methods.handleSubmit(onSubmit)}
+          className="space-y-4"
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <TextField
               name="firstName"
               label={t('firstName')}
               placeholder="ዮሐንስ"
               required
             />
-            <InputField
+            <TextField
               name="fatherName"
               label={t('fatherName')}
               placeholder="ኃይሌ"
@@ -166,45 +176,41 @@ export default function RegisterPage({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <InputField
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <TextField
               name="grandfatherName"
               label={t('grandfatherName')}
               placeholder="ተክሌ"
             />
-            <InputField
+            <TextField
               name="baptismalName"
               label={t('baptismalName')}
               placeholder="ወልደ ጊዮርጊስ"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <SelectField
               name="sex"
               label={t('sex')}
-              options={[
-                { label: t('male'), value: 'male' },
-                { label: t('female'), value: 'female' },
-              ]}
+              options={sexOptions}
               required
             />
-            <InputField
+            <TextField
               name="parish"
               label={t('parish')}
               placeholder="ደብረ ሰላም ቅዱስ እስጢፋኖስ"
             />
           </div>
 
-          <InputField
+          <PhoneField
             name="phone"
-            type="tel"
             label={t('phone')}
             placeholder="0911223344"
             required
           />
 
-          <InputField
+          <TextField
             name="email"
             type="email"
             label={t('email')}
@@ -212,34 +218,33 @@ export default function RegisterPage({
             required
           />
 
-          <PasswordField
-            name="password"
-            label={t('password')}
-            placeholder="••••••••"
-            required
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <TextField
+              name="password"
+              type="password"
+              label={t('password')}
+              placeholder="••••••••"
+              required
+            />
+            <TextField
+              name="confirmPassword"
+              type="password"
+              label={t('confirmPassword')}
+              placeholder="••••••••"
+              required
+            />
+          </div>
 
-          <PasswordField
-            name="confirmPassword"
-            label={t('confirmPassword')}
-            placeholder="••••••••"
-            required
-          />
-
-          <button
+          <PrimaryButton
             type="submit"
-            disabled={isSubmitting}
-            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+            disabled={!mounted || isSubmitting}
+            loading={isSubmitting}
+            loadingText={t('registering')}
+            startIcon={<UserPlus className="h-4 w-4" />}
+            className="w-full mt-2"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>{t('registering')}</span>
-              </>
-            ) : (
-              <span>{t('registerButton')}</span>
-            )}
-          </button>
+            {t('registerButton')}
+          </PrimaryButton>
         </form>
       </FormProvider>
 

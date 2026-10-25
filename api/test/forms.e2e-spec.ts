@@ -52,7 +52,7 @@ describe('Phase 6: Online Forms, Validation, Review & Exports (e2e)', () => {
     prisma = app.get<PrismaService>(PrismaService);
 
     // 1. Super Admin login
-    const adminRes = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+    const adminRes = await request(app.getHttpServer()).post('/api/v1/auth/admin/login').send({
       identifier: 'admin@aemade.org',
       password: 'Admin@123456!',
     });
@@ -141,7 +141,7 @@ describe('Phase 6: Online Forms, Validation, Review & Exports (e2e)', () => {
         status: 'active',
       },
     });
-    const resT = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+    const resT = await request(app.getHttpServer()).post('/api/v1/auth/admin/login').send({
       identifier: uTeacher.email,
       password: 'Pass123456!',
     });
@@ -156,7 +156,7 @@ describe('Phase 6: Online Forms, Validation, Review & Exports (e2e)', () => {
         status: 'active',
       },
     });
-    const resCm = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+    const resCm = await request(app.getHttpServer()).post('/api/v1/auth/admin/login').send({
       identifier: uCm.email,
       password: 'Pass123456!',
     });

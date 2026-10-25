@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -9,11 +9,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '../../../../providers/AuthProvider';
 import { useToast } from '../../../../providers/ToastProvider';
-import { InputField, PasswordField } from '../../../../components/ui/FormField';
-import { Loader2, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { TextField, PrimaryButton, SecondaryButton } from '../../../../components/forms';
+import { ShieldCheck, ArrowLeft, LogIn } from 'lucide-react';
 import { FormSkeleton } from '../../../../components/ui/SkeletonLoaders';
 
 function LoginForm({ locale }: { locale: string }) {
+  const [mounted, setMounted] = useState(false);
   const t = useTranslations('Auth');
   const tCommon = useTranslations('Common');
   const tVal = useTranslations('Validation');
@@ -31,6 +32,10 @@ function LoginForm({ locale }: { locale: string }) {
   const [step2FA, setStep2FA] = useState(false);
   const [tempToken, setTempToken] = useState<string>('');
   const [twoFactorCode, setTwoFactorCode] = useState<string>('');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const loginSchema = z.object({
     identifier: z
@@ -77,7 +82,7 @@ function LoginForm({ locale }: { locale: string }) {
       }
 
       toast.success('በተሳካ ሁኔታ ገብተዋል', 'እንኳን ደህና መጡ');
-      const target = redirectUrl || `/${locale}/admin`;
+      const target = redirectUrl || `/${locale}/portal`;
       router.push(target);
       router.refresh();
     } catch (err: any) {
@@ -104,7 +109,7 @@ function LoginForm({ locale }: { locale: string }) {
       }
 
       toast.success('ባለሁለት ደረጃ ማረጋገጫ ተጠናቋል', 'እንኳን ደህና መጡ');
-      const target = redirectUrl || `/${locale}/admin`;
+      const target = redirectUrl || `/${locale}/portal`;
       router.push(target);
       router.refresh();
     } catch (err: any) {
@@ -118,60 +123,71 @@ function LoginForm({ locale }: { locale: string }) {
     <div className="space-y-6">
       {!step2FA ? (
         <>
-          <div className="text-center">
+          <div className="text-center space-y-1.5">
             <h2 className="text-2xl font-bold tracking-tight text-foreground">
               {t('loginTitle')}
             </h2>
-            <p className="mt-1.5 text-xs text-muted-foreground">
+            <p className="text-xs md:text-sm text-muted-foreground">
               {t('loginSubtitle')}
             </p>
           </div>
 
           {errorMessage && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
-              {errorMessage}
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs font-medium text-destructive animate-fadeIn space-y-2">
+              <p>{errorMessage}</p>
+              {(errorMessage.includes('አስተዳደር') || errorMessage.toLowerCase().includes('admin')) && (
+                <div className="pt-1">
+                  <Link
+                    href={`/${locale}/admin/login`}
+                    className="inline-flex items-center gap-1.5 font-bold text-primary underline hover:opacity-90"
+                  >
+                    <span>{locale === 'am' ? 'ወደ አስተዳደር መግቢያ ሂድ →' : 'Go to Admin Login →'}</span>
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
           <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-              <InputField
+            <form
+              action="javascript:void(0);"
+              onSubmit={methods.handleSubmit(onSubmit)}
+              className="space-y-4"
+            >
+              <TextField
                 name="identifier"
                 label={t('emailOrPhone')}
                 placeholder="example@felegeselam.org / 0911000000"
                 required
               />
 
-              <PasswordField
+              <TextField
                 name="password"
+                type="password"
                 label={t('password')}
                 placeholder="••••••••"
                 required
               />
 
-              <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center justify-end text-xs">
                 <Link
                   href={`/${locale}/forgot-password`}
-                  className="font-medium text-primary hover:underline"
+                  className="font-medium text-primary hover:underline transition-colors"
                 >
                   {t('forgotPassword')}
                 </Link>
               </div>
 
-              <button
+              <PrimaryButton
                 type="submit"
-                disabled={isSubmitting}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+                disabled={!mounted || isSubmitting}
+                loading={isSubmitting}
+                loadingText={t('loggingIn')}
+                startIcon={<LogIn className="h-4 w-4" />}
+                className="w-full"
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>{t('loggingIn')}</span>
-                  </>
-                ) : (
-                  <span>{t('loginButton')}</span>
-                )}
-              </button>
+                {t('loginButton')}
+              </PrimaryButton>
             </form>
           </FormProvider>
 
@@ -186,10 +202,10 @@ function LoginForm({ locale }: { locale: string }) {
           </div>
         </>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6">
           <div className="text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
-              <ShieldCheck className="h-6 w-6" />
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300 mb-3 shadow-sm">
+              <ShieldCheck className="h-7 w-7" />
             </div>
             <h2 className="text-xl font-bold tracking-tight text-foreground">
               {t('twoFactorTitle')}
@@ -200,8 +216,18 @@ function LoginForm({ locale }: { locale: string }) {
           </div>
 
           {errorMessage && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
-              {errorMessage}
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs font-medium text-destructive animate-fadeIn space-y-2">
+              <p>{errorMessage}</p>
+              {(errorMessage.includes('አስተዳደር') || errorMessage.toLowerCase().includes('admin')) && (
+                <div className="pt-1">
+                  <Link
+                    href={`/${locale}/admin/login`}
+                    className="inline-flex items-center gap-1.5 font-bold text-primary underline hover:opacity-90"
+                  >
+                    <span>{locale === 'am' ? 'ወደ አስተዳደር መግቢያ ሂድ →' : 'Go to Admin Login →'}</span>
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -222,38 +248,33 @@ function LoginForm({ locale }: { locale: string }) {
                   setTwoFactorCode(e.target.value.replace(/\D/g, ''))
                 }
                 placeholder="123456"
-                className="w-full rounded-xl border border-input bg-background py-2.5 text-center font-mono text-2xl tracking-widest text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
+                className="h-12 w-full rounded-xl border border-input bg-background py-2.5 text-center font-mono text-2xl tracking-widest text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm"
                 autoFocus
                 required
               />
             </div>
 
-            <button
+            <PrimaryButton
               type="submit"
               disabled={isSubmitting || twoFactorCode.length < 6}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+              loading={isSubmitting}
+              loadingText={t('verifying')}
+              className="w-full"
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>{t('verifying')}</span>
-                </>
-              ) : (
-                <span>{t('verifyButton')}</span>
-              )}
-            </button>
+              {t('verifyButton')}
+            </PrimaryButton>
 
-            <button
+            <SecondaryButton
               type="button"
               onClick={() => {
                 setStep2FA(false);
                 setTwoFactorCode('');
               }}
-              className="inline-flex w-full items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              startIcon={<ArrowLeft className="h-4 w-4" />}
+              className="w-full text-xs"
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>{tCommon('back')}</span>
-            </button>
+              {tCommon('back')}
+            </SecondaryButton>
           </form>
         </div>
       )}

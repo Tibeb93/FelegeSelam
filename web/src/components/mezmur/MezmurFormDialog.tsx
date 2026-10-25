@@ -20,6 +20,14 @@ import {
   Video,
   FileAudio,
 } from 'lucide-react';
+import {
+  TextField,
+  TextArea,
+  SelectWithSearch,
+  SwitchField,
+  PrimaryButton,
+  SecondaryButton,
+} from '@/components/forms';
 
 interface MezmurFormDialogProps {
   open: boolean;
@@ -147,12 +155,25 @@ export function MezmurFormDialog({
     },
   });
 
+  const categoryOptions = [
+    {
+      label: locale === 'am' ? '— ምድብ ይምረጡ —' : '— Select Category —',
+      value: '',
+    },
+    ...categories.map((c) => ({
+      label: locale === 'am' ? c.nameAm : c.nameEn || c.nameAm,
+      value: c.id,
+    })),
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-card p-6 max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-            <Music className="h-5 w-5 text-primary" />
+      <DialogContent className="max-w-2xl bg-card p-6 md:p-8 rounded-2xl border border-border shadow-xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="border-b border-border pb-4">
+          <DialogTitle className="flex items-center gap-2.5 text-xl font-bold text-foreground">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300">
+              <Music className="h-5 w-5" />
+            </div>
             <span>
               {mezmurToEdit
                 ? locale === 'am'
@@ -166,7 +187,7 @@ export function MezmurFormDialog({
         </DialogHeader>
 
         {errorMsg && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+          <div className="mt-4 flex items-center gap-2 rounded-xl bg-destructive/10 p-3.5 text-xs font-medium text-destructive animate-fadeIn">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -175,104 +196,80 @@ export function MezmurFormDialog({
         <div className="mt-4 space-y-4">
           {/* Title & Category */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="text-xs font-semibold text-foreground">
-                {locale === 'am' ? 'የመዝሙሩ ርዕስ *' : 'Mezmur Title *'}
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder={locale === 'am' ? 'ምሳሌ፦ በመስቀልህ ጥላ ሥር' : 'Title'}
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
-            </div>
+            <TextField
+              name="title"
+              label={locale === 'am' ? 'የመዝሙሩ ርዕስ' : 'Mezmur Title'}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={locale === 'am' ? 'ምሳሌ፦ በመስቀልህ ጥላ ሥር' : 'Title'}
+              required
+            />
 
-            <div>
-              <label className="text-xs font-semibold text-foreground">
-                {locale === 'am' ? 'የመዝሙር ምድብ' : 'Category'}
-              </label>
-              <select
-                value={categoryId}
-                onChange={(e) =>
-                  setCategoryId(e.target.value ? Number(e.target.value) : '')
-                }
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-              >
-                <option value="">
-                  {locale === 'am' ? '— ምድብ ይምረጡ —' : '— Select Category —'}
-                </option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {locale === 'am' ? c.nameAm : c.nameEn || c.nameAm}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SelectWithSearch
+              name="categoryId"
+              label={locale === 'am' ? 'የመዝሙር ምድብ' : 'Category'}
+              options={categoryOptions}
+              value={categoryId}
+              onChange={(val) => setCategoryId(val ? Number(val) : '')}
+            />
           </div>
 
           {/* Singer & Visibility */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="text-xs font-semibold text-foreground">
-                {locale === 'am' ? 'አዝማሪ / መዘምራን' : 'Singer / Choir'}
-              </label>
-              <input
-                type="text"
-                value={singer}
-                onChange={(e) => setSinger(e.target.value)}
-                placeholder={
-                  locale === 'am'
-                    ? 'ምሳሌ፦ አዕማደ ሰላም መዘምራን'
-                    : 'e.g. Aemade Selam Choir'
-                }
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-center">
+            <TextField
+              name="singer"
+              label={locale === 'am' ? 'አዝማሪ / መዘምራን' : 'Singer / Choir'}
+              value={singer}
+              onChange={(e) => setSinger(e.target.value)}
+              placeholder={
+                locale === 'am'
+                  ? 'ምሳሌ፦ አዕማደ ሰላም መዘምራን'
+                  : 'e.g. Aemade Selam Choir'
+              }
+            />
 
-            <div className="flex items-center gap-3 pt-5">
-              <input
-                type="checkbox"
-                id="isPublic"
+            <div className="pt-2">
+              <SwitchField
+                name="isPublic"
+                label={
+                  locale === 'am'
+                    ? 'ለሁሉም በድረ-ገጹ ክፍት ይሁን (Public)'
+                    : 'Publicly visible'
+                }
+                helperText={
+                  locale === 'am'
+                    ? 'በመዝሙር ቤተ-መጽሐፍት ለጎብኚዎች ይታያል'
+                    : 'Shown in public library'
+                }
                 checked={isPublic}
-                onChange={(e) => setIsPublic(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-primary focus:ring-primary/30"
+                onChange={setIsPublic}
               />
-              <label htmlFor="isPublic" className="text-xs font-medium text-foreground cursor-pointer">
-                {locale === 'am'
-                  ? 'ለሁሉም ምዕመናን በድረ-ገጹ ክፍት ይሁን (Public)'
-                  : 'Publicly visible to visitors on website'}
-              </label>
             </div>
           </div>
 
           {/* Lyrics */}
-          <div>
-            <label className="text-xs font-semibold text-foreground">
-              {locale === 'am' ? 'የመዝሙሩ ስንኞችና ቃላት' : 'Lyrics'}
-            </label>
-            <textarea
-              rows={5}
-              value={lyrics}
-              onChange={(e) => setLyrics(e.target.value)}
-              placeholder={
-                locale === 'am'
-                  ? 'የመዝሙሩን ሙሉ ቃላት እዚህ ያስገቡ...'
-                  : 'Enter full lyrics in Amharic/Ge’ez...'
-              }
-              className="mt-1 w-full rounded-lg border border-input bg-background p-3 text-xs text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
+          <TextArea
+            name="lyrics"
+            label={locale === 'am' ? 'የመዝሙሩ ስንኞችና ቃላት' : 'Lyrics'}
+            rows={5}
+            value={lyrics}
+            onChange={(e) => setLyrics(e.target.value)}
+            placeholder={
+              locale === 'am'
+                ? 'የመዝሙሩን ሙሉ ቃላት እዚህ ያስገቡ...'
+                : 'Enter full lyrics in Amharic/Ge’ez...'
+            }
+          />
 
           {/* Audio Upload & Player Preview */}
-          <div className="rounded-xl border border-border/70 bg-muted/20 p-4 space-y-3">
+          <div className="rounded-2xl border border-border bg-muted/20 p-4 space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <FileAudio className="h-4 w-4 text-primary" />
               <span>{locale === 'am' ? 'የድምፅ ቅጂ (Audio)' : 'Audio Recording'}</span>
             </h4>
 
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-              <label className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground shadow-sm hover:bg-muted cursor-pointer transition-colors">
+              <label className="inline-flex h-12 items-center gap-2 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-foreground shadow-sm hover:bg-muted cursor-pointer transition-colors shrink-0">
                 {isUploading ? (
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 ) : (
@@ -297,8 +294,8 @@ export function MezmurFormDialog({
               </label>
 
               <div className="flex-1 w-full">
-                <input
-                  type="text"
+                <TextField
+                  name="audioUrl"
                   value={audioUrl}
                   onChange={(e) => setAudioUrl(e.target.value)}
                   placeholder={
@@ -306,66 +303,56 @@ export function MezmurFormDialog({
                       ? 'ወይም የድምፅ ፋይል ማስፈንጠሪያ (URL) እዚህ ያስገቡ'
                       : 'Or enter direct audio URL'
                   }
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
               </div>
             </div>
 
             {/* Audio Preview Player */}
             {audioUrl && (
-              <div className="mt-2 rounded-lg bg-card border border-border/80 p-3">
-                <p className="text-[11px] font-semibold text-foreground mb-1 flex items-center gap-1.5">
+              <div className="mt-2 rounded-xl bg-card border border-border p-3.5 shadow-sm">
+                <p className="text-xs font-semibold text-foreground mb-1.5 flex items-center gap-1.5">
                   <Play className="h-3.5 w-3.5 text-primary fill-primary" />
                   <span>{locale === 'am' ? 'የድምፅ ቅድመ-ዕይታ' : 'Audio Player Preview'}</span>
                 </p>
-                <audio controls src={audioUrl} className="w-full h-8 mt-1" />
+                <audio controls src={audioUrl} className="w-full h-9 mt-1" />
               </div>
             )}
           </div>
 
           {/* Video URL */}
-          <div>
-            <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-              <Video className="h-4 w-4 text-secondary" />
-              <span>{locale === 'am' ? 'የቪዲዮ ማስፈንጠሪያ (YouTube/MP4)' : 'Video URL'}</span>
-            </label>
-            <input
-              type="text"
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
-              className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
+          <TextField
+            name="videoUrl"
+            label={locale === 'am' ? 'የቪዲዮ ማስፈንጠሪያ (YouTube/MP4)' : 'Video URL'}
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=..."
+            startIcon={<Video className="h-4 w-4" />}
+          />
         </div>
 
-        <DialogFooter className="mt-6 flex justify-end gap-2">
-          <button
+        <DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border">
+          <SecondaryButton
             type="button"
             onClick={() => onOpenChange(false)}
-            className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-muted"
+            className="w-full sm:w-auto h-11"
           >
             {locale === 'am' ? 'ሰርዝ' : 'Cancel'}
-          </button>
-          <button
+          </SecondaryButton>
+          <PrimaryButton
             type="button"
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || isUploading}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+            loading={saveMutation.isPending}
+            className="w-full sm:w-auto h-11"
           >
-            {saveMutation.isPending && (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            )}
-            <span>
-              {mezmurToEdit
-                ? locale === 'am'
-                  ? 'አድስ'
-                  : 'Save Changes'
-                : locale === 'am'
-                ? 'መዝግብ'
-                : 'Create Mezmur'}
-            </span>
-          </button>
+            {mezmurToEdit
+              ? locale === 'am'
+                ? 'አድስ'
+                : 'Save Changes'
+              : locale === 'am'
+              ? 'መዝግብ'
+              : 'Create Mezmur'}
+          </PrimaryButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

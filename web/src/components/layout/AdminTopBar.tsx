@@ -13,7 +13,9 @@ import {
   ChevronRight,
   LogOut,
   Shield,
+  Smartphone,
 } from 'lucide-react';
+import { getAccessToken } from '../../lib/api-client';
 
 const BREADCRUMB_MAP: Record<string, { am: string; en: string }> = {
   admin: { am: 'አስተዳደር', en: 'Admin' },
@@ -40,7 +42,7 @@ interface AdminTopBarProps {
 
 export function AdminTopBar({ onToggleMobileMenu, locale }: AdminTopBarProps) {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -167,17 +169,49 @@ export function AdminTopBar({ onToggleMobileMenu, locale }: AdminTopBarProps) {
                   </div>
                 </div>
 
-                <div className="py-1">
+                <div className="py-1 space-y-0.5">
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
                       setShowUserMenu(false);
-                      logout();
+                      try {
+                        await fetch('/api/auth/admin/logout', { method: 'POST' });
+                      } catch {
+                        // ignore network failure
+                      }
+                      window.location.href = `/${locale}/admin/login`;
                     }}
-                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-foreground hover:bg-muted transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
                     <span>{locale === 'am' ? 'ውጣ' : 'Sign Out'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const confirmed = window.confirm(
+                        locale === 'am'
+                          ? 'ከሁሉም የተገናኙ መሳሪያዎች መውጣት ይፈልጋሉ?'
+                          : 'Are you sure you want to sign out from all devices?',
+                      );
+                      if (!confirmed) return;
+                      setShowUserMenu(false);
+                      try {
+                        const token = getAccessToken();
+                        await fetch('/api/auth/admin/logout-all', {
+                          method: 'POST',
+                          headers: token ? { Authorization: `Bearer ${token}` } : {},
+                        });
+                      } catch {
+                        // ignore network failure
+                      }
+                      window.location.href = `/${locale}/admin/login`;
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    <Smartphone className="h-4 w-4" />
+                    <span>{locale === 'am' ? 'ከሁሉም መሳሪያዎች ውጣ' : 'Sign Out Everywhere'}</span>
                   </button>
                 </div>
               </div>

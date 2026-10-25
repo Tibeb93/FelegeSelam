@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Phase 13: Public Website and Member Portal Suite', () => {
-  // Helper to log in as admin/member before portal tests
+  // Helper to log in as member before portal tests
   const loginUser = async (page: any) => {
     await page.goto('/am/login');
-    await page.locator('input[name="identifier"]').fill('admin@aemade.org');
-    await page.locator('input[name="password"]').fill('Admin@123456!');
+    await page.locator('input[name="identifier"]').fill('member@aemade.org');
+    await page.locator('input[name="password"]').fill('Member@123456!');
     await page.getByRole('button', { name: /ግባ|Sign In/i }).click();
-    await expect(page).toHaveURL(/\/(am|en)\/(admin|portal)/, { timeout: 20000 });
+    await expect(page).toHaveURL(/\/am\/portal/, { timeout: 20000 });
   };
 
   test('1. Public Home Page: SEO, Sinksar, urgent banner, and navigation', async ({ page }) => {

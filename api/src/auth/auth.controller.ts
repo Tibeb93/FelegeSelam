@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, HttpCode, HttpStatus, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
@@ -28,16 +28,49 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  private extractClientIp(req: any): string {
+    const forwarded = req?.headers ? req.headers['x-forwarded-for'] : undefined;
+    if (forwarded) {
+      return Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0].trim();
+    }
+    return req?.ip || req?.connection?.remoteAddress || req?.socket?.remoteAddress || '';
+  }
+
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // Strict rate limit on login (10 per min)
-  @ApiOperation({ summary: 'User Login' })
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // Strict rate limit on member login (10 per min)
+  @ApiOperation({ summary: 'Member Portal Login (Restricted to Member Accounts)' })
   @ApiResponse({ status: 200, description: 'Login successful, returns tokens and profile' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @ApiResponse({ status: 403, description: 'Account locked or suspended' })
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(@Body() dto: LoginDto, @Req() req: any) {
+    const ip = this.extractClientIp(req);
+    return this.authService.login(dto, ip);
+  }
+
+  @Public()
+  @Post('admin/login')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // Strict rate limit on admin login (5 per min)
+  @ApiOperation({ summary: 'Admin / Staff Login (Restricted to Staff Roles)' })
+  @ApiResponse({ status: 200, description: 'Admin login successful, returns tokens and redirect target' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 403, description: 'Account locked or suspended or IP blocked' })
+  async adminLogin(@Body() dto: LoginDto, @Req() req: any) {
+    const ip = this.extractClientIp(req);
+    return this.authService.adminLogin(dto, ip);
+  }
+
+  @Post('admin/logout-all')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @Roles('super_admin', 'admin', 'teacher', 'content_manager')
+  @ApiOperation({ summary: 'Revoke all refresh tokens for this staff user across all devices' })
+  @ApiResponse({ status: 200, description: 'Logged out of all sessions successfully' })
+  async logoutAll(@CurrentUser('id') userId: string, @Req() req: any) {
+    const ip = this.extractClientIp(req);
+    return this.authService.logoutAll(userId, ip);
   }
 
   @Public()

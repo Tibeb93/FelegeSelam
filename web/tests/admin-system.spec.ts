@@ -3,10 +3,10 @@ import { test, expect } from '@playwright/test';
 test.describe('Phase 12: Admin Dashboard, Contributions and System Pages Suite', () => {
   // Helper to log in as super_admin
   const loginSuperAdmin = async (page: any) => {
-    await page.goto('/am/login');
+    await page.goto('/am/admin/login');
     await page.locator('input[name="identifier"]').fill('admin@aemade.org');
     await page.locator('input[name="password"]').fill('Admin@123456!');
-    await page.getByRole('button', { name: 'ግባ' }).click();
+    await page.locator('button[type="submit"]').click();
     await expect(page).toHaveURL(/\/am\/admin/, { timeout: 15000 });
   };
 

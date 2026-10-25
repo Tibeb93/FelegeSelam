@@ -51,12 +51,12 @@ test.describe('Phase 8: Web Foundation & Admin Suite', () => {
   });
 
   test('4. End-to-end Login with demo credentials and redirect to /admin', async ({ page }) => {
-    await page.goto('/am/login');
+    await page.goto('/am/admin/login');
 
     // Enter superadmin credentials
     await page.locator('input[name="identifier"]').fill('admin@aemade.org');
     await page.locator('input[name="password"]').fill('Admin@123456!');
-    await page.getByRole('button', { name: 'ግባ' }).click();
+    await page.locator('button[type="submit"]').click();
 
     // Wait for redirect to admin dashboard
     await expect(page).toHaveURL(/\/am\/admin/, { timeout: 15000 });
@@ -73,10 +73,10 @@ test.describe('Phase 8: Web Foundation & Admin Suite', () => {
     page,
   }) => {
     // Login first
-    await page.goto('/am/login');
+    await page.goto('/am/admin/login');
     await page.locator('input[name="identifier"]').fill('admin@aemade.org');
     await page.locator('input[name="password"]').fill('Admin@123456!');
-    await page.getByRole('button', { name: 'ግባ' }).click();
+    await page.locator('button[type="submit"]').click();
     await expect(page).toHaveURL(/\/am\/admin/, { timeout: 15000 });
 
     // Navigate to members table

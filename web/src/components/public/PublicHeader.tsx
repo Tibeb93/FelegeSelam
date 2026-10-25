@@ -18,6 +18,7 @@ import {
   Sun,
   Moon,
   ShieldCheck,
+  Lock,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import { useTheme } from '../../providers/ThemeProvider';
@@ -144,16 +145,19 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
             <div className="flex items-center gap-2">
               <Link
                 href={`/${locale}/login`}
-                className="flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/5 px-3.5 py-2 text-sm font-semibold text-white hover:bg-white/15 transition-colors min-h-[44px]"
+                className="flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/5 px-3 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-white/15 transition-colors min-h-[40px]"
               >
                 <LogIn className="h-4 w-4 text-white/90" aria-hidden="true" />
                 <span>{t('navLogin')}</span>
               </Link>
+
+              {/* Small Gold Button for Admin Login (Staff Entrance) */}
               <Link
-                href={`/${locale}/register`}
-                className="flex items-center gap-1.5 rounded-xl bg-[#F2B233] px-3.5 py-2 text-sm font-bold text-[#0F2438] shadow-sm hover:bg-[#e0a42b] transition-colors min-h-[44px]"
+                href={`/${locale}/admin/login`}
+                className="flex items-center gap-1.5 rounded-xl bg-[#F2B233] px-3.5 py-2 text-xs sm:text-sm font-bold text-[#0F2438] shadow-sm hover:bg-[#e0a42b] active:scale-[0.98] transition-all min-h-[40px]"
               >
-                <span>{t('navRegister')}</span>
+                <Lock className="h-3.5 w-3.5 text-[#0F2438]" aria-hidden="true" />
+                <span>{locale === 'am' ? 'የአስተዳደር መግቢያ' : 'Admin Login'}</span>
               </Link>
             </div>
           )}
@@ -232,11 +236,12 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
                     <span>{t('navLogin')}</span>
                   </Link>
                   <Link
-                    href={`/${locale}/register`}
+                    href={`/${locale}/admin/login`}
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center justify-center gap-2 rounded-xl bg-[#F2B233] px-4 py-3 text-base font-bold text-[#0F2438] min-h-[48px]"
                   >
-                    <span>{t('navRegister')}</span>
+                    <Lock className="h-5 w-5 text-[#0F2438]" />
+                    <span>{locale === 'am' ? 'የአስተዳደር መግቢያ' : 'Admin Login'}</span>
                   </Link>
                 </>
               )}

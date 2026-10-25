@@ -280,6 +280,21 @@ async function main() {
     },
   });
 
+  // Seed default Member user for member portal testing & access
+  const memberRoleId = roleMap.get('member')!;
+  const memberHash = await argon2.hash('Member@123456!');
+  const memberUser = await prisma.user.upsert({
+    where: { email: 'member@aemade.org' },
+    update: { passwordHash: memberHash, roleId: memberRoleId, status: UserStatus.active },
+    create: {
+      email: 'member@aemade.org',
+      phone: '+251911334455',
+      passwordHash: memberHash,
+      roleId: memberRoleId,
+      status: UserStatus.active,
+    },
+  });
+
   // A. 30 MEMBERS (MEM-0003 to MEM-0032)
   console.log('Seeding 30 demo members...');
   const amharicFirstNames = [

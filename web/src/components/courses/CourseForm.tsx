@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useLocale, useTranslations } from 'next-intl';
@@ -10,30 +10,17 @@ import { Course, Member, PaginatedResponse } from '@/types/api';
 import { apiClient } from '@/lib/api-client';
 import { logger } from '@/lib/logger';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { EthiopianDatePicker } from '@/components/ui/EthiopianDatePicker';
+import {
+  FormCard,
+  FormSection,
+  TextField,
+  TextArea,
+  SelectWithSearch,
+  DateField,
+  SecondaryButton,
+  SubmitBar,
+} from '@/components/forms';
 import { BookOpen, Users, ArrowLeft, Save } from 'lucide-react';
-
-function FormField({
-  label,
-  error,
-  required,
-  children,
-}: {
-  label: string;
-  error?: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <label className="block text-xs font-medium text-foreground">
-        {label} {required && <span className="text-destructive">*</span>}
-      </label>
-      {children}
-      {error && <p className="text-xs text-destructive">{error}</p>}
-    </div>
-  );
-}
 
 const courseSchema = z.object({
   titleAm: z.string().min(2, 'የትምህርቱ ርዕስ በአማርኛ መሞላት አለበት'),
@@ -72,19 +59,14 @@ export function CourseForm({ initialData, courseId, isTeacher = false }: CourseF
   const t = useTranslations('Courses');
   const tCommon = useTranslations('Common');
   const router = useRouter();
+  const isAm = locale === 'am';
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [teachers, setTeachers] = useState<Member[]>([]);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isDirty },
-  } = useForm<CourseFormData>({
+  const methods = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
       titleAm: initialData?.titleAm || '',
@@ -100,8 +82,10 @@ export function CourseForm({ initialData, courseId, isTeacher = false }: CourseF
     },
   });
 
-  const startDateVal = watch('startDate');
-  const endDateVal = watch('endDate');
+  const {
+    handleSubmit,
+    formState: { isDirty },
+  } = methods;
 
   // Load teachers list
   useEffect(() => {
@@ -155,177 +139,142 @@ export function CourseForm({ initialData, courseId, isTeacher = false }: CourseF
     }
   };
 
+  const statusOptions = [
+    { label: t('statusDraft'), value: 'draft' },
+    { label: t('statusOpen'), value: 'open' },
+    { label: t('statusClosed'), value: 'closed' },
+    { label: t('statusArchived'), value: 'archived' },
+  ];
+
+  const levelOptions = ACADEMIC_LEVELS.map((lvl) => ({
+    label: lvl,
+    value: lvl,
+  }));
+
+  const teacherOptions = [
+    { label: `-- ${t('selectTeacher')} --`, value: '' },
+    ...teachers.map((tch) => ({
+      label: `${tch.firstName} ${tch.fatherName} (${tch.memberNo})`,
+      value: tch.id,
+    })),
+  ];
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <button
+        <SecondaryButton
           type="button"
           onClick={handleBack}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          startIcon={<ArrowLeft className="h-4 w-4" />}
+          className="h-10 px-4 text-xs"
         >
-          <ArrowLeft className="h-4 w-4" />
-          <span>{tCommon('back')}</span>
-        </button>
-        <h1 className="text-xl font-bold tracking-tight">
+          {tCommon('back')}
+        </SecondaryButton>
+        <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
           {courseId ? t('editTitle') : t('createTitle')}
         </h1>
       </div>
 
       {errorMessage && (
-        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive font-medium">
+        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive font-medium animate-fadeIn">
           {errorMessage}
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Basic Info Section */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-border">
-            <BookOpen className="h-5 w-5 text-primary" />
-            <h2 className="text-base font-semibold">{t('title')}</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField label={t('titleAm')} error={errors.titleAm?.message} required>
-              <input
-                {...register('titleAm')}
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Basic Course Info */}
+          <FormCard>
+            <FormSection
+              title={t('title')}
+              icon={BookOpen}
+              description={isAm ? 'የትምህርቱ ርዕስ፣ ደረጃ እና የአገልግሎት ሁኔታ።' : 'Course title, level and enrollment status.'}
+            >
+              <TextField
+                name="titleAm"
+                label={t('titleAm')}
                 placeholder="ለምሳሌ፡ የነገረ መለኮት መግቢያ"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                required
               />
-            </FormField>
-
-            <FormField label={t('titleEn')} error={errors.titleEn?.message}>
-              <input
-                {...register('titleEn')}
+              <TextField
+                name="titleEn"
+                label={t('titleEn')}
                 placeholder="e.g. Introduction to Theology"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
-            </FormField>
-          </div>
+              <div className="md:col-span-2">
+                <TextArea
+                  name="description"
+                  label={t('description')}
+                  placeholder="የትምህርቱ ዝርዝር ዓላማና ይዘት..."
+                  rows={3}
+                />
+              </div>
+              <SelectWithSearch
+                name="level"
+                label={t('level')}
+                options={levelOptions}
+              />
+              <SelectWithSearch
+                name="status"
+                label={t('status')}
+                options={statusOptions}
+                required
+              />
+            </FormSection>
+          </FormCard>
 
-          <FormField label={t('description')} error={errors.description?.message}>
-            <textarea
-              {...register('description')}
-              rows={3}
-              placeholder="የትምህርቱ ዝርዝር ዓላማና ይዘት..."
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </FormField>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField label={t('level')} error={errors.level?.message}>
-              <select
-                {...register('level')}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {ACADEMIC_LEVELS.map((lvl) => (
-                  <option key={lvl} value={lvl}>
-                    {lvl}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-
-            <FormField label={t('status')} error={errors.status?.message} required>
-              <select
-                {...register('status')}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="draft">{t('statusDraft')}</option>
-                <option value="open">{t('statusOpen')}</option>
-                <option value="closed">{t('statusClosed')}</option>
-                <option value="archived">{t('statusArchived')}</option>
-              </select>
-            </FormField>
-          </div>
-        </div>
-
-        {/* Schedule & Teacher Assignment */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-border">
-            <Users className="h-5 w-5 text-secondary" />
-            <h2 className="text-base font-semibold">{t('assignTeacher')}</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {!isTeacher && (
-              <FormField label={t('teacher')} error={errors.teacherId?.message}>
-                <select
-                  {...register('teacherId')}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">-- {t('selectTeacher')} --</option>
-                  {teachers.map((tch) => (
-                    <option key={tch.id} value={tch.id}>
-                      {tch.firstName} {tch.fatherName} ({tch.memberNo})
-                    </option>
-                  ))}
-                </select>
-              </FormField>
-            )}
-
-            <FormField label={t('capacity')} error={errors.capacity?.message}>
-              <input
+          {/* Schedule & Teacher Assignment */}
+          <FormCard>
+            <FormSection
+              title={t('assignTeacher')}
+              icon={Users}
+              description={isAm ? 'የመምህር ምደባ፣ የተማሪዎች አቅም እና የትምህርት ክፍለ ጊዜ።' : 'Assign teacher, student capacity, and course schedule.'}
+            >
+              {!isTeacher && (
+                <div className="md:col-span-2">
+                  <SelectWithSearch
+                    name="teacherId"
+                    label={t('teacher')}
+                    options={teacherOptions}
+                    placeholder={`-- ${t('selectTeacher')} --`}
+                  />
+                </div>
+              )}
+              <TextField
+                name="capacity"
                 type="number"
-                {...register('capacity')}
+                label={t('capacity')}
                 placeholder="40"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
-            </FormField>
-
-            <FormField label={t('schedule')} error={errors.schedule?.message}>
-              <input
-                {...register('schedule')}
+              <TextField
+                name="schedule"
+                label={t('schedule')}
                 placeholder="ለምሳሌ፡ ቅዳሜ ከሰዓት 8:00 - 10:00"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
-            </FormField>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">
-                {t('startDate')}
-              </label>
-              <EthiopianDatePicker
-                value={startDateVal || ''}
-                onChange={(val) => setValue('startDate', val, { shouldDirty: true })}
+              <DateField
+                name="startDate"
+                label={t('startDate')}
                 locale={locale as 'am' | 'en'}
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">
-                {t('endDate')}
-              </label>
-              <EthiopianDatePicker
-                value={endDateVal || ''}
-                onChange={(val) => setValue('endDate', val, { shouldDirty: true })}
+              <DateField
+                name="endDate"
+                label={t('endDate')}
                 locale={locale as 'am' | 'en'}
               />
-            </div>
-          </div>
-        </div>
+            </FormSection>
+          </FormCard>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
-          >
-            {tCommon('cancel')}
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all disabled:opacity-50"
-          >
-            <Save className="h-4 w-4" />
-            <span>{loading ? t('savingCourse') : t('saveCourse')}</span>
-          </button>
-        </div>
-      </form>
+          {/* Action Bar */}
+          <SubmitBar
+            primaryLabel={loading ? t('savingCourse') : t('saveCourse')}
+            primaryLoading={loading}
+            primaryIcon={<Save className="h-4 w-4" />}
+            secondaryLabel={tCommon('cancel')}
+            secondaryAction={handleBack}
+          />
+        </form>
+      </FormProvider>
 
       {/* Unsaved changes confirmation */}
       <ConfirmDialog

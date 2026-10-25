@@ -6,7 +6,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1
 export async function POST() {
   try {
     const cookieStore = cookies();
-    const refreshToken = cookieStore.get('fs_refresh_token')?.value;
+    const adminRefreshToken = cookieStore.get('fs_admin_refresh_token')?.value;
+    const memberRefreshToken = cookieStore.get('fs_refresh_token')?.value;
+
+    const isAdmin = Boolean(adminRefreshToken);
+    const refreshToken = adminRefreshToken || memberRefreshToken;
 
     if (!refreshToken) {
       return NextResponse.json(
@@ -31,8 +35,13 @@ export async function POST() {
 
     if (!response.ok) {
       const errRes = NextResponse.json(data, { status: response.status });
-      errRes.cookies.delete('fs_refresh_token');
-      errRes.cookies.delete('fs_session');
+      if (isAdmin) {
+        errRes.cookies.delete('fs_admin_refresh_token');
+        errRes.cookies.delete('fs_admin_session');
+      } else {
+        errRes.cookies.delete('fs_refresh_token');
+        errRes.cookies.delete('fs_session');
+      }
       return errRes;
     }
 
@@ -55,7 +64,9 @@ export async function POST() {
     }
 
     // Read existing session cookie if present
-    const existingSessionCookie = cookieStore.get('fs_session')?.value;
+    const existingSessionCookie = isAdmin
+      ? cookieStore.get('fs_admin_session')?.value
+      : cookieStore.get('fs_session')?.value;
     let existingSession: any = null;
     if (existingSessionCookie) {
       try {
@@ -69,7 +80,7 @@ export async function POST() {
       (typeof user?.role === 'string' ? user.role : user?.role?.name) ||
       decodedToken?.role ||
       existingSession?.role ||
-      'member';
+      (isAdmin ? 'admin' : 'member');
 
     const finalUserId =
       user?.id || decodedToken?.sub || existingSession?.userId || '';
@@ -104,8 +115,11 @@ export async function POST() {
       },
     });
 
+    const refreshCookieName = isAdmin ? 'fs_admin_refresh_token' : 'fs_refresh_token';
+    const sessionCookieName = isAdmin ? 'fs_admin_session' : 'fs_session';
+
     if (newRefreshToken) {
-      res.cookies.set('fs_refresh_token', newRefreshToken, {
+      res.cookies.set(refreshCookieName, newRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -114,7 +128,7 @@ export async function POST() {
       });
     }
 
-    res.cookies.set('fs_session', JSON.stringify(sessionData), {
+    res.cookies.set(sessionCookieName, JSON.stringify(sessionData), {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

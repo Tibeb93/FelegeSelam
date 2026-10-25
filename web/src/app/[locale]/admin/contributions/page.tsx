@@ -561,7 +561,7 @@ export default function ContributionsPage({
 
               {/* Amount */}
               <div>
-                <label className="block text-xs font-semibold text-foreground mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1.5 select-none">
                   {locale === 'am' ? 'የገንዘብ መጠን (በብር) *' : 'Amount (ETB) *'}
                 </label>
                 <input
@@ -571,21 +571,21 @@ export default function ContributionsPage({
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value ? Number(e.target.value) : '')}
                   placeholder="500"
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs md:text-sm text-foreground focus:border-primary focus:outline-none"
+                  className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all shadow-sm"
                   required
                 />
               </div>
 
               {/* Type and Payment Method */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1">
+                  <label className="block text-sm font-semibold text-foreground mb-1.5 select-none">
                     {locale === 'am' ? 'የክፍያው ዓይነት *' : 'Contribution Type *'}
                   </label>
                   <select
                     value={paymentType}
                     onChange={(e) => setPaymentType(e.target.value as ContributionType)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs md:text-sm text-foreground focus:border-primary focus:outline-none"
+                    className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all shadow-sm"
                   >
                     {CONTRIBUTION_TYPES.map((t) => (
                       <option key={t.value} value={t.value}>
@@ -596,13 +596,13 @@ export default function ContributionsPage({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1">
+                  <label className="block text-sm font-semibold text-foreground mb-1.5 select-none">
                     {locale === 'am' ? 'የክፍያ መንገድ *' : 'Payment Method *'}
                   </label>
                   <select
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs md:text-sm text-foreground focus:border-primary focus:outline-none"
+                    className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all shadow-sm"
                   >
                     {PAYMENT_METHODS.map((m) => (
                       <option key={m.value} value={m.value}>
@@ -614,9 +614,9 @@ export default function ContributionsPage({
               </div>
 
               {/* Reference Number & Date */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1">
+                  <label className="block text-sm font-semibold text-foreground mb-1.5 select-none">
                     {locale === 'am' ? 'የባንክ ማመሳከሪያ ቁጥር (ካለ)' : 'Reference / TXN No'}
                   </label>
                   <input
@@ -624,19 +624,19 @@ export default function ContributionsPage({
                     value={referenceNo}
                     onChange={(e) => setReferenceNo(e.target.value)}
                     placeholder="e.g. FT23485892"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs md:text-sm text-foreground focus:border-primary focus:outline-none"
+                    className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all shadow-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1">
+                  <label className="block text-sm font-semibold text-foreground mb-1.5 select-none">
                     {locale === 'am' ? 'የተከፈለበት ቀን *' : 'Payment Date *'}
                   </label>
                   <input
                     type="date"
                     value={paidAt}
                     onChange={(e) => setPaidAt(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs md:text-sm text-foreground focus:border-primary focus:outline-none"
+                    className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all shadow-sm"
                     required
                   />
                 </div>
@@ -644,7 +644,7 @@ export default function ContributionsPage({
 
               {/* Note */}
               <div>
-                <label className="block text-xs font-semibold text-foreground mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1.5 select-none">
                   {locale === 'am' ? 'ማስታወሻ / ዝርዝር' : 'Note / Remarks'}
                 </label>
                 <textarea
@@ -656,22 +656,22 @@ export default function ContributionsPage({
                       ? 'ስለ ክፍያው ተጨማሪ ማስታወሻ...'
                       : 'Additional details or remarks...'
                   }
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs md:text-sm text-foreground focus:border-primary focus:outline-none"
+                  className="w-full rounded-xl border border-input bg-background p-4 text-sm text-foreground focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all shadow-sm resize-y"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsRecordModalOpen(false)}
-                  className="rounded-xl border border-border px-4 py-2 text-xs md:text-sm font-semibold text-foreground hover:bg-muted"
+                  className="h-11 rounded-xl border border-border px-5 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
                 >
                   {locale === 'am' ? 'ተመለስ' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   disabled={recordPaymentMutation.isPending}
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2 text-xs md:text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 disabled:opacity-50"
+                  className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   <span>

@@ -7,8 +7,8 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '../../../../providers/ToastProvider';
-import { InputField } from '../../../../components/ui/FormField';
-import { Loader2, MailCheck, ArrowLeft } from 'lucide-react';
+import { TextField, PrimaryButton } from '../../../../components/forms';
+import { MailCheck, ArrowLeft, Send } from 'lucide-react';
 
 export default function ForgotPasswordPage({
   params: { locale },
@@ -58,14 +58,14 @@ export default function ForgotPasswordPage({
 
   if (isSubmitted) {
     return (
-      <div className="space-y-5 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <div className="space-y-6 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300 shadow-sm">
           <MailCheck className="h-8 w-8" />
         </div>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
+        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
           {locale === 'am' ? 'ኮድ ተልኳል' : 'Reset Code Sent'}
         </h2>
-        <p className="text-xs text-muted-foreground leading-relaxed">
+        <p className="text-xs md:text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
           {locale === 'am'
             ? `የይለፍ ቃል መቀየሪያ ባለ 6-አሃዝ ኮድ ወደ ${submittedEmail} ተልኳል።`
             : `A 6-digit reset code has been sent to ${submittedEmail}.`}
@@ -73,15 +73,17 @@ export default function ForgotPasswordPage({
 
         <Link
           href={`/${locale}/reset-password?email=${encodeURIComponent(submittedEmail)}`}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
+          className="block"
         >
-          {locale === 'am' ? 'የይለፍ ቃል ቀይር' : 'Proceed to Reset Password'}
+          <PrimaryButton type="button" className="w-full">
+            {locale === 'am' ? 'የይለፍ ቃል ቀይር' : 'Proceed to Reset Password'}
+          </PrimaryButton>
         </Link>
 
         <div className="pt-2">
           <Link
             href={`/${locale}/login`}
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>{t('loginLink')}</span>
@@ -93,18 +95,18 @@ export default function ForgotPasswordPage({
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
+      <div className="text-center space-y-1.5">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">
           {t('forgotPasswordTitle')}
         </h2>
-        <p className="mt-1.5 text-xs text-muted-foreground">
+        <p className="text-xs md:text-sm text-muted-foreground">
           {t('forgotPasswordDesc')}
         </p>
       </div>
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-          <InputField
+          <TextField
             name="email"
             type="email"
             label={t('email')}
@@ -112,27 +114,23 @@ export default function ForgotPasswordPage({
             required
           />
 
-          <button
+          <PrimaryButton
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+            loading={isSubmitting}
+            loadingText={t('sending')}
+            startIcon={<Send className="h-4 w-4" />}
+            className="w-full"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>{t('sending')}</span>
-              </>
-            ) : (
-              <span>{t('sendResetLink')}</span>
-            )}
-          </button>
+            {t('sendResetCode')}
+          </PrimaryButton>
         </form>
       </FormProvider>
 
       <div className="text-center pt-2">
         <Link
           href={`/${locale}/login`}
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>{t('loginLink')}</span>

@@ -59,7 +59,7 @@ describe('Courses, Attendance, Grades & Certificates (e2e)', () => {
     prisma = app.get<PrismaService>(PrismaService);
 
     // 1. Login as Super Admin
-    const adminLogin = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+    const adminLogin = await request(app.getHttpServer()).post('/api/v1/auth/admin/login').send({
       identifier: 'admin@aemade.org',
       password: 'Admin@123456!',
     });
@@ -102,7 +102,7 @@ describe('Courses, Attendance, Grades & Certificates (e2e)', () => {
     teacherBUserId = teacherB.id;
 
     const loginA = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
+      .post('/api/v1/auth/admin/login')
       .send({
         identifier: `teacher_a_${ts}@aemade.org`,
         password: 'TeacherPass123!',
@@ -110,7 +110,7 @@ describe('Courses, Attendance, Grades & Certificates (e2e)', () => {
     teacherAToken = loginA.body.accessToken;
 
     const loginB = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
+      .post('/api/v1/auth/admin/login')
       .send({
         identifier: `teacher_b_${ts}@aemade.org`,
         password: 'TeacherPass123!',
