@@ -88,6 +88,8 @@ export class MailService {
        </div>`,
     );
 
-    this.logger.log(`[EMAIL DISPATCH] Welcome email dispatched for: ${fullName} (${email}, ${html.length} bytes)`);
+    this.logger.log(
+      `[EMAIL DISPATCH] Welcome email dispatched for: ${fullName} (${email}, ${html.length} bytes)`,
+    );
   }
 }

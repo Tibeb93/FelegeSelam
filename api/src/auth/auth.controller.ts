@@ -20,7 +20,7 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 per min
+  @Throttle({ default: { limit: process.env.NODE_ENV === 'production' ? 5 : 60, ttl: 60000 } })
   @ApiOperation({ summary: 'Member Self-Registration' })
   @ApiResponse({ status: 201, description: 'User registration created (status pending)' })
   @ApiResponse({ status: 409, description: 'Email or phone already registered' })
@@ -39,7 +39,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // Strict rate limit on member login (10 per min)
+  @Throttle({ default: { limit: process.env.NODE_ENV === 'production' ? 10 : 60, ttl: 60000 } })
   @ApiOperation({ summary: 'Member Portal Login (Restricted to Member Accounts)' })
   @ApiResponse({ status: 200, description: 'Login successful, returns tokens and profile' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
@@ -52,9 +52,12 @@ export class AuthController {
   @Public()
   @Post('admin/login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // Strict rate limit on admin login (5 per min)
+  @Throttle({ default: { limit: process.env.NODE_ENV === 'production' ? 5 : 60, ttl: 60000 } })
   @ApiOperation({ summary: 'Admin / Staff Login (Restricted to Staff Roles)' })
-  @ApiResponse({ status: 200, description: 'Admin login successful, returns tokens and redirect target' })
+  @ApiResponse({
+    status: 200,
+    description: 'Admin login successful, returns tokens and redirect target',
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @ApiResponse({ status: 403, description: 'Account locked or suspended or IP blocked' })
   async adminLogin(@Body() dto: LoginDto, @Req() req: any) {

@@ -118,7 +118,7 @@ export class AuthService {
   // -------------------------------------------------------------
   // 2. LOGIN (Member portal login - restricted to member accounts)
   // -------------------------------------------------------------
-  async login(dto: LoginDto, ip?: string) {
+  async login(dto: LoginDto, _ip?: string) {
     const user = await this.prisma.user.findFirst({
       where: {
         OR: [{ email: dto.identifier }, { phone: dto.identifier }],
@@ -255,7 +255,8 @@ export class AuthService {
           return (
             normAllowed === normalizedIp ||
             normAllowed === ip ||
-            (normAllowed === '127.0.0.1' && (normalizedIp === 'localhost' || normalizedIp === '::1'))
+            (normAllowed === '127.0.0.1' &&
+              (normalizedIp === 'localhost' || normalizedIp === '::1'))
           );
         });
 
@@ -269,7 +270,9 @@ export class AuthService {
               newValue: { identifier: dto.identifier, ip, reason: 'IP address not in allow-list' },
             },
           });
-          throw new ForbiddenException('Access denied from this IP address / ከዚህ አይ ፒ አድራሻ መግባት አይፈቀድም');
+          throw new ForbiddenException(
+            'Access denied from this IP address / ከዚህ አይ ፒ አድራሻ መግባት አይፈቀድም',
+          );
         }
       }
     }

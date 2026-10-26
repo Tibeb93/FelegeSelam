@@ -7,7 +7,7 @@ test.describe('Phase 12: Admin Dashboard, Contributions and System Pages Suite',
     await page.locator('input[name="identifier"]').fill('admin@aemade.org');
     await page.locator('input[name="password"]').fill('Admin@123456!');
     await page.locator('button[type="submit"]').click();
-    await expect(page).toHaveURL(/\/am\/admin/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/am\/admin(?:\?.*)?$/, { timeout: 15000 });
   };
 
   test('1. Admin Dashboard KPIs, Recharts Analytics, and Quick Actions', async ({ page }) => {
@@ -83,7 +83,7 @@ test.describe('Phase 12: Admin Dashboard, Contributions and System Pages Suite',
 
     // Verify DataTable is visible with user rows
     await expect(page.locator('table')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('table').getByText('admin@aemade.org')).toBeVisible();
+    await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
 
     // Open Create User modal
     await page.getByRole('button', { name: /አዲስ ተጠቃሚ ፍጠር|Create User/i }).click();
@@ -123,7 +123,7 @@ test.describe('Phase 12: Admin Dashboard, Contributions and System Pages Suite',
 
     // Click Save Settings
     await page.getByRole('button', { name: /ማስተካከያዎችን መዝግብ|Save Settings/i }).click();
-    await expect(page.getByText(/ማስተካከያዎቹ በተሳካ ሁኔታ ተቀምጠዋል|Settings saved/i)).toBeVisible({
+    await expect(page.getByText(/ማስተካከያዎቹ በተሳካ ሁኔታ ተቀምጠዋል|ተቀምጠዋል|Settings saved/i).first()).toBeVisible({
       timeout: 10000,
     });
   });

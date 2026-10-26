@@ -10,8 +10,8 @@ import { SchoolLogo } from '../../../../components/common/SchoolLogo';
 import { LanguageSwitcher } from '../../../../components/LanguageSwitcher';
 import { TextField } from '../../../../components/forms';
 import { ShieldAlert, LogIn, ArrowLeft, KeyRound, Lock, Info } from 'lucide-react';
-import { setAccessToken } from '../../../../lib/api-client';
 import { useToast } from '../../../../providers/ToastProvider';
+import { useAuth } from '../../../../providers/AuthProvider';
 
 function AdminLoginForm({ locale }: { locale: string }) {
   const router = useRouter();
@@ -19,6 +19,7 @@ function AdminLoginForm({ locale }: { locale: string }) {
   const redirectUrl = searchParams.get('redirect');
   const reason = searchParams.get('reason');
   const toast = useToast();
+  const { adminLogin } = useAuth();
 
   const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,17 +66,11 @@ function AdminLoginForm({ locale }: { locale: string }) {
         payload.twoFactorToken = twoFactorToken.trim();
       }
 
-      const res = await fetch('/api/auth/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const result = await adminLogin(payload);
 
-      const data = await res.json();
-
-      if (!res.ok) {
+      if (!result.success) {
         const msg =
-          data.message ||
+          result.message ||
           (locale === 'am'
             ? 'የተሳሳተ የተጠቃሚ ስም ወይም የይለፍ ቃል'
             : 'Invalid credentials or staff access restricted');
@@ -84,10 +79,7 @@ function AdminLoginForm({ locale }: { locale: string }) {
         return;
       }
 
-      const payloadData = data.data || data;
-
-      // Check if 2FA is required
-      if (payloadData?.requiresTwoFactor || payloadData?.requires2FA) {
+      if (result.requires2FA) {
         setRequires2FA(true);
         toast.info(
           locale === 'am'
@@ -98,19 +90,13 @@ function AdminLoginForm({ locale }: { locale: string }) {
         return;
       }
 
-      // Successful login
-      const { accessToken, redirectPath } = payloadData || {};
-      if (accessToken) {
-        setAccessToken(accessToken);
-      }
-
       toast.success(
         locale === 'am' ? 'ወደ አስተዳደር ክፍል እንኳን ደህና መጡ' : 'Welcome to the Admin Portal',
         locale === 'am' ? 'በተሳካ ሁኔታ ገብተዋል' : 'Signed In Successfully',
       );
 
       // Redirect by role target or query param
-      const target = redirectUrl || (redirectPath ? `/${locale}${redirectPath}` : `/${locale}/admin`);
+      const target = redirectUrl || (result.redirectPath ? `/${locale}${result.redirectPath}` : `/${locale}/admin`);
       router.push(target);
       router.refresh();
     } catch (err: any) {

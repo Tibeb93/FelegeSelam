@@ -7,7 +7,7 @@ test.describe('Phase 11: Admin Content and Form Builder Suite', () => {
     await page.locator('input[name="identifier"]').fill('admin@aemade.org');
     await page.locator('input[name="password"]').fill('Admin@123456!');
     await page.locator('button[type="submit"]').click();
-    await expect(page).toHaveURL(/\/am\/admin/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/am\/admin(?:\?.*)?$/, { timeout: 15000 });
   };
 
   test('1. Sinksar post & urgent notice creation, listing, and calendar view', async ({ page }) => {

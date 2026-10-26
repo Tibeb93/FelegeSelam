@@ -27,7 +27,7 @@ export default function UsersPage({
 }: {
   params: { locale: string };
 }) {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isLoading: isAuthLoading } = useAuth();
   const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
@@ -52,7 +52,9 @@ export default function UsersPage({
   const [resetPasswordVal, setResetPasswordVal] = useState('');
   const [resetError, setResetError] = useState('');
 
-  const isSuperAdmin = currentUser?.role?.name === 'super_admin';
+  const isSuperAdmin =
+    currentUser?.role?.name === 'super_admin' ||
+    (currentUser as any)?.role === 'super_admin';
 
   // Query users list
   const { data: usersData, isLoading: isUsersLoading } = useQuery<{
@@ -172,6 +174,15 @@ export default function UsersPage({
       roleId: createRoleId,
     });
   };
+
+  // Show loader while auth session resolves
+  if (isAuthLoading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   // If not super_admin, display restricted access banner
   if (!isSuperAdmin) {

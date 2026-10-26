@@ -26,13 +26,13 @@ export class MembersExportService {
   private readonly brandPrimary900 = '#0A2E52'; // Navy
   private readonly brandPrimary500 = '#1E78C8'; // Blue
   private readonly brandPrimary100 = '#E8F1FB'; // Soft Blue
-  private readonly brandText = '#0F2438';       // Dark Text
-  private readonly brandMuted = '#5B6B7C';      // Muted Text
-  private readonly brandBorder = '#D7E3F1';     // Border
-  private readonly brandGold = '#F2B233';       // Accent Gold
-  private readonly brandGreen = '#0F4C81';      // Backward compatibility alias
-  private readonly brandCream = '#E8F1FB';      // Backward compatibility alias
-  private readonly brandDark = '#0A2E52';       // Backward compatibility alias
+  private readonly brandText = '#0F2438'; // Dark Text
+  private readonly brandMuted = '#5B6B7C'; // Muted Text
+  private readonly brandBorder = '#D7E3F1'; // Border
+  private readonly brandGold = '#F2B233'; // Accent Gold
+  private readonly brandGreen = '#0F4C81'; // Backward compatibility alias
+  private readonly brandCream = '#E8F1FB'; // Backward compatibility alias
+  private readonly brandDark = '#0A2E52'; // Backward compatibility alias
 
   /**
    * Helper to launch Puppeteer browser safely with auto-detected Chrome/Edge executable

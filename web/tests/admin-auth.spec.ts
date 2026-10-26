@@ -36,7 +36,7 @@ test.describe('TASK R4: Admin-Only Entry Page & Staff/Member Separation', () => 
     await expect(page.locator('nav a[href*="/about"]')).toHaveCount(0);
 
     // Has back to home link
-    await expect(page.locator('a[href="/am"]')).toBeVisible();
+    await expect(page.locator('a[href="/am"]').first()).toBeVisible();
   });
 
   test('3. Unauthenticated access to /admin/* redirects to /admin/login', async ({ page, context }) => {
@@ -53,13 +53,13 @@ test.describe('TASK R4: Admin-Only Entry Page & Staff/Member Separation', () => 
   test('4. Member credentials cannot log into /admin/login (gets generic error)', async ({ page }) => {
     await page.goto('/am/admin/login');
 
-    // Enter non-staff or invalid credentials
-    await page.locator('input[name="identifier"]').fill('normal_member@aemade.org');
-    await page.locator('input[name="password"]').fill('MemberPassword123!');
+    // Enter member credentials
+    await page.locator('input[name="identifier"]').fill('member@aemade.org');
+    await page.locator('input[name="password"]').fill('Member@123456!');
     await page.locator('button[type="submit"]').click();
 
     // Expect generic error message (exact same as wrong password)
-    await expect(page.locator('text=የተሳሳተ የተጠቃሚ ስም ወይም የይለፍ ቃል|Invalid credentials')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/የተሳሳተ የተጠቃሚ ስም ወይም የይለፍ ቃል|Invalid credentials/i).first()).toBeVisible({ timeout: 10000 });
 
     // Ensure we are STILL on /admin/login, not in admin dashboard
     await expect(page).toHaveURL(/\/am\/admin\/login/);
@@ -74,10 +74,10 @@ test.describe('TASK R4: Admin-Only Entry Page & Staff/Member Separation', () => 
     await page.getByRole('button', { name: /ግባ|Sign In/i }).click();
 
     // Expect message rejecting staff from member portal
-    await expect(page.getByText(/ይህ መግቢያ ለአባላት ብቻ ነው|This portal is for members only/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/ይህ መግቢያ ለአባላት ብቻ ነው|This portal is for members only/i).first()).toBeVisible({ timeout: 10000 });
 
     // Has direct helpful link to admin login
-    const adminDoorLink = page.locator('a[href*="/admin/login"]');
+    const adminDoorLink = page.locator('a[href*="/admin/login"]').first();
     await expect(adminDoorLink).toBeVisible();
 
     // Ensure user was NOT logged in to /admin or /portal
@@ -108,10 +108,10 @@ test.describe('TASK R4: Admin-Only Entry Page & Staff/Member Separation', () => 
     const profileBtn = page.locator('button[aria-label="User profile menu"]');
     await profileBtn.click();
 
-    // Check for Sign Out button
-    await expect(page.getByRole('button', { name: /ውጣ|Sign Out$/i })).toBeVisible();
+    // Check for Sign Out button in top bar user menu
+    await expect(page.locator('header').getByRole('button', { name: 'ውጣ', exact: true })).toBeVisible();
 
-    // Check for Sign Out Everywhere button
-    await expect(page.getByRole('button', { name: /ከሁሉም መሳሪያዎች ውጣ|Sign Out Everywhere/i })).toBeVisible();
+    // Check for Sign Out Everywhere button in top bar user menu
+    await expect(page.locator('header').getByRole('button', { name: /ከሁሉም መሳሪያዎች ውጣ|Sign Out Everywhere/i })).toBeVisible();
   });
 });

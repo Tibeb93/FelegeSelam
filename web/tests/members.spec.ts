@@ -7,7 +7,7 @@ test.describe('Phase 9: Admin Members Screens', () => {
     await page.locator('input[name="identifier"]').fill('admin@aemade.org');
     await page.locator('input[name="password"]').fill('Admin@123456!');
     await page.locator('button[type="submit"]').click();
-    await expect(page).toHaveURL(/\/am\/admin/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/am\/admin(?:\?.*)?$/, { timeout: 15000 });
   };
 
   test('1. Members list page renders with filters, bulk selection and action buttons', async ({

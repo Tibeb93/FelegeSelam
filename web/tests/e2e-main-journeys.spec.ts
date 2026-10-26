@@ -8,7 +8,7 @@ test.describe('Phase 14: Main Journeys & Accessibility Suite', () => {
     await page.locator('input[name="identifier"]').fill('admin@aemade.org');
     await page.locator('input[name="password"]').fill('Admin@123456!');
     await page.locator('button[type="submit"]').click();
-    await expect(page).toHaveURL(/\/am\/admin/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/am\/admin(?:\?.*)?$/, { timeout: 15000 });
   };
 
   test('1. Member Self-Registration Flow', async ({ page }) => {

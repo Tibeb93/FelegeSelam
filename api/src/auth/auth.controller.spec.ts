@@ -10,7 +10,11 @@ describe('AuthController', () => {
   const mockAuthService = {
     register: jest.fn().mockResolvedValue({ id: 'u1', email: 'test@example.com' }),
     login: jest.fn().mockResolvedValue({ accessToken: 'acc', refreshToken: 'ref' }),
-    adminLogin: jest.fn().mockResolvedValue({ accessToken: 'adm-acc', refreshToken: 'adm-ref', redirectPath: '/admin' }),
+    adminLogin: jest.fn().mockResolvedValue({
+      accessToken: 'adm-acc',
+      refreshToken: 'adm-ref',
+      redirectPath: '/admin',
+    }),
     refreshToken: jest.fn().mockResolvedValue({ accessToken: 'new-acc', refreshToken: 'new-ref' }),
     logout: jest.fn().mockResolvedValue({ message: 'Logged out' }),
     logoutAll: jest.fn().mockResolvedValue({ message: 'Logged out of all sessions' }),
@@ -51,13 +55,19 @@ describe('AuthController', () => {
   });
 
   it('should login user', async () => {
-    const res = await controller.login({ email: 'test@example.com', password: 'pwd' } as any, { ip: '127.0.0.1' } as any);
+    const res = await controller.login(
+      { email: 'test@example.com', password: 'pwd' } as any,
+      { ip: '127.0.0.1' } as any,
+    );
     expect(res).toHaveProperty('accessToken', 'acc');
     expect(service.login).toHaveBeenCalled();
   });
 
   it('should login staff via adminLogin', async () => {
-    const res = await controller.adminLogin({ identifier: 'admin@aemade.org', password: 'pwd' } as any, { ip: '127.0.0.1' } as any);
+    const res = await controller.adminLogin(
+      { identifier: 'admin@aemade.org', password: 'pwd' } as any,
+      { ip: '127.0.0.1' } as any,
+    );
     expect(res).toHaveProperty('accessToken', 'adm-acc');
     expect(res).toHaveProperty('redirectPath', '/admin');
     expect(service.adminLogin).toHaveBeenCalled();
