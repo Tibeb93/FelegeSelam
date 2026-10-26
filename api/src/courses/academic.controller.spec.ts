@@ -1,19 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  AttendanceController,
-  GradesController,
-  CertificatesController,
-} from './academic.controller';
+import { GradesController, CertificatesController } from './academic.controller';
 import { CoursesService } from './courses.service';
 
 describe('AcademicControllers', () => {
-  let attendanceController: AttendanceController;
   let gradesController: GradesController;
   let certificatesController: CertificatesController;
   let service: CoursesService;
 
   const mockCoursesService = {
-    scanAttendanceQr: jest.fn().mockResolvedValue({ id: 'a1', status: 'present' }),
     addGrade: jest.fn().mockResolvedValue({ id: 'g1', score: 95 }),
     updateGrade: jest.fn().mockResolvedValue({ id: 'g1', score: 98 }),
     deleteGrade: jest.fn().mockResolvedValue({ message: 'Deleted' }),
@@ -28,7 +22,7 @@ describe('AcademicControllers', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AttendanceController, GradesController, CertificatesController],
+      controllers: [GradesController, CertificatesController],
       providers: [
         {
           provide: CoursesService,
@@ -37,25 +31,14 @@ describe('AcademicControllers', () => {
       ],
     }).compile();
 
-    attendanceController = module.get<AttendanceController>(AttendanceController);
     gradesController = module.get<GradesController>(GradesController);
     certificatesController = module.get<CertificatesController>(CertificatesController);
     service = module.get<CoursesService>(CoursesService);
   });
 
   it('should be defined', () => {
-    expect(attendanceController).toBeDefined();
     expect(gradesController).toBeDefined();
     expect(certificatesController).toBeDefined();
-  });
-
-  it('should scan attendance via QR', async () => {
-    const res = await attendanceController.scanAttendance(
-      { memberNo: 'AS-0001', courseId: 'c1' } as any,
-      { role: 'teacher' },
-    );
-    expect(res).toHaveProperty('status', 'present');
-    expect(service.scanAttendanceQr).toHaveBeenCalled();
   });
 
   it('should add grade', async () => {

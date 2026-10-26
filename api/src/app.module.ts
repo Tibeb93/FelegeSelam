@@ -12,6 +12,7 @@ import { MailModule } from './mail/mail.module';
 import { StorageModule } from './storage/storage.module';
 import { MembersModule } from './members/members.module';
 import { CoursesModule } from './courses/courses.module';
+import { AttendanceModule } from './attendance/attendance.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MezmursModule } from './mezmurs/mezmurs.module';
 import { PostsModule } from './posts/posts.module';
@@ -44,6 +45,7 @@ import { RequestLoggingMiddleware } from './common/middleware/logging.middleware
     StorageModule,
     MembersModule,
     CoursesModule,
+    AttendanceModule,
     NotificationsModule,
     MezmursModule,
     PostsModule,

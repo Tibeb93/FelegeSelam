@@ -11,6 +11,7 @@ import {
   CourseStatus,
   EnrollmentStatus,
   AttendanceStatus,
+  AttendanceSessionStatus,
   MemberStatus,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -686,7 +687,7 @@ export class CoursesService {
   // =========================================================================
 
   async recordSessionAttendance(courseId: string, dto: RecordSessionAttendanceDto, user: any) {
-    await this.findOneCourse(courseId, user);
+    const course = await this.findOneCourse(courseId, user);
     const sessionDate = this.normalizeSessionDate(dto.sessionDate);
 
     // Check for duplicate memberIds in the request payload
@@ -715,10 +716,26 @@ export class CoursesService {
       );
     }
 
+    let session = await this.prisma.attendanceSession.findFirst({
+      where: { courseId, sessionDate, status: AttendanceSessionStatus.open },
+    });
+    if (!session) {
+      session = await this.prisma.attendanceSession.create({
+        data: {
+          courseId,
+          sessionDate,
+          title: `${course.titleAm} - የመገኘት መዝገብ`,
+          status: AttendanceSessionStatus.open,
+          openedBy: user?.id || 'system',
+        },
+      });
+    }
+
     const created = await this.prisma.$transaction(
       dto.records.map((rec) =>
         this.prisma.attendance.create({
           data: {
+            sessionId: session.id,
             courseId,
             memberId: rec.memberId,
             sessionDate,
@@ -748,17 +765,31 @@ export class CoursesService {
   }
 
   async editSessionAttendance(courseId: string, dto: RecordSessionAttendanceDto, user: any) {
-    await this.findOneCourse(courseId, user);
+    const course = await this.findOneCourse(courseId, user);
     const sessionDate = this.normalizeSessionDate(dto.sessionDate);
+
+    let session = await this.prisma.attendanceSession.findFirst({
+      where: { courseId, sessionDate, status: AttendanceSessionStatus.open },
+    });
+    if (!session) {
+      session = await this.prisma.attendanceSession.create({
+        data: {
+          courseId,
+          sessionDate,
+          title: `${course.titleAm} - የመገኘት መዝገብ`,
+          status: AttendanceSessionStatus.open,
+          openedBy: user?.id || 'system',
+        },
+      });
+    }
 
     const updated = await this.prisma.$transaction(
       dto.records.map((rec) =>
         this.prisma.attendance.upsert({
           where: {
-            memberId_courseId_sessionDate: {
+            sessionId_memberId: {
+              sessionId: session.id,
               memberId: rec.memberId,
-              courseId,
-              sessionDate,
             },
           },
           update: {
@@ -766,6 +797,7 @@ export class CoursesService {
             markedBy: user?.id ?? null,
           },
           create: {
+            sessionId: session.id,
             courseId,
             memberId: rec.memberId,
             sessionDate,
@@ -821,12 +853,26 @@ export class CoursesService {
 
     const sessionDate = this.normalizeSessionDate(dto.sessionDate);
 
-    const existing = await this.prisma.attendance.findUnique({
-      where: {
-        memberId_courseId_sessionDate: {
-          memberId: member.id,
+    let session = await this.prisma.attendanceSession.findFirst({
+      where: { courseId: course.id, sessionDate, status: AttendanceSessionStatus.open },
+    });
+    if (!session) {
+      session = await this.prisma.attendanceSession.create({
+        data: {
           courseId: course.id,
           sessionDate,
+          title: `${course.titleAm} - የመገኘት መዝገብ`,
+          status: AttendanceSessionStatus.open,
+          openedBy: user?.id || 'system',
+        },
+      });
+    }
+
+    const existing = await this.prisma.attendance.findUnique({
+      where: {
+        sessionId_memberId: {
+          sessionId: session.id,
+          memberId: member.id,
         },
       },
     });
@@ -839,6 +885,7 @@ export class CoursesService {
 
     const attendance = await this.prisma.attendance.create({
       data: {
+        sessionId: session.id,
         memberId: member.id,
         courseId: course.id,
         sessionDate,

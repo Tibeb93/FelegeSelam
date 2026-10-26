@@ -59,6 +59,11 @@ enum AttendanceStatus {
   excused
 }
 
+enum AttendanceSessionStatus {
+  open
+  closed
+}
+
 enum PostType {
   sinksar
   bible_reading
@@ -237,10 +242,11 @@ model Course {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  lessons      Lesson[]
-  enrollments  Enrollment[]
-  attendances  Attendance[]
-  certificates Certificate[]
+  lessons            Lesson[]
+  enrollments        Enrollment[]
+  attendances        Attendance[]
+  attendanceSessions AttendanceSession[]
+  certificates       Certificate[]
 
   @@index([status])
   @@index([teacherId])
@@ -285,20 +291,44 @@ model Enrollment {
   @@map("enrollments")
 }
 
+model AttendanceSession {
+  id          String                  @id @default(uuid()) @db.Char(36)
+  sessionDate DateTime                @db.Date
+  title       String                  @db.VarChar(200)
+  courseId    String?                 @db.Char(36)
+  status      AttendanceSessionStatus @default(open)
+  openedBy    String                  @db.Char(36)
+  closedAt    DateTime?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+
+  course      Course?                 @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  attendances Attendance[]
+
+  @@index([sessionDate])
+  @@index([courseId])
+  @@index([status])
+  @@map("attendance_sessions")
+}
+
 model Attendance {
-  id          String           @id @default(uuid()) @db.Char(36)
-  memberId    String           @db.Char(36)
-  courseId    String           @db.Char(36)
-  sessionDate DateTime         @db.Date
-  status      AttendanceStatus @default(present)
-  markedBy    String?          @db.Char(36)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id          String             @id @default(uuid()) @db.Char(36)
+  sessionId   String?            @db.Char(36)
+  memberId    String             @db.Char(36)
+  courseId    String?            @db.Char(36)
+  sessionDate DateTime           @db.Date
+  status      AttendanceStatus   @default(present)
+  markedBy    String?            @db.Char(36)
+  notes       String?            @db.VarChar(255)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 
-  member      Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  session     AttendanceSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  member      Member             @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  course      Course?            @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-  @@unique([memberId, courseId, sessionDate])
+  @@unique([sessionId, memberId])
+  @@index([sessionId])
   @@index([memberId])
   @@index([courseId])
   @@index([sessionDate])

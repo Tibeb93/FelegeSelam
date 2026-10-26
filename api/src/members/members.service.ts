@@ -216,6 +216,72 @@ export class MembersService {
     });
   }
 
+  /**
+   * Lightweight search by name (Amharic or English) or member ID
+   * Limited to 20 results, optimized for attendance door check-in
+   */
+  async searchLightweight(query: string) {
+    if (!query || !query.trim()) {
+      return [];
+    }
+    const term = query.trim();
+    const parts = term.split(/\s+/).filter(Boolean);
+
+    const orConditions: Prisma.MemberWhereInput[] = [
+      { memberNo: { contains: term } },
+      { firstName: { contains: term } },
+      { fatherName: { contains: term } },
+      { grandfatherName: { contains: term } },
+      { baptismalName: { contains: term } },
+      { phone: { contains: term } },
+    ];
+
+    if (parts.length >= 2) {
+      orConditions.push({
+        AND: [{ firstName: { contains: parts[0] } }, { fatherName: { contains: parts[1] } }],
+      });
+    }
+
+    const members = await this.prisma.member.findMany({
+      where: {
+        deletedAt: null,
+        OR: orConditions,
+      },
+      take: 20,
+      orderBy: { memberNo: 'asc' },
+      select: {
+        id: true,
+        memberNo: true,
+        firstName: true,
+        fatherName: true,
+        grandfatherName: true,
+        baptismalName: true,
+        photoUrl: true,
+        status: true,
+        department: {
+          select: {
+            id: true,
+            nameAm: true,
+            nameEn: true,
+          },
+        },
+      },
+    });
+
+    return members.map((m) => ({
+      id: m.id,
+      memberNo: m.memberNo,
+      fullName: `${m.firstName} ${m.fatherName} ${m.grandfatherName || ''}`.trim(),
+      firstName: m.firstName,
+      fatherName: m.fatherName,
+      grandfatherName: m.grandfatherName,
+      baptismalName: m.baptismalName,
+      photo: m.photoUrl,
+      department: m.department,
+      status: m.status,
+    }));
+  }
+
   async findOne(id: string): Promise<any> {
     const member = await this.prisma.member.findFirst({
       where: { id, deletedAt: null },

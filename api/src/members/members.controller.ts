@@ -34,6 +34,7 @@ import { QueryMemberDto, ExportMemberQueryDto, ExportFormat } from './dto/query-
 import { GenerateLetterDto } from './dto/letter-member.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, CurrentUser } from '../common/decorators/auth.decorator';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Members')
 @ApiBearerAuth('JWT-auth')
@@ -57,6 +58,21 @@ export class MembersController {
   @ApiResponse({ status: 200, description: 'Paginated list of members' })
   async findAll(@Query() query: QueryMemberDto) {
     return this.membersService.findAll(query);
+  }
+
+  @Get('search')
+  @Roles('super_admin', 'admin', 'teacher')
+  @Throttle({ default: { limit: 120, ttl: 60000 } })
+  @ApiOperation({
+    summary: 'Lightweight search by name (Amharic or English) or member ID (max 20)',
+  })
+  @ApiQuery({ name: 'q', required: true, description: 'Search term (name or member ID)' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of matching members (id, memberNo, fullName, photo, department, status)',
+  })
+  async search(@Query('q') query: string) {
+    return this.membersService.searchLightweight(query);
   }
 
   @Get('template')

@@ -4,15 +4,11 @@ import { StorageModule } from '../storage/storage.module';
 import { CoursesService } from './courses.service';
 import { CertificatesPdfService } from './certificates-pdf.service';
 import { CoursesController } from './courses.controller';
-import {
-  AttendanceController,
-  GradesController,
-  CertificatesController,
-} from './academic.controller';
+import { GradesController, CertificatesController } from './academic.controller';
 
 @Module({
   imports: [PrismaModule, StorageModule],
-  controllers: [CoursesController, AttendanceController, GradesController, CertificatesController],
+  controllers: [CoursesController, GradesController, CertificatesController],
   providers: [CoursesService, CertificatesPdfService],
   exports: [CoursesService],
 })

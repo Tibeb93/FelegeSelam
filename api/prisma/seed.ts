@@ -1,4 +1,4 @@
-import { PrismaClient, Sex, MemberStatus, CourseStatus, MediaType, EnrollmentStatus, AttendanceStatus, PostType, EventRsvpStatus, FormStatus, FormResponseStatus, UserStatus } from '@prisma/client';
+import { PrismaClient, Sex, MemberStatus, CourseStatus, MediaType, EnrollmentStatus, AttendanceStatus, AttendanceSessionStatus, PostType, EventRsvpStatus, FormStatus, FormResponseStatus, UserStatus } from '@prisma/client';
 import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
@@ -463,6 +463,21 @@ async function main() {
 
   // Enroll first 15 members in first course
   const primaryCourse = createdCourses[0];
+
+  const seedSession = await prisma.attendanceSession.upsert({
+    where: { id: 'seed-attendance-session-1' },
+    update: {},
+    create: {
+      id: 'seed-attendance-session-1',
+      sessionDate: new Date('2026-10-03'),
+      title: 'የነገረ መለኮት ትምህርት - መገኘት',
+      courseId: primaryCourse.id,
+      status: AttendanceSessionStatus.closed,
+      openedBy: superAdminUser.id,
+      closedAt: new Date('2026-10-03T12:00:00Z'),
+    },
+  });
+
   for (let m = 0; m < 15; m++) {
     const member = createdMembers[m];
     const enrollment = await prisma.enrollment.upsert({
@@ -494,14 +509,14 @@ async function main() {
     // Add attendance
     await prisma.attendance.upsert({
       where: {
-        memberId_courseId_sessionDate: {
+        sessionId_memberId: {
+          sessionId: seedSession.id,
           memberId: member.id,
-          courseId: primaryCourse.id,
-          sessionDate: new Date('2026-10-03'),
         },
       },
       update: {},
       create: {
+        sessionId: seedSession.id,
         memberId: member.id,
         courseId: primaryCourse.id,
         sessionDate: new Date('2026-10-03'),

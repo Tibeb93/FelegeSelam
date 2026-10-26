@@ -15,30 +15,10 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { Response } from 'express';
 import { CoursesService } from './courses.service';
-import { ScanAttendanceDto } from './dto/attendance.dto';
 import { CreateGradeDto, UpdateGradeDto } from './dto/grade.dto';
 import { IssueCertificateDto } from './dto/certificate.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Public, CurrentUser } from '../common/decorators/auth.decorator';
-
-@ApiTags('Attendance')
-@ApiBearerAuth('JWT-auth')
-@Controller('attendance')
-@UseGuards(RolesGuard)
-export class AttendanceController {
-  constructor(private readonly coursesService: CoursesService) {}
-
-  @Post('scan')
-  @Roles('super_admin', 'admin', 'teacher')
-  @ApiOperation({
-    summary: 'Scan member QR code (memberNo + courseId) to mark attendance',
-  })
-  @ApiResponse({ status: 201, description: 'Attendance marked via QR scan' })
-  @ApiResponse({ status: 409, description: 'Duplicate attendance scan for session' })
-  async scanAttendance(@Body() dto: ScanAttendanceDto, @CurrentUser() user: any) {
-    return this.coursesService.scanAttendanceQr(dto, user);
-  }
-}
 
 @ApiTags('Grades & Assessments')
 @ApiBearerAuth('JWT-auth')
