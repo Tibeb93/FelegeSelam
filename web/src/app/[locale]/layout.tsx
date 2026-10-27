@@ -5,6 +5,7 @@ import { QueryProvider } from '../../providers/QueryProvider';
 import { ThemeProvider } from '../../providers/ThemeProvider';
 import { ToastProvider } from '../../providers/ToastProvider';
 import { AuthProvider } from '../../providers/AuthProvider';
+import { SiteSettingsProvider } from '../../providers/SiteSettingsProvider';
 import '../globals.css';
 
 export const viewport: Viewport = {
@@ -16,25 +17,33 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት | Aemade Selam Sunday School',
-    template: '%s | አዕማደ ሰላም ሰንበት ትምህርት ቤት',
+    default: 'Aemade Selam Sunday School | Felegeselam Kidus Giyorgis Cathedral',
+    template: '%s | Aemade Selam Sunday School, Felegeselam Kidus Giyorgis Cathedral',
   },
   description:
-    'Ethiopian Orthodox Tewahedo Church Sunday School Management System and Spiritual Education Portal. አዕማደ ሰላም ሰንበት ትምህርት ቤት - ደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን።',
+    'Ethiopian Orthodox Tewahedo Church Sunday School Management System and Spiritual Education Portal. አዕማደ ሰላም ሰንበት ትምህርት ቤት - ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል፣ ፍኖተ ሰላም፣ ምዕራብ ጎጃም፣ አማራ ክልል፣ ኢትዮጵያ።',
   keywords: [
     'Ethiopian Orthodox',
     'Tewahedo',
     'Sunday School',
     'Aemade Selam',
+    'Felegeselam Kidus Giyorgis Cathedral',
+    'Finote Selam',
+    'West Gojjam',
+    'Amhara',
+    'ቅዱስ ጊዮርጊስ',
+    'ፈለገ ሰላም',
+    'አዕማደ ሰላም',
+    'ፍኖተ ሰላም',
+    'ምዕራብ ጎጃም',
     'Mezmur',
     'Sinksar',
     'Ethiopian Calendar',
-    'ቅዱስ እስጢፋኖስ',
     'ሰንበት ትምህርት ቤት',
     'መዝሙር',
     'ስንክሳር',
   ],
-  authors: [{ name: 'Aemade Selam Sunday School' }],
+  authors: [{ name: 'Aemade Selam Sunday School, Felegeselam Kidus Giyorgis Cathedral' }],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'),
   manifest: '/manifest.json',
   icons: {
@@ -43,17 +52,17 @@ export const metadata: Metadata = {
     apple: '/logo.svg',
   },
   openGraph: {
-    title: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት | Aemade Selam Sunday School',
+    title: 'Aemade Selam Sunday School | Felegeselam Kidus Giyorgis Cathedral',
     description:
-      'በደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን አዕማደ ሰላም ሰንበት ትምህርት ቤት ኦፊሴላዊ ድረ-ገጽ እና መንፈሳዊ የትምህርት ፖርታል።',
+      'በፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል አዕማደ ሰላም ሰንበት ትምህርት ቤት ኦፊሴላዊ ድረ-ገጽ እና መንፈሳዊ የትምህርት ፖርታል (ፍኖተ ሰላም፣ ምዕራብ ጎጃም)።',
     url: '/',
-    siteName: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት',
+    siteName: 'Aemade Selam Sunday School - Felegeselam Kidus Giyorgis Cathedral',
     images: [
       {
         url: '/uploads/branding/logo.png',
         width: 800,
         height: 600,
-        alt: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት',
+        alt: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት - ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል',
       },
     ],
     locale: 'am_ET',
@@ -61,8 +70,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት | Aemade Selam Sunday School',
-    description: 'በሃይማኖት ጽኑ፥ በመልካም ምግባር አብሩ - ኦፊሴላዊ ድረ-ገጽ',
+    title: 'Aemade Selam Sunday School | Felegeselam Kidus Giyorgis Cathedral',
+    description: 'በሃይማኖት ጽኑ፥ በመልካም ምግባር አብሩ - ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል፣ ፍኖተ ሰላም፣ ምዕራብ ጎጃም',
   },
   robots: {
     index: true,
@@ -79,8 +88,33 @@ export default async function RootLayout({
 }) {
   const messages = await getMessages();
 
+  const placeOfWorshipJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'PlaceOfWorship',
+    name: 'Felegeselam Kidus Giyorgis Cathedral',
+    alternateName: 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል',
+    subOrganization: {
+      '@type': 'EducationalOrganization',
+      name: 'Aemade Selam Sunday School',
+      alternateName: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Felegeselam Kidus Giyorgis Cathedral',
+      addressLocality: 'Finote Selam',
+      addressRegion: 'Amhara',
+      addressCountry: 'ET',
+    },
+  };
+
   return (
     <html lang={locale}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(placeOfWorshipJsonLd) }}
+        />
+      </head>
       <body className="min-h-screen bg-background text-foreground antialiased selection:bg-secondary/30 font-ethiopic">
         {/* Skip to Content for Accessibility / Lighthouse 95+ */}
         <a
@@ -91,11 +125,13 @@ export default async function RootLayout({
         </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>
-            <ThemeProvider>
-              <ToastProvider>
-                <AuthProvider>{children}</AuthProvider>
-              </ToastProvider>
-            </ThemeProvider>
+            <SiteSettingsProvider>
+              <ThemeProvider>
+                <ToastProvider>
+                  <AuthProvider>{children}</AuthProvider>
+                </ToastProvider>
+              </ThemeProvider>
+            </SiteSettingsProvider>
           </QueryProvider>
         </NextIntlClientProvider>
       </body>

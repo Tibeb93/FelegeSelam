@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { Browser } from 'puppeteer';
 import * as QRCode from 'qrcode';
 import * as fs from 'fs';
+import { PrismaService } from '../prisma/prisma.service';
+import { DEFAULT_SITE_IDENTITY } from '../common/site-identity';
 
 export interface CertificatePdfPayload {
   code: string;
@@ -27,6 +29,42 @@ export interface CertificatePdfPayload {
 @Injectable()
 export class CertificatesPdfService {
   private readonly logger = new Logger(CertificatesPdfService.name);
+
+  constructor(private readonly prisma?: PrismaService) {}
+
+  async getBranding() {
+    if (this.prisma) {
+      try {
+        const [identitySetting, churchSetting, locationSetting] = await Promise.all([
+          this.prisma.setting.findUnique({ where: { settingKey: 'site_identity' } }),
+          this.prisma.setting.findUnique({ where: { settingKey: 'identity.church' } }),
+          this.prisma.setting.findUnique({ where: { settingKey: 'identity.location' } }),
+        ]);
+        const idVal = (identitySetting?.settingValue || {}) as any;
+        const chVal = (churchSetting?.settingValue || {}) as any;
+        const locVal = (locationSetting?.settingValue || {}) as any;
+
+        return {
+          nameAm: idVal.nameAm || DEFAULT_SITE_IDENTITY.school.nameAm,
+          nameEn: idVal.nameEn || DEFAULT_SITE_IDENTITY.school.nameEn,
+          churchName: chVal.nameAm || idVal.churchName || DEFAULT_SITE_IDENTITY.church.nameAm,
+          churchNameEn: chVal.nameEn || idVal.churchNameEn || DEFAULT_SITE_IDENTITY.church.nameEn,
+          locationLine: locVal.combinedAm || DEFAULT_SITE_IDENTITY.location.combinedAm,
+          locationLineEn: locVal.combinedEn || DEFAULT_SITE_IDENTITY.location.combinedEn,
+          logoUrl: idVal.logoUrl || DEFAULT_SITE_IDENTITY.school.logoUrl,
+        };
+      } catch {}
+    }
+    return {
+      nameAm: DEFAULT_SITE_IDENTITY.school.nameAm,
+      nameEn: DEFAULT_SITE_IDENTITY.school.nameEn,
+      churchName: DEFAULT_SITE_IDENTITY.church.nameAm,
+      churchNameEn: DEFAULT_SITE_IDENTITY.church.nameEn,
+      locationLine: DEFAULT_SITE_IDENTITY.location.combinedAm,
+      locationLineEn: DEFAULT_SITE_IDENTITY.location.combinedEn,
+      logoUrl: DEFAULT_SITE_IDENTITY.school.logoUrl,
+    };
+  }
 
   private async getBrowser(): Promise<Browser> {
     let executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
@@ -72,6 +110,7 @@ export class CertificatesPdfService {
   }
 
   async generateCertificatePdf(payload: CertificatePdfPayload): Promise<Buffer> {
+    const branding = await this.getBranding();
     const fullName =
       `${payload.member.firstName} ${payload.member.fatherName} ${payload.member.grandfatherName || ''}`.trim();
     const issueDateStr = new Date(payload.issuedAt).toISOString().split('T')[0];
@@ -227,9 +266,9 @@ export class CertificatesPdfService {
     <div class="inner-frame">
       <div class="header">
         <div class="cross">✝</div>
-        <div class="church-name">በኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን</div>
-        <div class="school-name">አዕማደ ሰላም ሰንበት ትምህርት ቤት</div>
-        <div class="subtitle">ETHIOPIAN ORTHODOX TEWAHEDO CHURCH — AEMADE SELAM SUNDAY SCHOOL</div>
+        <div class="church-name">${branding.churchName}</div>
+        <div class="school-name">${branding.nameAm}</div>
+        <div class="subtitle">${branding.churchName.toUpperCase()} — ${branding.nameEn.toUpperCase()} (${branding.locationLine})</div>
       </div>
 
       <div class="cert-badge">
@@ -241,7 +280,7 @@ export class CertificatesPdfService {
         ተማሪ <span class="student-name">${fullName}</span>
         ${payload.member.baptismalName ? `(የክርስትና ስም፡ <strong>${payload.member.baptismalName}</strong>)` : ''}
         <br />
-        በአዕማደ ሰላም ሰንበት ትምህርት ቤት ሲሰጥ የነበረውን
+        በ${branding.nameAm} ሲሰጥ የነበረውን
         <span class="course-title">«${payload.course.titleAm}»</span>
         ${payload.course.titleEn ? `(${payload.course.titleEn})` : ''}
         ${payload.course.level ? `[${payload.course.level}]` : ''}
@@ -252,6 +291,7 @@ export class CertificatesPdfService {
       <div class="footer">
         <div class="sig-box">
           <div class="sig-line">የትምህርት ክፍል ኃላፊ ፊርማ</div>
+          <div style="font-size: 10px; color: #5B6B7C; margin-top: 3px;">${branding.churchName}</div>
         </div>
 
         <div class="qr-section">
@@ -265,6 +305,7 @@ export class CertificatesPdfService {
 
         <div class="sig-box">
           <div class="sig-line">የሰንበት ትምህርት ቤቱ ሰብሳቢ ፊርማና ማኅተም</div>
+          <div style="font-size: 10px; color: #5B6B7C; margin-top: 3px;">${branding.churchName}</div>
         </div>
       </div>
     </div>

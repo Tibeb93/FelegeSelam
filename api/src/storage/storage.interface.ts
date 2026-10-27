@@ -10,6 +10,8 @@ export interface IStorageService {
     file: Express.Multer.File,
     options?: { allowedMimeTypes?: string[]; maxSizeBytes?: number },
   ): Promise<{ fileUrl: string; originalName: string; size: number; mimeType: string }>;
+  saveBrandingImage(file: Express.Multer.File, type: 'logo' | 'favicon' | 'hero'): Promise<string>;
+  savePaymentProof(file: Express.Multer.File): Promise<string>;
   deleteFile(fileUrl: string): Promise<void>;
   getFilePath(fileUrl: string): string;
 }

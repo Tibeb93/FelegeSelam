@@ -90,6 +90,7 @@ export class AuthService {
           sex: dto.sex,
           phone: dto.phone,
           email: dto.email,
+          parish: dto.parish,
           status: MemberStatus.pending,
         },
       });

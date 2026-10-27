@@ -1,5 +1,6 @@
 import { PrismaClient, Sex, MemberStatus, CourseStatus, MediaType, EnrollmentStatus, AttendanceStatus, AttendanceSessionStatus, PostType, EventRsvpStatus, FormStatus, FormResponseStatus, UserStatus } from '@prisma/client';
 import * as argon2 from 'argon2';
+import { DEFAULT_SITE_IDENTITY } from '../src/common/site-identity';
 
 const prisma = new PrismaClient();
 
@@ -38,6 +39,9 @@ async function main() {
         'forms:read',
         'forms:write',
         'reports:read',
+        'cms:read',
+        'cms:write',
+        'cms:publish',
       ],
     },
     {
@@ -63,6 +67,8 @@ async function main() {
         'mezmur:write',
         'events:read',
         'events:write',
+        'cms:read',
+        'cms:write',
       ],
     },
     {
@@ -338,28 +344,32 @@ async function main() {
     const memberNo = `MEM-${(i + 3).toString().padStart(4, '0')}`;
     const deptId = deptIds[i % deptIds.length];
 
+    const isFirstMemberUser = i === 0;
     const member = await prisma.member.upsert({
       where: { memberNo },
-      update: {},
+      update: isFirstMemberUser
+        ? { userId: memberUser.id, email: 'member@aemade.org' }
+        : {},
       create: {
         memberNo,
+        userId: isFirstMemberUser ? memberUser.id : undefined,
         firstName: p.fn,
         fatherName: p.fan,
         grandfatherName: p.gfn,
         baptismalName: p.bn,
         sex: p.sex,
-        phone: `+2519${(10000000 + i).toString().slice(0, 8)}`,
-        email: `member${i + 3}@aemade.org`,
+        phone: isFirstMemberUser ? '+251911334455' : `+2519${(10000000 + i).toString().slice(0, 8)}`,
+        email: isFirstMemberUser ? 'member@aemade.org' : `member${i + 3}@aemade.org`,
         departmentId: deptId,
         status: MemberStatus.active,
-        parish: 'ቅድስት ሥላሴ ካቴድራል',
+        parish: 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል',
         confessionFather: 'መልአከ ሰላም ቆሞስ አባ ተክለ ማርያም',
         educationLevel: i % 2 === 0 ? 'የመጀመሪያ ዲግሪ' : 'የሁለተኛ ደረጃ ትምህርት',
         occupation: i % 2 === 0 ? 'የቢሮ ባለሙያ' : 'ተማሪ',
-        region: 'አዲስ አበባ',
-        zone: 'ቂርቆስ',
-        woreda: 'ወረዳ 04',
-        kebele: 'ቀበሌ 12',
+        region: 'አማራ ክልል',
+        zone: 'ምዕራብ ጎጃም',
+        woreda: 'ፍኖተ ሰላም',
+        kebele: 'ቀበሌ 01',
         joinedAt: new Date(2023, i % 12, (i % 28) + 1),
       },
     });
@@ -780,9 +790,9 @@ async function main() {
             participantName: `${createdMembers[1].firstName} ${createdMembers[1].fatherName}`,
             phone: createdMembers[1].phone || '0911000002',
             ageGroup: '21-30',
-            parishChurch: 'ደብረ ሰላም ቅዱስ እስጢፋኖስ',
+            parishChurch: 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል',
             attendanceDays: ['ቅዳሜ', 'እሑድ'],
-            transportation: 'ካዛንቺስ',
+            transportation: 'ፍኖተ ሰላም',
           },
         },
       ],
@@ -966,24 +976,112 @@ async function main() {
   console.log('Seeding system settings...');
   const defaultSettingsData = [
     {
+      settingKey: 'identity.school',
+      settingValue: DEFAULT_SITE_IDENTITY.school,
+    },
+    {
+      settingKey: 'identity.church',
+      settingValue: DEFAULT_SITE_IDENTITY.church,
+    },
+    {
+      settingKey: 'identity.location',
+      settingValue: DEFAULT_SITE_IDENTITY.location,
+    },
+    {
+      settingKey: 'site_identity',
+      settingValue: {
+        nameAm: DEFAULT_SITE_IDENTITY.school.nameAm,
+        nameEn: DEFAULT_SITE_IDENTITY.school.nameEn,
+        shortName: DEFAULT_SITE_IDENTITY.school.shortNameAm,
+        taglineAm: DEFAULT_SITE_IDENTITY.school.taglineAm,
+        taglineEn: DEFAULT_SITE_IDENTITY.school.taglineEn,
+        churchName: DEFAULT_SITE_IDENTITY.church.nameAm,
+        churchNameAm: DEFAULT_SITE_IDENTITY.church.nameAm,
+        churchNameEn: DEFAULT_SITE_IDENTITY.church.nameEn,
+        townAm: DEFAULT_SITE_IDENTITY.location.townAm,
+        townEn: DEFAULT_SITE_IDENTITY.location.townEn,
+        zoneAm: DEFAULT_SITE_IDENTITY.location.zoneAm,
+        zoneEn: DEFAULT_SITE_IDENTITY.location.zoneEn,
+        combinedAm: DEFAULT_SITE_IDENTITY.location.combinedAm,
+        combinedEn: DEFAULT_SITE_IDENTITY.location.combinedEn,
+        logoUrl: DEFAULT_SITE_IDENTITY.school.logoUrl,
+        faviconUrl: DEFAULT_SITE_IDENTITY.school.faviconUrl,
+      },
+    },
+    {
       settingKey: 'school_profile',
       settingValue: {
-        nameAm: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት',
-        nameEn: 'Aemade Selam Sunday School',
-        logoUrl: '/uploads/branding/logo.png',
-        parish: 'ደብረ ሰላም ቅዱስ እስጢፋኖስ',
-        mottoAm: 'በሃይማኖት ጽኑ፥ በመልካም ምግባር አብሩ',
-        mottoEn: 'Firm in Faith, Shining in Good Deeds',
+        nameAm: DEFAULT_SITE_IDENTITY.school.nameAm,
+        nameEn: DEFAULT_SITE_IDENTITY.school.nameEn,
+        logoUrl: DEFAULT_SITE_IDENTITY.school.logoUrl,
+        parish: DEFAULT_SITE_IDENTITY.church.nameAm,
+        mottoAm: DEFAULT_SITE_IDENTITY.school.taglineAm,
+        mottoEn: DEFAULT_SITE_IDENTITY.school.taglineEn,
+      },
+    },
+    {
+      settingKey: 'home_content',
+      settingValue: {
+        heroTitleAm: 'እንኳን ወደ ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል ሰንበት ትምህርት ቤት በደህና መጡ',
+        heroTitleEn: 'Welcome to the Sunday School of Felegeselam Kidus Giyorgis Cathedral',
+        heroSubtitleAm: 'የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን እምነትና ሥርዓት የሚማሩበትና መንፈሳዊ ሕይወትዎን የሚያዳብሩበት መድረክ',
+        heroSubtitleEn: 'A platform to learn the faith and order of the Ethiopian Orthodox Tewahedo Church and cultivate spiritual growth',
+        welcomeMessageAm: 'በሰላም መጡ! በፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል አዕማደ ሰላም ሰንበት ትምህርት ቤት ተማሪዎችና ምዕመናን አገልግሎት።',
+        welcomeMessageEn: 'Welcome to the Sunday School of Felegeselam Kidus Giyorgis Cathedral in Finote Selam, West Gojjam.',
+        primaryCtaTextAm: 'የአባላት ምዝገባ',
+        primaryCtaTextEn: 'Member Registration',
+        primaryCtaLink: '/register',
+        secondaryCtaTextAm: 'ትምህርቶችን ይመልከቱ',
+        secondaryCtaTextEn: 'Explore Courses',
+        secondaryCtaLink: '/courses',
+        sections: [
+          { id: 'sinksar', enabled: true, titleAm: 'የዕለቱ ስንክሳር', titleEn: "Today's Synaxarium", order: 1 },
+          { id: 'news', enabled: true, titleAm: 'ዜናዎችና ማስታወቂያዎች', titleEn: 'News & Announcements', order: 2 },
+          { id: 'courses', enabled: true, titleAm: 'የሚሰጡ ትምህርቶች', titleEn: 'Featured Courses', order: 3 },
+          { id: 'mezmur', enabled: true, titleAm: 'የምስጋና መዝሙራት', titleEn: 'Spiritual Hymns', order: 4 },
+          { id: 'contact', enabled: true, titleAm: 'አድራሻና ግንኙነት', titleEn: 'Contact Us', order: 5 },
+        ],
+        announcement: {
+          enabled: false,
+          textAm: 'የዘንድሮው የትምህርት ዘመን ምዝገባ ተጀምሯል!',
+          textEn: 'Registration for the new academic year is now open!',
+          type: 'info',
+          link: '/register',
+        },
       },
     },
     {
       settingKey: 'contact_details',
       settingValue: {
-        phone: '+251 91 123 4567',
-        alternatePhone: '+251 11 551 2345',
-        email: 'info@aemadeselam.org',
-        address: 'አዲስ አበባ, ኢትዮጵያ',
-        poBox: '1234',
+        phone: '',
+        alternatePhone: '',
+        email: '',
+        address: DEFAULT_SITE_IDENTITY.location.combinedAm,
+        poBox: '',
+      },
+    },
+    {
+      settingKey: 'about_contact',
+      settingValue: {
+        aboutAm: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት በፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል (ፍኖተ ሰላም፣ ምዕራብ ጎጃም) ስር የሚገኝ መንፈሳዊ ተቋም ሲሆን ወጣቶችንና ምዕመናንን በሃይማኖትና በምግባር ለማነጽ ይሠራል።',
+        aboutEn: 'Aemade Selam Sunday School is a spiritual institution under Felegeselam Kidus Giyorgis Cathedral in Finote Selam, West Gojjam, dedicated to edifying youth and parishioners in Orthodox faith and virtuous deeds.',
+        missionAm: 'ሕፃናትንና ወጣቶችን በኦርቶዶክሳዊት ተዋሕዶ እምነት ማነጽና ለቤተክርስቲያንና ለአገር የሚጠቅሙ ዜጎች ማድረግ።',
+        missionEn: 'Nurturing children and youth in Orthodox Tewahedo faith and shaping productive citizens for Church and society.',
+        visionAm: 'በሃይማኖት የጸና፣ በምግባር ያበራና በትምህርት የበለጸገ መንፈሳዊ ትውልድ ማየት።',
+        visionEn: 'To see a spiritual generation steadfast in faith, radiant in virtuous deeds, and enriched in divine knowledge.',
+        phone: '',
+        alternatePhone: '',
+        email: '',
+        address: DEFAULT_SITE_IDENTITY.location.combinedAm,
+        mapLink: '',
+        socialLinks: {
+          telegram: '',
+          youtube: '',
+          facebook: '',
+          tiktok: '',
+        },
+        footerCopyrightAm: '© ፳፻፲፰ አዕማደ ሰላም ሰንበት ትምህርት ቤት። መብቱ በሕግ የተጠበቀ ነው።',
+        footerCopyrightEn: '© 2026 Aemade Selam Sunday School. All rights reserved.',
       },
     },
     {
@@ -1008,8 +1106,8 @@ async function main() {
   for (const s of defaultSettingsData) {
     await prisma.setting.upsert({
       where: { settingKey: s.settingKey },
-      update: { settingValue: s.settingValue },
-      create: { settingKey: s.settingKey, settingValue: s.settingValue },
+      update: { settingValue: s.settingValue as any },
+      create: { settingKey: s.settingKey, settingValue: s.settingValue as any },
     });
   }
   console.log(`✓ System settings seeded/verified`);

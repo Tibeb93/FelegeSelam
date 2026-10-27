@@ -21,7 +21,7 @@ export default function RegisterPage({
 }: {
   params: { locale: string };
 }) {
-  const [mounted, setMounted] = useState(false);
+  const [_mounted, setMounted] = useState(false);
   const t = useTranslations('Auth');
   const tVal = useTranslations('Validation');
   const toast = useToast();
@@ -67,7 +67,7 @@ export default function RegisterPage({
       sex: 'male',
       phone: '',
       email: '',
-      parish: '',
+      parish: isAm ? 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል' : 'Felegeselam Kidus Giyorgis Cathedral',
       password: '',
       confirmPassword: '',
     },
@@ -102,15 +102,24 @@ export default function RegisterPage({
       const data = await response.json();
 
       if (!response.ok) {
-        setErrorMessage(data.message || 'የምዝገባ ጥያቄው አልተሳካም');
-        toast.error(data.message || 'የምዝገባ ጥያቄው አልተሳካም');
+        const errorDetail =
+          Array.isArray(data.errors) && data.errors.length > 0
+            ? `${data.message ? data.message + ': ' : ''}${data.errors.join(', ')}`
+            : data.message || (isAm ? 'የምዝገባ ጥያቄው አልተሳካም' : 'Registration failed');
+        setErrorMessage(errorDetail);
+        toast.error(errorDetail);
         return;
       }
 
       setIsSuccess(true);
-      toast.success('የምዝገባ ጥያቄዎ በተሳካ ሁኔታ ቀርቧል', 'እንኳን ደስ አለዎት');
+      toast.success(
+        isAm ? 'የምዝገባ ጥያቄዎ በተሳካ ሁኔታ ቀርቧል' : 'Registration submitted successfully',
+        isAm ? 'እንኳን ደስ አለዎት' : 'Congratulations'
+      );
     } catch (err: any) {
-      setErrorMessage(err.message || 'የአውታረ መረብ ችግር አጋጥሟል');
+      const msg = err.message || (isAm ? 'የአውታረ መረብ ችግር አጋጥሟል' : 'Network error occurred');
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -166,12 +175,14 @@ export default function RegisterPage({
               name="firstName"
               label={t('firstName')}
               placeholder="ዮሐንስ"
+              autoComplete="given-name"
               required
             />
             <TextField
               name="fatherName"
               label={t('fatherName')}
               placeholder="ኃይሌ"
+              autoComplete="family-name"
               required
             />
           </div>
@@ -181,6 +192,7 @@ export default function RegisterPage({
               name="grandfatherName"
               label={t('grandfatherName')}
               placeholder="ተክሌ"
+              autoComplete="additional-name"
             />
             <TextField
               name="baptismalName"
@@ -199,7 +211,8 @@ export default function RegisterPage({
             <TextField
               name="parish"
               label={t('parish')}
-              placeholder="ደብረ ሰላም ቅዱስ እስጢፋኖስ"
+              defaultValue={isAm ? 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል' : 'Felegeselam Kidus Giyorgis Cathedral'}
+              placeholder={isAm ? "ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል" : "Felegeselam Kidus Giyorgis Cathedral"}
             />
           </div>
 
@@ -207,6 +220,7 @@ export default function RegisterPage({
             name="phone"
             label={t('phone')}
             placeholder="0911223344"
+            autoComplete="tel"
             required
           />
 
@@ -215,6 +229,7 @@ export default function RegisterPage({
             type="email"
             label={t('email')}
             placeholder="member@felegeselam.org"
+            autoComplete="email"
             required
           />
 
@@ -224,6 +239,7 @@ export default function RegisterPage({
               type="password"
               label={t('password')}
               placeholder="••••••••"
+              autoComplete="new-password"
               required
             />
             <TextField
@@ -231,17 +247,19 @@ export default function RegisterPage({
               type="password"
               label={t('confirmPassword')}
               placeholder="••••••••"
+              autoComplete="new-password"
               required
             />
           </div>
 
           <PrimaryButton
+            id="register-submit-button"
             type="submit"
-            disabled={!mounted || isSubmitting}
+            disabled={isSubmitting}
             loading={isSubmitting}
             loadingText={t('registering')}
-            startIcon={<UserPlus className="h-4 w-4" />}
-            className="w-full mt-2"
+            startIcon={<UserPlus className="h-5 w-5" />}
+            className="w-full mt-3 h-12 text-base font-bold shadow-md cursor-pointer"
           >
             {t('registerButton')}
           </PrimaryButton>

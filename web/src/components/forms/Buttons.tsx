@@ -38,14 +38,23 @@ export const PrimaryButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm focus-visible:ring-destructive',
     }[variant];
 
+    const fallbackStyle: React.CSSProperties =
+      variant === 'primary'
+        ? {
+            backgroundColor: 'hsl(var(--primary, 208 79% 28%))',
+            color: 'hsl(var(--primary-foreground, 0 0% 100%))',
+          }
+        : {};
+
     return (
       <button
         ref={ref}
         type={type}
         disabled={disabled || loading}
         aria-disabled={disabled || loading}
+        style={{ ...fallbackStyle, ...props.style }}
         className={cn(
-          'inline-flex h-12 min-h-[48px] items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold tracking-wide transition-all duration-150 select-none',
+          'inline-flex h-12 min-h-[48px] items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold tracking-wide transition-all duration-150 select-none cursor-pointer',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.99]',
           variantStyles,

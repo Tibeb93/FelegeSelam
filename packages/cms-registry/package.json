@@ -1,0 +1,17 @@
+{
+  "name": "@felegeselam/cms-registry",
+  "version": "1.0.0",
+  "description": "Shared CMS Section Registry and Validation for FelegeSelam",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

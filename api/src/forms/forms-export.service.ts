@@ -4,6 +4,8 @@ import type { Browser } from 'puppeteer';
 import * as fs from 'fs';
 import { FormFieldSchema, FormSchemaDefinition } from './dto/form-schema.interface';
 import { Form, FormResponse, Member } from '@prisma/client';
+import { DEFAULT_SITE_IDENTITY } from '../common/site-identity';
+import { gregorianToEthiopian } from '../common/ethiopian-calendar';
 
 export type FormWithResponses = Form & {
   responses: Array<
@@ -93,8 +95,12 @@ export class FormsExportService {
    * Generates a beautifully formatted Excel report of form responses
    */
   async generateResponsesExcel(form: FormWithResponses): Promise<Buffer> {
+    const ethDate = gregorianToEthiopian(new Date());
+    const ethDateStr = `${ethDate.day} ${ethDate.monthNameAm} ${ethDate.year} ዓ.ም.`;
+    const gregDateStr = new Date().toISOString().split('T')[0];
+
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'አዕማደ ሰላም ሰንበት ትምህርት ቤት';
+    workbook.creator = `${DEFAULT_SITE_IDENTITY.school.nameAm} - ${DEFAULT_SITE_IDENTITY.church.nameAm}`;
     workbook.created = new Date();
 
     const worksheet = workbook.addWorksheet('Responses', {
@@ -109,8 +115,8 @@ export class FormsExportService {
     // Title Row
     worksheet.mergeCells('A1', 'H1');
     const titleCell = worksheet.getCell('A1');
-    titleCell.value = `አዕማደ ሰላም ሰንበት ት/ቤት - ${form.title}`;
-    titleCell.font = { name: 'Calibri', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    titleCell.value = `${DEFAULT_SITE_IDENTITY.church.nameAm} • ${DEFAULT_SITE_IDENTITY.school.nameAm} (${DEFAULT_SITE_IDENTITY.location.combinedAm}) — ${form.title}`;
+    titleCell.font = { name: 'Calibri', size: 15, bold: true, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = {
       type: 'pattern',
       pattern: 'solid',
@@ -122,7 +128,7 @@ export class FormsExportService {
     // Subtitle / Info Rows
     worksheet.mergeCells('A2', 'H2');
     const infoCell = worksheet.getCell('A2');
-    infoCell.value = `ቅጽ መለያ፦ ${form.id} | ሁኔታ፦ ${form.status} | የተዘጋጀበት ቀን፦ ${new Date().toISOString().split('T')[0]}`;
+    infoCell.value = `ካቴድራል፦ ${DEFAULT_SITE_IDENTITY.church.nameAm} | ቅጽ መለያ፦ ${form.id} | ሁኔታ፦ ${form.status} | ቀን (Eth / Greg)፦ ${ethDateStr} (${gregDateStr})`;
     infoCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF0F2438' } };
     infoCell.fill = {
       type: 'pattern',
@@ -470,7 +476,10 @@ export class FormsExportService {
       <body>
         <div class="header-box">
           <div class="header-title">
-            <h1>አዕማደ ሰላም ሰንበት ትምህርት ቤት</h1>
+            <h1>${DEFAULT_SITE_IDENTITY.school.nameAm}</h1>
+            <div style="font-size: 11px; color: #0F4C81; font-weight: 600; margin-bottom: 3px;">
+              ${DEFAULT_SITE_IDENTITY.church.nameAm} • ${DEFAULT_SITE_IDENTITY.location.combinedAm}
+            </div>
             <h2>${this.escapeHtml(form.title)} - የምላሾች ሪፖርት</h2>
           </div>
           <div style="text-align: right; font-size: 10px; color: #5B6B7C;">
@@ -515,7 +524,7 @@ export class FormsExportService {
         </table>
 
         <div class="footer-note">
-          <div>የአዕማደ ሰላም ሰንበት ትምህርት ቤት አስተዳደር ስርዓት (Aemade Selam EMS)</div>
+          <div>${DEFAULT_SITE_IDENTITY.church.nameAm} • ${DEFAULT_SITE_IDENTITY.school.nameAm} (${DEFAULT_SITE_IDENTITY.location.combinedAm})</div>
           <div>ገጽ 1 / 1</div>
         </div>
       </body>

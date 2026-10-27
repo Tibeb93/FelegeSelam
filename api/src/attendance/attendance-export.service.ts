@@ -1,10 +1,47 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import type { Browser } from 'puppeteer';
+import { PrismaService } from '../prisma/prisma.service';
+import { DEFAULT_SITE_IDENTITY } from '../common/site-identity';
+import { gregorianToEthiopian } from '../common/ethiopian-calendar';
 
 @Injectable()
 export class AttendanceExportService {
   private readonly logger = new Logger(AttendanceExportService.name);
+
+  constructor(private readonly prisma?: PrismaService) {}
+
+  async getBranding() {
+    if (this.prisma) {
+      try {
+        const [identitySetting, churchSetting, locationSetting] = await Promise.all([
+          this.prisma.setting.findUnique({ where: { settingKey: 'site_identity' } }),
+          this.prisma.setting.findUnique({ where: { settingKey: 'identity.church' } }),
+          this.prisma.setting.findUnique({ where: { settingKey: 'identity.location' } }),
+        ]);
+        const idVal = (identitySetting?.settingValue || {}) as any;
+        const chVal = (churchSetting?.settingValue || {}) as any;
+        const locVal = (locationSetting?.settingValue || {}) as any;
+
+        return {
+          nameAm: idVal.nameAm || DEFAULT_SITE_IDENTITY.school.nameAm,
+          nameEn: idVal.nameEn || DEFAULT_SITE_IDENTITY.school.nameEn,
+          churchName: chVal.nameAm || idVal.churchName || DEFAULT_SITE_IDENTITY.church.nameAm,
+          churchNameEn: chVal.nameEn || idVal.churchNameEn || DEFAULT_SITE_IDENTITY.church.nameEn,
+          locationLine: locVal.combinedAm || DEFAULT_SITE_IDENTITY.location.combinedAm,
+          locationLineEn: locVal.combinedEn || DEFAULT_SITE_IDENTITY.location.combinedEn,
+        };
+      } catch {}
+    }
+    return {
+      nameAm: DEFAULT_SITE_IDENTITY.school.nameAm,
+      nameEn: DEFAULT_SITE_IDENTITY.school.nameEn,
+      churchName: DEFAULT_SITE_IDENTITY.church.nameAm,
+      churchNameEn: DEFAULT_SITE_IDENTITY.church.nameEn,
+      locationLine: DEFAULT_SITE_IDENTITY.location.combinedAm,
+      locationLineEn: DEFAULT_SITE_IDENTITY.location.combinedEn,
+    };
+  }
 
   // Blue & White Brand Colors
   private readonly brandPrimary700 = '#0F4C81'; // Deep Blue
@@ -52,6 +89,7 @@ export class AttendanceExportService {
     const browser = await this.getBrowser();
     try {
       const page = await browser.newPage();
+      const branding = await this.getBranding();
 
       const dateStr = new Date(session.sessionDate).toLocaleDateString('en-CA');
       const recordsHtml = (session.attendances || [])
@@ -177,8 +215,10 @@ export class AttendanceExportService {
         <body>
           <div class="header-banner">
             <div>
-              <h1 class="title">አዕማደ ሰላም ሰንበት ትምህርት ቤት</h1>
-              <p class="subtitle">የመገኘት መዝገብ ሪፖርት / Attendance Roster Sheet: <strong>${session.title}</strong></p>
+              <h1 class="title">${branding.nameAm}</h1>
+              <h2 style="color: #0F4C81; font-size: 13px; font-weight: 700; margin: 2px 0;">${branding.churchName}</h2>
+              <p style="color: #5B6B7C; font-size: 10px; margin: 1px 0;">${branding.locationLine}</p>
+              <p class="subtitle" style="margin-top: 4px;">የመገኘት መዝገብ ሪፖርት / Attendance Roster Sheet: <strong>${session.title}</strong></p>
             </div>
             <div class="meta-box">
               <div>ቀን / Date: <strong>${dateStr}</strong></div>
@@ -222,7 +262,7 @@ export class AttendanceExportService {
           </table>
 
           <div class="footer">
-            የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን — አዕማደ ሰላም ሰንበት ትምህርት ቤት © ${new Date().getFullYear()}
+            ${branding.churchName} • ${branding.nameAm} (${branding.locationLine}) © ${new Date().getFullYear()}
           </div>
         </body>
         </html>
@@ -245,8 +285,13 @@ export class AttendanceExportService {
    * Generate Attendance Excel (.xlsx) Export
    */
   async exportExcel(session: any, stats: any): Promise<Buffer> {
+    const branding = await this.getBranding();
+    const ethDate = gregorianToEthiopian(new Date(session.sessionDate));
+    const ethDateStr = `${ethDate.day} ${ethDate.monthNameAm} ${ethDate.year} ዓ.ም.`;
+    const gregDateStr = new Date(session.sessionDate).toISOString().split('T')[0];
+
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'Aemade Selam System';
+    workbook.creator = `${branding.nameAm} - ${branding.churchName}`;
     workbook.created = new Date();
 
     const sheet = workbook.addWorksheet('የመገኘት መዝገብ (Attendance)', {
@@ -256,7 +301,7 @@ export class AttendanceExportService {
     // Title Row
     sheet.mergeCells('A1:F1');
     const titleCell = sheet.getCell('A1');
-    titleCell.value = 'አዕማደ ሰላም ሰንበት ትምህርት ቤት — የመገኘት መዝገብ (Attendance Sheet)';
+    titleCell.value = `${branding.churchName} • ${branding.nameAm} (${branding.locationLine}) — የመገኘት መዝገብ`;
     titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = {
       type: 'pattern',
@@ -269,7 +314,7 @@ export class AttendanceExportService {
     // Subtitle & Date
     sheet.mergeCells('A2:F2');
     const subCell = sheet.getCell('A2');
-    subCell.value = `መርሐ-ግብር: ${session.title} | ቀን: ${new Date(session.sessionDate).toLocaleDateString('en-CA')} | የተገኙ: ${stats.present} | ያልተገኙ: ${stats.absent} | ያረፈዱ: ${stats.late}`;
+    subCell.value = `ካቴድራል፦ ${branding.churchName} | መርሐ-ግብር፦ ${session.title} | ቀን (Eth / Greg)፦ ${ethDateStr} (${gregDateStr}) | የተገኙ፦ ${stats.present} | ያልተገኙ፦ ${stats.absent} | ያረፈዱ፦ ${stats.late}`;
     subCell.font = { name: 'Arial', size: 10, italic: true };
     subCell.alignment = { vertical: 'middle', horizontal: 'center' };
     sheet.getRow(2).height = 20;

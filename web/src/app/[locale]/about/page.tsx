@@ -72,7 +72,9 @@ export default async function AboutPage({ params: { locale } }: AboutPageProps) 
               {locale === 'am' ? 'የሰንበት ትምህርት ቤታችን ታሪክና ተልዕኮ' : 'History & Sacred Mission'}
             </h1>
             <p className="mx-auto max-w-2xl text-sm sm:text-base text-muted-foreground leading-relaxed">
-              {t('aboutText')}
+              {locale === 'am'
+                ? 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል፣ ፍኖተ ሰላም፣ ምዕራብ ጎጃም። አዕማደ ሰላም ሰንበት ትምህርት ቤት የኦርቶዶክሳዊ ተዋሕዶ እምነት፣ ሥርዓትና ትውፊት ማዕከል ነው።'
+                : 'Felegeselam Kidus Giyorgis Cathedral, Finote Selam, West Gojjam. Aemade Selam Sunday School is dedicated to fostering faith, divine knowledge, and holy tradition.'}
             </p>
           </div>
         </section>
@@ -90,15 +92,15 @@ export default async function AboutPage({ params: { locale } }: AboutPageProps) 
                     {locale === 'am' ? 'መሠረተ አመሠራረትና አመጣጥ' : 'Foundation & Heritage'}
                   </h2>
                   <p className="text-xs text-primary font-semibold">
-                    {locale === 'am' ? 'በደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን' : 'At Debre Selam Saint Stephen Church'}
+                    {locale === 'am' ? 'በፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል፣ ፍኖተ ሰላም' : 'At Felegeselam Kidus Giyorgis Cathedral, Finote Selam'}
                   </p>
                 </div>
               </div>
 
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 {locale === 'am'
-                  ? 'አዕማደ ሰላም ሰንበት ትምህርት ቤት የተመሠረተው በደብረ ሰላም ቅዱስ እስጢፋኖስ አጥቢያ ቤተ ክርስቲያን ምእመናንና ካህናት አነሳሽነት ሲሆን፣ ዓላማውም የኦርቶዶክስ ተዋሕዶ ሃይማኖትን ሕገ ወንጌልና የቤተክርስቲያን ትውፊት ለሕፃናትና ወጣቶች በተቀናጀ መልኩ ማስተማር ነው። ላለፉት ሠላሳ ዓመታት በሺዎች የሚቆጠሩ መንፈሳዊ ልጆችን በዕውቀትና በሥነ-ምግባር አንጾ ለቤተክርስቲያን መሪነትና ለአገር ጠቃሚ ዜግነት አብቅቷል።'
-                  : 'Aemade Selam Sunday School was founded by the clergy and faithful of Debre Selam Saint Stephen Church with the sacred objective of providing systematic theological instruction, liturgical tradition, and moral virtue to the youth. Over the past three decades, it has nurtured thousands of faithful servants of Christ.'}
+                  ? 'አዕማደ ሰላም ሰንበት ትምህርት ቤት የተመሠረተው በፍኖተ ሰላም ከተማ በሚገኘው በፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል ምእመናንና ካህናት አነሳሽነት ሲሆን፣ ዓላማውም የኦርቶዶክስ ተዋሕዶ ሃይማኖትን ሕገ ወንጌልና የቤተክርስቲያን ትውፊት ለሕፃናትና ወጣቶች በተቀናጀ መልኩ ማስተማር ነው። ላለፉት ዓመታት በሺዎች የሚቆጠሩ መንፈሳዊ ልጆችን በዕውቀትና በሥነ-ምግባር አንጾ ለቤተክርስቲያንና ለአገር አበርክቷል።'
+                  : 'Aemade Selam Sunday School was founded by the clergy and faithful of Felegeselam Kidus Giyorgis Cathedral in Finote Selam, West Gojjam, with the sacred objective of providing systematic theological instruction, liturgical tradition, and moral virtue to the youth. Over the years, it has nurtured thousands of faithful servants of Christ.'}
               </p>
             </div>
 
@@ -131,12 +133,12 @@ export default async function AboutPage({ params: { locale } }: AboutPageProps) 
                 {t('patronSaint')}
               </span>
               <h3 className="text-xl font-bold text-foreground">
-                {locale === 'am' ? 'ቅዱስ እስጢፋኖስ ቀዳሜ ሰማዕት ወሊቀ ዲያቆናት' : 'Saint Stephen Protomartyr & Archdeacon'}
+                {locale === 'am' ? 'ቅዱስ ጊዮርጊስ መክብበ ሰማዕታት (የካቴድራሉ ጠባቂ)' : 'Saint George the Megalomartyr (Cathedral Patron)'}
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {locale === 'am'
-                  ? 'ቅዱስ እስጢፋኖስ በሐዋርያት እጅ ከተመረጡት ሰባቱ ዲያቆናት የመጀመሪያውና ስለ ክርስቶስ ስም ደሙን ያፈሰሰ ቀዳሜ ሰማዕት ነው። የእርሱ ጽናት፣ እምነትና ይቅር ባይነት ለሰንበት ትምህርት ቤታችን ተማሪዎች ዘወትር አርአያና አብነት ሆኖ ይኖራል።'
-                  : 'Saint Stephen, the first among the seven deacons and the very first martyr of the Christian Church, stands as our eternal patron. His unyielding faith, profound scriptural defense, and merciful prayer inspire our community.'}
+                  ? 'ቅዱስ ጊዮርጊስ ስለ ክርስቶስ ፍቅር ሰባት ዓመታት መከራን የታገሠ፣ የጽናት፣ የእምነትና የድል አርአያ የሆነ ታላቅ ሰማዕትና የፈለገ ሰላም ካቴድራላችን ጠባቂ ቅዱስ ነው። የእርሱ ተጋድሎና አምላካዊ ጥበቃ ለሰንበት ትምህርት ቤታችን ተማሪዎች ዘወትር ብርታትና መመሪያ ሆኖ ይኖራል።'
+                  : 'Saint George the Great Martyr, who endured seven years of tribulations for the love of Christ, stands as the illustrious patron of Felegeselam Cathedral. His steadfast faith, courage, and spiritual defense continually inspire our Sunday school students and community.'}
               </p>
             </div>
 

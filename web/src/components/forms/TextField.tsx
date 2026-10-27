@@ -54,6 +54,11 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
     const inputId = id || name;
     const isPassword = type === 'password';
     const computedType = isPassword ? (showPassword ? 'text' : 'password') : type;
+    const defaultAutoComplete = isPassword
+      ? name.toLowerCase().includes('confirm') || name.toLowerCase().includes('new')
+        ? 'new-password'
+        : 'current-password'
+      : undefined;
 
     const registerProps =
       Boolean(formContext) && value === undefined
@@ -63,6 +68,13 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
         : {};
 
     const { ref: rhfRef, name: _rhfName, ...restRegister } = registerProps as any;
+
+    const resolvedDefaultValue =
+      props.defaultValue !== undefined
+        ? props.defaultValue
+        : formContext && value === undefined
+        ? formContext.getValues(name)
+        : undefined;
 
     return (
       <div className={cn('w-full space-y-1.5', containerClassName)}>
@@ -92,6 +104,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
             name={name}
             type={computedType}
             placeholder={placeholder}
+            autoComplete={props.autoComplete || defaultAutoComplete}
             disabled={disabled}
             aria-invalid={Boolean(error)}
             aria-describedby={
@@ -102,6 +115,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
               else if (ref) (ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
               if (rhfRef) rhfRef(node);
             }}
+            defaultValue={resolvedDefaultValue}
             value={value}
             onChange={onChange}
             {...restRegister}

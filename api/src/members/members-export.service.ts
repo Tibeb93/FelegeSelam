@@ -16,10 +16,57 @@ import type { Browser } from 'puppeteer';
 import * as QRCode from 'qrcode';
 import * as fs from 'fs';
 import { LetterType } from './dto/letter-member.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { DEFAULT_SITE_IDENTITY } from '../common/site-identity';
+import { gregorianToEthiopian } from '../common/ethiopian-calendar';
 
 @Injectable()
 export class MembersExportService {
   private readonly logger = new Logger(MembersExportService.name);
+
+  constructor(private readonly prisma?: PrismaService) {}
+
+  async getBranding() {
+    if (this.prisma) {
+      try {
+        const [identitySetting, churchSetting, locationSetting] = await Promise.all([
+          this.prisma.setting.findUnique({ where: { settingKey: 'site_identity' } }),
+          this.prisma.setting.findUnique({ where: { settingKey: 'identity.church' } }),
+          this.prisma.setting.findUnique({ where: { settingKey: 'identity.location' } }),
+        ]);
+        const idVal = (identitySetting?.settingValue || {}) as any;
+        const chVal = (churchSetting?.settingValue || {}) as any;
+        const locVal = (locationSetting?.settingValue || {}) as any;
+
+        return {
+          nameAm: idVal.nameAm || DEFAULT_SITE_IDENTITY.school.nameAm,
+          nameEn: idVal.nameEn || DEFAULT_SITE_IDENTITY.school.nameEn,
+          churchName: chVal.nameAm || idVal.churchName || DEFAULT_SITE_IDENTITY.church.nameAm,
+          churchNameEn: chVal.nameEn || idVal.churchNameEn || DEFAULT_SITE_IDENTITY.church.nameEn,
+          locationLine: locVal.combinedAm || DEFAULT_SITE_IDENTITY.location.combinedAm,
+          locationLineEn: locVal.combinedEn || DEFAULT_SITE_IDENTITY.location.combinedEn,
+          town: locVal.townAm || DEFAULT_SITE_IDENTITY.location.townAm,
+          zone: locVal.zoneAm || DEFAULT_SITE_IDENTITY.location.zoneAm,
+          logoUrl: idVal.logoUrl || DEFAULT_SITE_IDENTITY.school.logoUrl,
+          phone: locVal.phone || '',
+          email: locVal.email || '',
+        };
+      } catch {}
+    }
+    return {
+      nameAm: DEFAULT_SITE_IDENTITY.school.nameAm,
+      nameEn: DEFAULT_SITE_IDENTITY.school.nameEn,
+      churchName: DEFAULT_SITE_IDENTITY.church.nameAm,
+      churchNameEn: DEFAULT_SITE_IDENTITY.church.nameEn,
+      locationLine: DEFAULT_SITE_IDENTITY.location.combinedAm,
+      locationLineEn: DEFAULT_SITE_IDENTITY.location.combinedEn,
+      town: DEFAULT_SITE_IDENTITY.location.townAm,
+      zone: DEFAULT_SITE_IDENTITY.location.zoneAm,
+      logoUrl: DEFAULT_SITE_IDENTITY.school.logoUrl,
+      phone: '',
+      email: '',
+    };
+  }
 
   // Blue & White Brand Design Tokens
   private readonly brandPrimary700 = '#0F4C81'; // Deep Blue
@@ -86,8 +133,13 @@ export class MembersExportService {
   // =========================================================================
 
   async generateMembersExcel(members: any[]): Promise<Buffer> {
+    const branding = await this.getBranding();
+    const ethDate = gregorianToEthiopian(new Date());
+    const ethDateStr = `${ethDate.day} ${ethDate.monthNameAm} ${ethDate.year} ዓ.ም.`;
+    const gregDateStr = new Date().toISOString().split('T')[0];
+
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'Aemade Selam Sunday School';
+    workbook.creator = `${branding.nameAm} - ${branding.churchName}`;
     workbook.created = new Date();
 
     const sheet = workbook.addWorksheet('Members Roster', {
@@ -97,7 +149,7 @@ export class MembersExportService {
     // Title banner
     sheet.mergeCells('A1:L1');
     const titleCell = sheet.getCell('A1');
-    titleCell.value = 'አዕማደ ሰላም ሰንበት ትምህርት ቤት - የአባላት ዝርዝር (Aemade Selam Sunday School Members)';
+    titleCell.value = `${branding.churchName} • ${branding.nameAm} (${branding.locationLine}) — የአባላት ዝርዝር`;
     titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = {
       type: 'pattern',
@@ -110,7 +162,7 @@ export class MembersExportService {
     // Subtitle
     sheet.mergeCells('A2:L2');
     const subtitleCell = sheet.getCell('A2');
-    subtitleCell.value = `ሪፖርት የተዘጋጀበት ቀን: ${new Date().toISOString().split('T')[0]} | ጠቅላላ አባላት: ${members.length}`;
+    subtitleCell.value = `ካቴድራል፦ ${branding.churchName} | ቀን (Eth / Greg)፦ ${ethDateStr} (${gregDateStr}) | ጠቅላላ አባላት፦ ${members.length}`;
     subtitleCell.font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FFE8F1FB' } };
     subtitleCell.fill = {
       type: 'pattern',
@@ -289,11 +341,11 @@ export class MembersExportService {
       '1998-05-12',
       '+251911223344',
       'yohannes@example.com',
-      'አዲስ አበባ',
-      'አዲስ አበባ',
-      'የካ',
-      '08',
-      'ደብረ ሰላም መድኃኔዓለም',
+      'አማራ ክልል',
+      'ምዕራብ ጎጃም ዞን',
+      'ፍኖተ ሰላም',
+      '01',
+      'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል',
       'መልአከ ሰላም አስራት',
       'Degree',
       'Engineer',
@@ -408,17 +460,18 @@ export class MembersExportService {
       );
     });
 
+    const branding = await this.getBranding();
     const doc = new Document({
       sections: [
         {
           children: [
             new Paragraph({
-              text: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት',
+              text: `${branding.nameAm} • ${branding.churchName}`,
               heading: HeadingLevel.HEADING_1,
               alignment: AlignmentType.CENTER,
             }),
             new Paragraph({
-              text: 'Aemade Selam Sunday School - Members Directory',
+              text: `${branding.nameEn} — ${branding.locationLineEn}`,
               alignment: AlignmentType.CENTER,
             }),
             new Paragraph({
@@ -611,13 +664,16 @@ export class MembersExportService {
       )
       .join('');
 
+    const branding = await this.getBranding();
+
     const html = this.getHtmlWrapper(`
       <div class="header">
         <div class="cross-icon">✝</div>
         <div class="org-title">
-          <h1>በኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን</h1>
-          <h2>አዕማደ ሰላም ሰንበት ትምህርት ቤት</h2>
-          <p>Aemade Selam Sunday School - Official Members Roster</p>
+          <h1>${branding.nameAm}</h1>
+          <h2 style="color: #0F4C81; font-size: 15px; font-weight: 700; margin: 2px 0;">${branding.churchName}</h2>
+          <p style="color: #5B6B7C; font-size: 11px; margin: 1px 0;">${branding.locationLine} | ${branding.locationLineEn}</p>
+          <p style="color: #F2B233; font-size: 11px; font-weight: 600; margin-top: 2px;">${branding.nameEn} - Official Members Roster</p>
         </div>
         <div class="cross-icon">✝</div>
       </div>
@@ -645,7 +701,7 @@ export class MembersExportService {
       </table>
 
       <div class="footer">
-        <div>አዕማደ ሰላም ሰንበት ትምህርት ቤት አስተዳደር</div>
+        <div>${branding.nameAm} • ${branding.churchName} (${branding.locationLine})</div>
         <div>ገጽ 1 / 1</div>
       </div>
     `);
@@ -674,14 +730,16 @@ export class MembersExportService {
       : `<div style="width: 110px; height: 110px; background: #E8F1FB; border-radius: 8px; border: 2px dashed #0F4C81; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #5B6B7C; text-align: center; padding: 6px;">ፎቶ አልተጫነም</div>`;
 
     const qrDataUrl = await QRCode.toDataURL(member.memberNo, { margin: 1, width: 100 });
+    const branding = await this.getBranding();
 
     const html = this.getHtmlWrapper(`
       <div class="header">
         <div class="cross-icon">✝</div>
         <div class="org-title">
-          <h1>በኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን</h1>
-          <h2>አዕማደ ሰላም ሰንበት ትምህርት ቤት</h2>
-          <p>የአባል ሙሉ መረጃ (Member Official Profile)</p>
+          <h1>${branding.nameAm}</h1>
+          <h2 style="color: #0F4C81; font-size: 15px; font-weight: 700; margin: 2px 0;">${branding.churchName}</h2>
+          <p style="color: #5B6B7C; font-size: 11px; margin: 1px 0;">${branding.locationLine}</p>
+          <p style="color: #F2B233; font-size: 11px; font-weight: 600; margin-top: 2px;">የአባል ሙሉ መረጃ (${branding.nameEn} Profile)</p>
         </div>
         <div class="cross-icon">✝</div>
       </div>
@@ -739,8 +797,8 @@ export class MembersExportService {
       </table>
 
       <div class="footer">
-        <div>አዕማደ ሰላም ሰንበት ትምህርት ቤት</div>
-        <div>የተዘጋጀበት ቀን: ${new Date().toISOString().split('T')[0]}</div>
+        <div>${branding.nameAm} • ${branding.churchName}</div>
+        <div>${branding.locationLine} | የተዘጋጀበት ቀን: ${new Date().toISOString().split('T')[0]}</div>
       </div>
     `);
 
@@ -771,6 +829,8 @@ export class MembersExportService {
     const photoTag = member.photoUrl
       ? `<img src="${member.photoUrl}" style="width: 80px; height: 95px; object-fit: cover; border-radius: 6px; border: 2px solid #0F4C81;" alt="Photo" />`
       : `<div style="width: 80px; height: 95px; background: #E8F1FB; border-radius: 6px; border: 1px solid #0F4C81; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #5B6B7C; text-align: center;">ፎቶ</div>`;
+
+    const branding = await this.getBranding();
 
     const html = `<!DOCTYPE html>
 <html lang="am">
@@ -875,8 +935,9 @@ export class MembersExportService {
 <body>
   <div class="id-card">
     <div class="card-header">
-      <h1>አዕማደ ሰላም ሰንበት ትምህርት ቤት</h1>
-      <h2>AEMADE SELAM SUNDAY SCHOOL MEMBER ID CARD</h2>
+      <h1>${branding.nameAm}</h1>
+      <h2 style="font-size: 8px; color: #FFFFFF; margin: 1px 0;">${branding.churchName}</h2>
+      <p style="font-size: 7.5px; color: #F2B233; margin: 0;">${branding.locationLine} • ${branding.nameEn.toUpperCase()}</p>
     </div>
     <div class="card-body">
       <div>
@@ -895,7 +956,7 @@ export class MembersExportService {
       </div>
     </div>
     <div class="card-footer">
-      <span>የተመዘገበበት: ${member.joinedAt ? new Date(member.joinedAt).getFullYear() : '2026'}</span>
+      <span>${branding.churchName}</span>
       <span>የአባልነት መታወቂያ ካርድ</span>
     </div>
   </div>
@@ -963,13 +1024,16 @@ export class MembersExportService {
       `;
     }
 
+    const branding = await this.getBranding();
+
     const html = this.getHtmlWrapper(`
       <div class="header">
         <div class="cross-icon">✝</div>
         <div class="org-title">
-          <h1>በኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን</h1>
-          <h2>አዕማደ ሰላም ሰንበት ትምህርት ቤት</h2>
-          <p>Aemade Selam Sunday School Administration</p>
+          <h1>${branding.nameAm}</h1>
+          <h2 style="color: #0F4C81; font-size: 15px; font-weight: 700; margin: 2px 0;">${branding.churchName}</h2>
+          <p style="color: #5B6B7C; font-size: 11px; margin: 1px 0;">${branding.locationLine} | ${branding.locationLineEn}</p>
+          <p style="color: #F2B233; font-size: 11px; font-weight: 600; margin-top: 2px;">${branding.nameEn} Administration</p>
         </div>
         <div class="cross-icon">✝</div>
       </div>
@@ -993,26 +1057,29 @@ export class MembersExportService {
         ${bodyAm}
       </div>
 
-      <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+      <div style="margin-top: 40px; display: flex; justify-content: space-between;">
         <div style="text-align: center;">
           <div style="border-bottom: 1px dotted #0F2438; width: 180px; margin-bottom: 6px;"></div>
           <div style="font-size: 12px; font-weight: 600; color: #0F2438;">ዋና ጸሐፊ</div>
-          <div style="font-size: 10px; color: #5B6B7C;">አዕማደ ሰላም ሰንበት ትምህርት ቤት</div>
+          <div style="font-size: 10px; color: #5B6B7C;">${branding.nameAm}</div>
+          <div style="font-size: 9px; color: #7B8B9C;">${branding.churchName}</div>
         </div>
-        <div style="text-align: center; border: 2px dashed #F2B233; padding: 12px 20px; border-radius: 8px;">
+        <div style="text-align: center; border: 2px dashed #F2B233; padding: 10px 18px; border-radius: 8px;">
           <div style="color: #0F4C81; font-size: 12px; font-weight: 700;">የሰንበት ትምህርት ቤቱ ማኅተም</div>
           <div style="font-size: 9px; color: #5B6B7C; margin-top: 4px;">Official Seal</div>
+          <div style="font-size: 8px; color: #7B8B9C; margin-top: 2px;">${branding.churchName}</div>
         </div>
         <div style="text-align: center;">
           <div style="border-bottom: 1px dotted #0F2438; width: 180px; margin-bottom: 6px;"></div>
           <div style="font-size: 12px; font-weight: 600; color: #0F2438;">ሊቀመንበር</div>
-          <div style="font-size: 10px; color: #5B6B7C;">አዕማደ ሰላም ሰንበት ትምህርት ቤት</div>
+          <div style="font-size: 10px; color: #5B6B7C;">${branding.nameAm}</div>
+          <div style="font-size: 9px; color: #7B8B9C;">${branding.churchName}</div>
         </div>
       </div>
 
       <div class="footer">
-        <div>አዕማደ ሰላም ሰንበት ትምህርት ቤት ጽ/ቤት | ስልክ: +251 11 000 0000</div>
-        <div>ኢሜይል: info@aemadeselam.org</div>
+        <div>${branding.nameAm} • ${branding.churchName}</div>
+        <div>${branding.locationLine}</div>
       </div>
     `);
 

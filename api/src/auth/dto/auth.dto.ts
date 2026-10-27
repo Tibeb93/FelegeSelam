@@ -41,6 +41,11 @@ export class RegisterDto {
   @ApiProperty({ enum: Sex, example: Sex.male })
   @IsEnum(Sex)
   sex: Sex;
+
+  @ApiPropertyOptional({ example: 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል' })
+  @IsString()
+  @IsOptional()
+  parish?: string;
 }
 
 export class LoginDto {

@@ -67,7 +67,7 @@ test.describe('Phase 9: Admin Members Screens', () => {
     await page.locator('input[name="email"]').fill(testEmail);
 
     // Fill address & church information
-    await page.locator('input[name="parish"]').fill('ደብረ ሰላም መድኃኔዓለም');
+    await page.locator('input[name="parish"]').fill('ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል');
     await page.locator('input[name="confessionFather"]').fill('ቀሲስ አስራት');
     await page.locator('input[name="occupation"]').fill('መምህር (Teacher)');
 

@@ -129,7 +129,7 @@ test.describe('Phase 13: Public Website and Member Portal Suite', () => {
 
     // Verify Official ID Card elements
     await expect(page.locator('#printable-id-card')).toBeVisible();
-    await expect(page.getByText(/ደብረ ሰላም ቅዱስ እስጢፋኖስ/i).first()).toBeVisible();
+    await expect(page.getByText(/ፈለገ ሰላም ቅዱስ ጊዮርጊስ/i).first()).toBeVisible();
 
     // Check QR code SVG exists
     const qrCode = page.locator('#printable-id-card svg').last();

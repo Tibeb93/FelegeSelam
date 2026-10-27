@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { useSiteIdentity } from '@/hooks/useSiteIdentity';
 
 interface ContactPageProps {
   params: { locale: string };
@@ -24,6 +25,7 @@ interface ContactPageProps {
 
 export default function ContactPage({ params: { locale } }: ContactPageProps) {
   const t = useTranslations('Website');
+  const siteIdentity = useSiteIdentity(locale);
   const [formData, setFormData] = useState({
     name: '',
     emailOrPhone: '',
@@ -75,7 +77,7 @@ export default function ContactPage({ params: { locale } }: ContactPageProps) {
                   {t('contactInfo')}
                 </h2>
                 <p className="text-xs text-secondary font-medium">
-                  {locale === 'am' ? 'ደብረ ሰላም ቅዱስ እስጢፋኖስ' : 'Debre Selam St. Stephen'}
+                  {siteIdentity.churchName}
                 </p>
               </div>
             </div>
@@ -85,25 +87,52 @@ export default function ContactPage({ params: { locale } }: ContactPageProps) {
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <strong className="block text-foreground">{locale === 'am' ? 'አድራሻ' : 'Address'}</strong>
-                  <span>{t('contactAddress')}</span>
+                  <span>{siteIdentity.address}</span>
+                  <span className="block text-xs text-muted-foreground mt-0.5">
+                    {siteIdentity.regionCountry}
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <strong className="block text-foreground">{locale === 'am' ? 'ስልክ' : 'Phone'}</strong>
-                  <span>+251 91 123 4567 / +251 11 551 2345</span>
+              {siteIdentity.hasPhone && (
+                <div className="flex items-start gap-3">
+                  <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block text-foreground">{locale === 'am' ? 'ስልክ' : 'Phone'}</strong>
+                    <span>{siteIdentity.phone}</span>
+                    {siteIdentity.alternatePhone && (
+                      <span className="block text-xs">{siteIdentity.alternatePhone}</span>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <strong className="block text-foreground">{locale === 'am' ? 'ኢሜይል' : 'Email'}</strong>
-                  <span>info@aemadeselam.org</span>
+              {siteIdentity.hasEmail && (
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block text-foreground">{locale === 'am' ? 'ኢሜይል' : 'Email'}</strong>
+                    <span>{siteIdentity.email}</span>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {siteIdentity.hasMapLink && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block text-foreground">{locale === 'am' ? 'ካርታ' : 'Map'}</strong>
+                    <a
+                      href={siteIdentity.mapLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline text-xs font-semibold"
+                    >
+                      {locale === 'am' ? 'በGoogle Maps ይመልከቱ →' : 'View on Google Maps →'}
+                    </a>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
@@ -118,8 +147,8 @@ export default function ContactPage({ params: { locale } }: ContactPageProps) {
             <div className="rounded-2xl border border-secondary/30 bg-secondary/10 p-4">
               <p className="text-xs text-foreground font-semibold leading-relaxed">
                 {locale === 'am'
-                  ? 'የሰንበት ትምህርት ቤታችን ጽሕፈት ቤት በደብረ ሰላም ቅዱስ እስጢፋኖስ ቅጥር ግቢ ውስጥ ይገኛል።'
-                  : 'The Sunday School office is located within the sacred grounds of Debre Selam St. Stephen Church.'}
+                  ? `የሰንበት ትምህርት ቤታችን ጽሕፈት ቤት በፍኖተ ሰላም ${siteIdentity.churchName} ቅጥር ግቢ ውስጥ ይገኛል።`
+                  : `The Sunday School office is located within the sacred grounds of ${siteIdentity.churchName} in ${siteIdentity.town}, West Gojjam.`}
               </p>
             </div>
           </div>

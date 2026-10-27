@@ -158,6 +158,7 @@ function LoginForm({ locale }: { locale: string }) {
                 name="identifier"
                 label={t('emailOrPhone')}
                 placeholder="example@felegeselam.org / 0911000000"
+                autoComplete="username"
                 required
               />
 
@@ -166,6 +167,7 @@ function LoginForm({ locale }: { locale: string }) {
                 type="password"
                 label={t('password')}
                 placeholder="••••••••"
+                autoComplete="current-password"
                 required
               />
 
@@ -179,6 +181,7 @@ function LoginForm({ locale }: { locale: string }) {
               </div>
 
               <PrimaryButton
+                id="login-submit-button"
                 type="submit"
                 disabled={!mounted || isSubmitting}
                 loading={isSubmitting}

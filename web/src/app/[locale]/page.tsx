@@ -3,10 +3,8 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import {
   Church,
-  BookOpen,
   Music,
   Calendar,
-  Sparkles,
   ChevronRight,
   ShieldCheck,
   Award,
@@ -18,10 +16,10 @@ import {
 import { PublicHeader } from '@/components/public/PublicHeader';
 import { PublicFooter } from '@/components/public/PublicFooter';
 import { SpiritualBanner } from '@/components/public/SpiritualBanner';
+import { PublicHomeHero } from '@/components/public/PublicHomeHero';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SchoolLogo } from '@/components/common/SchoolLogo';
 
 interface PageProps {
   params: { locale: string };
@@ -71,7 +69,7 @@ export default async function HomePage({ params: { locale } }: PageProps) {
     },
     {
       id: 'mezmur-2',
-      title: 'እስጢፋኖስ ቀዳሜ ሰማዕት',
+      title: 'ጊዮርጊስ ኃያል',
       singer: 'የሰንበት ት/ቤቱ መዘምራን',
       category: 'የቅዱሳን መታሰቢያ',
       duration: '5:02',
@@ -92,77 +90,8 @@ export default async function HomePage({ params: { locale } }: PageProps) {
 
       {/* 2. Main Content Landmark for SEO & Lighthouse Accessibility */}
       <main id="main-content" className="flex-1" tabIndex={-1}>
-        {/* Hero Section */}
-        <section className="relative overflow-hidden border-b border-[#0A2E52] bg-gradient-to-b from-[#0A2E52] via-[#0F4C81] to-[#0A2E52] text-white py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-4xl text-center space-y-6">
-              {/* Circular School Logo */}
-              <div className="flex justify-center mb-2">
-                <SchoolLogo size={96} />
-              </div>
-
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs sm:text-sm font-semibold text-[#F2B233] shadow-xs">
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-                <span>
-                  {locale === 'am' ? 'ደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን' : 'Debre Selam St. Stephen Church'}
-                </span>
-              </div>
-
-              {/* Large white Amharic welcome message */}
-              <h1 className="text-3xl font-black tracking-tight text-white sm:text-5xl md:text-6xl leading-tight">
-                {locale === 'am' ? 'እንኳን ወደ አዕማደ ሰላም ሰንበት ትምህርት ቤት በደህና መጡ' : 'Welcome to Aemade Selam Sunday School'}
-              </h1>
-
-              <p className="text-lg text-[#E8F1FB] font-semibold tracking-wide sm:text-2xl">
-                {t('heroTitle')}
-              </p>
-
-              <p className="mx-auto max-w-2xl text-sm sm:text-base md:text-lg text-white/80 leading-relaxed">
-                {locale === 'am'
-                  ? 'የተዋሕዶ ልጆችን በኦርቶዶክሳዊ እምነት፣ ሥርዓትና ትውፊት አንፆ ለቤተ ክርስቲያንና ለአገር የሚያበቃ መንፈሳዊ የትምህርት ማዕከል'
-                  : 'Nurturing generations in Orthodox Christian doctrine, holy liturgy, and sacred tradition to serve the Church and society.'}
-              </p>
-
-              {/* CTAs */}
-              <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-                <Button
-                  asChild
-                  size="lg"
-                  className="min-h-[48px] bg-[#F2B233] text-[#0F2438] hover:bg-[#e0a42b] shadow-lg hover:shadow-xl font-bold text-base px-8 rounded-xl transition-all"
-                >
-                  <Link href={`/${locale}/courses`}>
-                    <BookOpen className="mr-2 h-5 w-5" aria-hidden="true" />
-                    <span>{t('exploreCourses')}</span>
-                  </Link>
-                </Button>
-
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="min-h-[48px] border-2 border-white/30 text-white bg-white/5 hover:bg-white/15 text-base px-6 rounded-xl transition-all"
-                >
-                  <Link href={`/${locale}/mezmur`}>
-                    <Music className="mr-2 h-5 w-5 text-[#F2B233]" aria-hidden="true" />
-                    <span>{t('listenMezmur')}</span>
-                  </Link>
-                </Button>
-
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="lg"
-                  className="min-h-[48px] text-[#E8F1FB] hover:bg-white/10 text-base px-6 rounded-xl"
-                >
-                  <Link href={`/${locale}/calendar`}>
-                    <Calendar className="mr-2 h-5 w-5 text-[#F2B233]" aria-hidden="true" />
-                    <span>{t('viewCalendar')}</span>
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Dynamic & Configurable Hero Section */}
+        <PublicHomeHero locale={locale} />
 
         {/* Spiritual Banner Section: Today's Sinksar & Urgent Notice */}
         <section className="container mx-auto px-4 py-8">
@@ -429,8 +358,8 @@ export default async function HomePage({ params: { locale } }: PageProps) {
                       <span className="text-xs text-[#0F4C81] dark:text-[#68A7E0] font-bold">ጥር 11</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{locale === 'am' ? 'ቅዱስ እስጢፋኖስ (ጠባቂያችን)' : 'St. Stephen (Patron Feast)'}</span>
-                      <span className="text-xs text-[#F2B233] font-bold">ታኅሣሥ 17</span>
+                      <span className="font-medium">{locale === 'am' ? 'ቅዱስ ጊዮርጊስ (የካቴድራሉ ጠባቂ)' : 'St. George (Cathedral Patron Feast)'}</span>
+                      <span className="text-xs text-[#F2B233] font-bold">ሚያዝያ 23</span>
                     </div>
                   </div>
                 </div>

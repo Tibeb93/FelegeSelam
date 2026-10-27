@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { DEFAULT_SITE_IDENTITY } from '../common/site-identity';
 
 @Injectable()
 export class MailService {
@@ -21,6 +22,11 @@ export class MailService {
    * Generates a branded HTML email wrapper
    */
   private getEmailHtml(title: string, bodyContent: string): string {
+    const schoolNameAm = DEFAULT_SITE_IDENTITY.school.nameAm;
+    const churchNameAm = DEFAULT_SITE_IDENTITY.church.nameAm;
+    const churchNameEn = DEFAULT_SITE_IDENTITY.church.nameEn;
+    const combinedAm = DEFAULT_SITE_IDENTITY.location.combinedAm;
+
     return `<!DOCTYPE html>
 <html lang="am">
 <head>
@@ -43,15 +49,15 @@ export class MailService {
 <body>
   <div class="email-container">
     <div class="email-header">
-      <h1>አዕማደ ሰላም ሰንበት ትምህርት ቤት</h1>
-      <p>ደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን</p>
+      <h1>${schoolNameAm}</h1>
+      <p>${churchNameAm}</p>
     </div>
     <div class="email-body">
       ${bodyContent}
     </div>
     <div class="email-footer">
-      <p>© ${new Date().getFullYear()} አዕማደ ሰላም ሰንበት ትምህርት ቤት • Debre Selam St. Stephen Church</p>
-      <p>አዲስ አበባ፣ ኢትዮጵያ • info@aemade.org</p>
+      <p>© ${new Date().getFullYear()} ${schoolNameAm} • ${churchNameEn}</p>
+      <p>${combinedAm}</p>
     </div>
   </div>
 </body>
@@ -81,7 +87,7 @@ export class MailService {
     const html = this.getEmailHtml(
       'እንኳን ወደ አዕማደ ሰላም በደህና መጡ (Welcome)',
       `<h3>የተከበሩ ${fullName}፤</h3>
-       <p>ወደ ደብረ ሰላም ቅዱስ እስጢፋኖስ አዕማደ ሰላም ሰንበት ትምህርት ቤት የትምህርትና የአባላት ፖርታል በደህና መጡ!</p>
+       <p>ወደ ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል አዕማደ ሰላም ሰንበት ትምህርት ቤት የትምህርትና የአባላት ፖርታል በደህና መጡ!</p>
        <p>በመለያዎ በመግባት መንፈሳዊ ትምህርቶችን መከታተል፣ መዝሙራትን ማዳመጥ፣ እና የቤተክርስቲያን መርሐ-ግብሮችን መከታተል ይችላሉ።</p>
        <div style="text-align: center;">
          <a href="http://localhost:3001" class="btn-cta">ወደ ፖርታሉ ይግቡ</a>

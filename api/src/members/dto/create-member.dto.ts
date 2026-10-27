@@ -60,19 +60,19 @@ export class CreateMemberDto {
   @MaxLength(191)
   email?: string;
 
-  @ApiPropertyOptional({ example: 'አዲስ አበባ', description: 'Region (ክልል)' })
+  @ApiPropertyOptional({ example: 'አማራ ክልል', description: 'Region (ክልል)' })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   region?: string;
 
-  @ApiPropertyOptional({ example: 'አዲስ አበባ', description: 'Zone (ዞን)' })
+  @ApiPropertyOptional({ example: 'ምዕራብ ጎጃም ዞን', description: 'Zone (ዞን)' })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   zone?: string;
 
-  @ApiPropertyOptional({ example: 'የካ', description: 'Woreda (ወረዳ)' })
+  @ApiPropertyOptional({ example: 'ፍኖተ ሰላም', description: 'Woreda (ወረዳ)' })
   @IsOptional()
   @IsString()
   @MaxLength(100)
@@ -90,7 +90,7 @@ export class CreateMemberDto {
   addressDetail?: string;
 
   @ApiPropertyOptional({
-    example: 'ደብረ ሰላም መድኃኔዓለም',
+    example: 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል',
     description: 'Parish church (የአጥቢያ ቤተክርስቲያን)',
   })
   @IsOptional()

@@ -4,6 +4,8 @@ import * as QRCode from 'qrcode';
 import type { Browser } from 'puppeteer';
 import * as fs from 'fs';
 import { Contribution, Member } from '@prisma/client';
+import { DEFAULT_SITE_IDENTITY } from '../common/site-identity';
+import { gregorianToEthiopian } from '../common/ethiopian-calendar';
 
 export type ContributionWithMember = Contribution & {
   member: Pick<
@@ -262,7 +264,10 @@ export class ContributionsReceiptService {
         <div class="receipt-border">
           <div class="header">
             <div class="header-left">
-              <h1>አዕማደ ሰላም ሰንበት ትምህርት ቤት</h1>
+              <h1>${DEFAULT_SITE_IDENTITY.school.nameAm}</h1>
+              <div style="font-size: 11px; color: #0F4C81; font-weight: 600; margin-bottom: 3px;">
+                ${DEFAULT_SITE_IDENTITY.church.nameAm} • ${DEFAULT_SITE_IDENTITY.location.combinedAm}
+              </div>
               <h2>የገቢ ደረሰኝ ቫውቸር (Official Income Receipt)</h2>
             </div>
             <div class="receipt-badge">
@@ -325,7 +330,8 @@ export class ContributionsReceiptService {
               <div class="sign-line">የገንዘብ ያዥ ፊርማ (Cashier)</div>
             </div>
             <div style="text-align: center; margin-top: 15px;">
-              የሰንበት ትምህርት ቤቱ ይፋዊ ማህተም (Official Stamp)
+              <div style="font-weight: 600; color: #0F4C81;">${DEFAULT_SITE_IDENTITY.church.nameAm}</div>
+              <div style="font-size: 8px; color: #666;">${DEFAULT_SITE_IDENTITY.school.nameAm} ይፋዊ ማህተም</div>
             </div>
             <div>
               <div class="sign-line">የከፋዩ ፊርማ (Payer)</div>
@@ -359,8 +365,12 @@ export class ContributionsReceiptService {
     contributions: ContributionWithMember[],
     summary: { totalAmount: number; totalCount: number },
   ): Promise<Buffer> {
+    const ethDate = gregorianToEthiopian(new Date());
+    const ethDateStr = `${ethDate.day} ${ethDate.monthNameAm} ${ethDate.year} ዓ.ም.`;
+    const gregDateStr = new Date().toISOString().split('T')[0];
+
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'አዕማደ ሰላም ሰንበት ትምህርት ቤት';
+    workbook.creator = `${DEFAULT_SITE_IDENTITY.school.nameAm} - ${DEFAULT_SITE_IDENTITY.church.nameAm}`;
     workbook.created = new Date();
 
     const worksheet = workbook.addWorksheet('Contributions', {
@@ -370,7 +380,7 @@ export class ContributionsReceiptService {
     // Title
     worksheet.mergeCells('A1', 'J1');
     const titleCell = worksheet.getCell('A1');
-    titleCell.value = 'አዕማደ ሰላም ሰንበት ት/ቤት - የገቢና የመዋጮ መዝገብ (Contributions Register)';
+    titleCell.value = `${DEFAULT_SITE_IDENTITY.church.nameAm} • ${DEFAULT_SITE_IDENTITY.school.nameAm} (${DEFAULT_SITE_IDENTITY.location.combinedAm}) — የገቢና የመዋጮ መዝገብ`;
     titleCell.font = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = {
       type: 'pattern',
@@ -383,7 +393,7 @@ export class ContributionsReceiptService {
     // Subtitle & Stats
     worksheet.mergeCells('A2', 'J2');
     const subCell = worksheet.getCell('A2');
-    subCell.value = `ጠቅላላ የተሰበሰበ ገቢ፦ ${summary.totalAmount.toLocaleString()} ብር  |  ጠቅላላ ደረሰኞች፦ ${summary.totalCount}  |  ቀን፦ ${new Date().toISOString().split('T')[0]}`;
+    subCell.value = `ካቴድራል፦ ${DEFAULT_SITE_IDENTITY.church.nameAm}  |  ጠቅላላ የተሰበሰበ ገቢ፦ ${summary.totalAmount.toLocaleString()} ብር  |  ጠቅላላ ደረሰኞች፦ ${summary.totalCount}  |  ቀን (Eth / Greg)፦ ${ethDateStr} (${gregDateStr})`;
     subCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF0F2438' } };
     subCell.fill = {
       type: 'pattern',

@@ -1,19 +1,33 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SettingsController } from './settings.controller';
 import { SettingsService } from './settings.service';
+import { StorageService } from '../storage/storage.service';
 
 describe('SettingsController', () => {
   let controller: SettingsController;
   let service: SettingsService;
+  let storage: StorageService;
 
   const mockSettingsService = {
-    getPublicSettings: jest.fn().mockResolvedValue({ school_name: 'Aemade Selam' }),
+    getPublicSettings: jest.fn().mockResolvedValue({ siteIdentity: { nameAm: 'አዕማደ ሰላም' } }),
     getCalendarSettings: jest.fn().mockResolvedValue({ fastingSeasons: [], majorFeasts: [] }),
-    upsertSetting: jest.fn().mockResolvedValue({ id: '1', settingKey: 'k', settingValue: {} }),
+    upsertSetting: jest.fn().mockResolvedValue({ settingKey: 'k', settingValue: {} }),
     findAll: jest.fn().mockResolvedValue([{ settingKey: 'k', settingValue: {} }]),
     findOne: jest.fn().mockResolvedValue({ settingKey: 'k', settingValue: {} }),
-    update: jest.fn().mockResolvedValue({ settingKey: 'k', settingValue: {} }),
-    batchUpdate: jest.fn().mockResolvedValue({ updated: 1 }),
+    batchUpdate: jest.fn().mockResolvedValue([{ settingKey: 'k', settingValue: {} }]),
+    getRolesMatrix: jest.fn().mockResolvedValue({ modules: [], roles: [] }),
+    updateRolesMatrix: jest.fn().mockResolvedValue([]),
+    getDangerStats: jest.fn().mockResolvedValue({ softDeletedMembers: 0, totalAuditLogs: 10 }),
+    restoreSoftDeletedMembers: jest.fn().mockResolvedValue({ restoredCount: 0 }),
+    purgeAuditLogs: jest.fn().mockResolvedValue({ purgedCount: 5 }),
+    generateBackup: jest.fn().mockResolvedValue({ metadata: {}, data: {} }),
+    getVersions: jest.fn().mockResolvedValue([]),
+    restoreVersion: jest.fn().mockResolvedValue({ settingKey: 'k', settingValue: {} }),
+    resetToDefault: jest.fn().mockResolvedValue({ settingKey: 'k', settingValue: {} }),
+  };
+
+  const mockStorageService = {
+    saveBrandingImage: jest.fn().mockResolvedValue('/uploads/branding/logo.png'),
   };
 
   beforeEach(async () => {
@@ -24,11 +38,16 @@ describe('SettingsController', () => {
           provide: SettingsService,
           useValue: mockSettingsService,
         },
+        {
+          provide: StorageService,
+          useValue: mockStorageService,
+        },
       ],
     }).compile();
 
     controller = module.get<SettingsController>(SettingsController);
     service = module.get<SettingsService>(SettingsService);
+    storage = module.get<StorageService>(StorageService);
   });
 
   it('should be defined', () => {
@@ -37,37 +56,52 @@ describe('SettingsController', () => {
 
   it('should return public settings', async () => {
     const result = await controller.getPublicSettings();
-    expect(result).toEqual({ school_name: 'Aemade Selam' });
+    expect(result).toHaveProperty('siteIdentity');
     expect(service.getPublicSettings).toHaveBeenCalled();
   });
 
-  it('should return calendar data', async () => {
-    const result = await controller.getCalendarData();
-    expect(result).toHaveProperty('fastingSeasons');
-    expect(service.getCalendarSettings).toHaveBeenCalled();
+  it('should get and update roles matrix', async () => {
+    await controller.getRolesMatrix();
+    expect(service.getRolesMatrix).toHaveBeenCalled();
+
+    await controller.updateRolesMatrix({ matrix: [{ roleId: 1, permissions: ['*'] }] }, 'admin-1');
+    expect(service.updateRolesMatrix).toHaveBeenCalledWith(
+      [{ roleId: 1, permissions: ['*'] }],
+      'admin-1',
+    );
   });
 
-  it('should find all settings', async () => {
-    const result = await controller.findAll();
-    expect(Array.isArray(result)).toBe(true);
-    expect(service.findAll).toHaveBeenCalled();
+  it('should handle danger zone operations', async () => {
+    await controller.getDangerStats();
+    expect(service.getDangerStats).toHaveBeenCalled();
+
+    await controller.restoreSoftDeletedMembers({ confirmation: 'RESTORE' }, 'admin-1');
+    expect(service.restoreSoftDeletedMembers).toHaveBeenCalledWith('RESTORE', 'admin-1');
+
+    await controller.purgeAuditLogs({ confirmation: 'PURGE', days: 30 }, 'admin-1');
+    expect(service.purgeAuditLogs).toHaveBeenCalledWith('PURGE', 30, 'admin-1');
+
+    await controller.generateBackup({ confirmation: 'BACKUP' }, 'admin-1');
+    expect(service.generateBackup).toHaveBeenCalledWith('BACKUP', 'admin-1');
   });
 
-  it('should find one setting by key', async () => {
-    const result = await controller.findOne('k');
-    expect(result).toHaveProperty('settingKey', 'k');
-    expect(service.findOne).toHaveBeenCalledWith('k');
+  it('should upload branding image via StorageService', async () => {
+    const fakeFile = {
+      buffer: Buffer.from('test'),
+      mimetype: 'image/png',
+      size: 100,
+    } as any;
+
+    const res = await controller.uploadBranding(fakeFile, 'logo');
+    expect(res).toHaveProperty('fileUrl', '/uploads/branding/logo.png');
+    expect(storage.saveBrandingImage).toHaveBeenCalledWith(fakeFile, 'logo');
   });
 
-  it('should update setting', async () => {
-    const result = await controller.updateSetting('k', { settingValue: 'val' });
-    expect(result).toBeDefined();
-    expect(service.upsertSetting).toHaveBeenCalledWith('k', 'val');
-  });
+  it('should get versions and restore version', async () => {
+    await controller.getVersions('site_identity');
+    expect(service.getVersions).toHaveBeenCalledWith('site_identity');
 
-  it('should batch update settings', async () => {
-    const result = await controller.batchUpdate({ settings: { a: { b: 1 } } });
-    expect(result).toEqual({ updated: 1 });
-    expect(service.batchUpdate).toHaveBeenCalledWith({ a: { b: 1 } });
+    await controller.restoreVersion('site_identity', 'ver-1', 'admin-1');
+    expect(service.restoreVersion).toHaveBeenCalledWith('site_identity', 'ver-1', 'admin-1');
   });
 });

@@ -1,9 +1,9 @@
-import { IsString, IsNotEmpty, IsObject } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsObject, IsOptional, IsArray, IsNumber } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateSettingDto {
   @ApiProperty({
-    example: 'school_profile',
+    example: 'site_identity',
     description: 'Setting key identifier',
   })
   @IsString()
@@ -15,25 +15,27 @@ export class UpdateSettingDto {
       nameAm: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት',
       nameEn: 'Aemade Selam Sunday School',
       logoUrl: '/uploads/branding/logo.png',
-      parish: 'ደብረ ሰላም ቅዱስ እስጢፋኖስ',
     },
     description: 'JSON setting value object',
   })
   @IsObject()
   @IsNotEmpty()
   settingValue!: Record<string, any>;
+
+  @ApiPropertyOptional({
+    example: 'Updated school tagline and logo',
+    description: 'Reason for version history tracking',
+  })
+  @IsString()
+  @IsOptional()
+  changeReason?: string;
 }
 
 export class BatchUpdateSettingsDto {
   @ApiProperty({
     example: {
-      school_profile: {
+      site_identity: {
         nameAm: 'አዕማደ ሰላም ሰንበት ትምህርት ቤት',
-        nameEn: 'Aemade Selam Sunday School',
-      },
-      contact_details: {
-        phone: '+251 91 123 4567',
-        email: 'info@aemadeselam.org',
       },
     },
     description: 'Map of setting keys to setting value objects',
@@ -41,4 +43,43 @@ export class BatchUpdateSettingsDto {
   @IsObject()
   @IsNotEmpty()
   settings!: Record<string, Record<string, any>>;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  changeReason?: string;
+}
+
+export class RolePermissionItemDto {
+  @ApiProperty({ example: 2 })
+  @IsNumber()
+  roleId!: number;
+
+  @ApiProperty({ example: ['members:read', 'courses:read'] })
+  @IsArray()
+  permissions!: string[];
+}
+
+export class UpdateRolesMatrixDto {
+  @ApiProperty({ type: [RolePermissionItemDto] })
+  @IsArray()
+  matrix!: RolePermissionItemDto[];
+}
+
+export class DangerActionDto {
+  @ApiProperty({
+    example: 'RESTORE',
+    description: 'Exact uppercase confirmation code (e.g. RESTORE, PURGE, BACKUP)',
+  })
+  @IsString()
+  @IsNotEmpty()
+  confirmation!: string;
+
+  @ApiPropertyOptional({
+    example: 30,
+    description: 'Days retention period for purge operations (default 30)',
+  })
+  @IsNumber()
+  @IsOptional()
+  days?: number;
 }

@@ -108,7 +108,7 @@ describe('Members Module & Exports (e2e)', () => {
           phone: `+251911${Math.floor(100000 + Math.random() * 900000)}`,
           email: `tewodros_${Date.now()}@example.com`,
           status: 'pending',
-          parish: 'ደብረ ሰላም መድኃኔዓለም',
+          parish: 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል',
           confessionFather: 'መልአከ ሰላም አስራት',
         })
         .expect(201);

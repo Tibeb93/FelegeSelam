@@ -1,10 +1,14 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import { useSiteSettings } from '../../providers/SiteSettingsProvider';
 
 interface SchoolLogoProps {
   className?: string;
   size?: number;
   showText?: boolean;
   variant?: 'full' | 'icon' | 'badge';
+  logoUrl?: string;
 }
 
 export function SchoolLogo({
@@ -12,9 +16,38 @@ export function SchoolLogo({
   size = 48,
   showText = false,
   variant: _variant = 'icon',
+  logoUrl: propLogoUrl,
 }: SchoolLogoProps) {
-  return (
-    <div className={`inline-flex items-center gap-3 ${className}`}>
+  const [imageError, setImageError] = useState(false);
+  let contextLogoUrl: string | undefined;
+
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const settings = useSiteSettings();
+    contextLogoUrl = settings?.logoUrl;
+  } catch {
+    // Outside of SiteSettingsProvider
+  }
+
+  const activeLogo = propLogoUrl || contextLogoUrl;
+  const showCustomImage = activeLogo && !imageError && activeLogo !== '/uploads/branding/logo.png';
+
+  const renderLogoImage = () => {
+    if (showCustomImage) {
+      return (
+        <img
+          src={activeLogo}
+          alt="School Logo"
+          width={size}
+          height={size}
+          style={{ width: `${size}px`, height: `${size}px` }}
+          className="shrink-0 object-contain rounded-full shadow-sm select-none"
+          onError={() => setImageError(true)}
+        />
+      );
+    }
+
+    return (
       <svg
         width={size}
         height={size}
@@ -73,7 +106,7 @@ export function SchoolLogo({
         />
         <text fill="#F2B233" fontSize="5.5" fontWeight="600" letterSpacing="0.5">
           <textPath href="#textArcBottom" startOffset="50%" textAnchor="middle">
-            ደብረ ሰላም ቅ/እስጢፋኖስ
+            ፈለገ ሰላም ቅ/ጊዮርጊስ
           </textPath>
         </text>
 
@@ -118,11 +151,16 @@ export function SchoolLogo({
           strokeLinecap="round"
         />
       </svg>
+    );
+  };
 
+  return (
+    <div className={`inline-flex items-center gap-3 ${className}`}>
+      {renderLogoImage()}
       {showText && (
         <div className="flex flex-col">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            ደብረ ሰላም ቅ/እስጢፋኖስ
+            ፈለገ ሰላም ቅ/ጊዮርጊስ
           </span>
           <span className="text-base font-bold text-foreground leading-tight">
             አዕማደ ሰላም ሰንበት ት/ቤት

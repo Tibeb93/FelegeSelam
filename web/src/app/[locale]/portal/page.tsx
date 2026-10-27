@@ -19,6 +19,7 @@ import { apiRequest } from '@/lib/api-client';
 import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSiteIdentity } from '@/hooks/useSiteIdentity';
 
 interface PortalDashboardProps {
   params: { locale: string };
@@ -28,6 +29,7 @@ export default function MemberPortalDashboard({ params: { locale } }: PortalDash
   const t = useTranslations('Portal');
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const siteIdentity = useSiteIdentity(locale);
 
   // Load member full profile with enrollments & attendance
   const { data: memberProfile } = useQuery({
@@ -91,7 +93,7 @@ export default function MemberPortalDashboard({ params: { locale } }: PortalDash
 
             <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
               {memberProfile?.department?.nameAm
-                ? `${memberProfile.department.nameAm} • ደብረ ሰላም ቅዱስ እስጢፋኖስ`
+                ? `${memberProfile.department.nameAm} • ${siteIdentity.churchName}`
                 : locale === 'am'
                 ? 'በዚህ ፖርታል አማካኝነት ትምህርቶችዎን፣ የመገኘት ምዝገባዎንና ውጤትዎን መከታተል ይችላሉ።'
                 : 'Manage your course enrollments, attendance records, exam results, and spiritual activities.'}
@@ -275,7 +277,7 @@ export default function MemberPortalDashboard({ params: { locale } }: PortalDash
                     </div>
 
                     <p className="text-xs text-muted-foreground line-clamp-1">
-                      {ev.location || (locale === 'am' ? 'ደብረ ሰላም ቅዱስ እስጢፋኖስ' : 'Debre Selam St. Stephen')}
+                      {ev.location || siteIdentity.churchName}
                     </p>
 
                     {/* Quick RSVP buttons */}

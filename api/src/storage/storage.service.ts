@@ -22,6 +22,8 @@ export class StorageService implements IStorageService {
     this.ensureDirectoryExists(path.join(this.baseUploadDir, 'mezmurs', 'audio'));
     this.ensureDirectoryExists(path.join(this.baseUploadDir, 'mezmurs', 'video'));
     this.ensureDirectoryExists(path.join(this.baseUploadDir, 'forms'));
+    this.ensureDirectoryExists(path.join(this.baseUploadDir, 'branding'));
+    this.ensureDirectoryExists(path.join(this.baseUploadDir, 'payments'));
   }
 
   private ensureDirectoryExists(dirPath: string): void {
@@ -299,6 +301,176 @@ export class StorageService implements IStorageService {
     } catch (err: any) {
       this.logger.error(`Error saving form field file: ${err.message}`, err.stack);
       throw new BadRequestException('Failed to save uploaded file');
+    }
+  }
+
+  async saveBrandingImage(
+    file: Express.Multer.File,
+    type: 'logo' | 'favicon' | 'hero',
+  ): Promise<string> {
+    if (!file) {
+      throw new BadRequestException('No branding image file provided');
+    }
+
+    if (type === 'logo') {
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
+      if (!allowed.includes(file.mimetype)) {
+        throw new BadRequestException(
+          `Invalid logo file type (${file.mimetype}). Allowed types: PNG, JPEG, WebP, SVG`,
+        );
+      }
+      const maxSizeBytes = 2 * 1024 * 1024; // 2 MB
+      if (file.size > maxSizeBytes) {
+        throw new BadRequestException(
+          `Logo file size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 2 MB maximum limit`,
+        );
+      }
+
+      const brandingDir = path.join(this.baseUploadDir, 'branding');
+      this.ensureDirectoryExists(brandingDir);
+
+      if (file.mimetype === 'image/svg+xml') {
+        const randomName = `logo-${crypto.randomUUID()}.svg`;
+        const dest = path.join(brandingDir, randomName);
+        await fs.promises.writeFile(dest, file.buffer);
+        this.logger.log(`Branding SVG logo saved: ${randomName}`);
+        return `/uploads/branding/${randomName}`;
+      } else {
+        const randomName = `logo-${crypto.randomUUID()}.png`;
+        const dest = path.join(brandingDir, randomName);
+        try {
+          await sharp(file.buffer)
+            .resize(512, 512, {
+              fit: 'inside',
+              withoutEnlargement: true,
+            })
+            .png({ quality: 90 })
+            .toFile(dest);
+          this.logger.log(`Branding raster logo saved: ${randomName}`);
+          return `/uploads/branding/${randomName}`;
+        } catch (err: any) {
+          this.logger.error(`Error resizing logo with sharp: ${err.message}`, err.stack);
+          throw new BadRequestException('Failed to process and optimize logo image');
+        }
+      }
+    } else if (type === 'favicon') {
+      const allowed = [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/x-icon',
+        'image/vnd.microsoft.icon',
+        'image/svg+xml',
+      ];
+      if (!allowed.includes(file.mimetype)) {
+        throw new BadRequestException(
+          `Invalid favicon type (${file.mimetype}). Allowed: PNG, ICO, SVG, JPEG, WebP`,
+        );
+      }
+      const maxSizeBytes = 1 * 1024 * 1024; // 1 MB
+      if (file.size > maxSizeBytes) {
+        throw new BadRequestException(
+          `Favicon file size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 1 MB limit`,
+        );
+      }
+
+      const brandingDir = path.join(this.baseUploadDir, 'branding');
+      this.ensureDirectoryExists(brandingDir);
+
+      if (file.mimetype === 'image/svg+xml' || file.mimetype.includes('icon')) {
+        const ext = file.mimetype === 'image/svg+xml' ? 'svg' : 'ico';
+        const randomName = `favicon-${crypto.randomUUID()}.${ext}`;
+        const dest = path.join(brandingDir, randomName);
+        await fs.promises.writeFile(dest, file.buffer);
+        return `/uploads/branding/${randomName}`;
+      } else {
+        const randomName = `favicon-${crypto.randomUUID()}.png`;
+        const dest = path.join(brandingDir, randomName);
+        await sharp(file.buffer).resize(64, 64, { fit: 'inside' }).png().toFile(dest);
+        return `/uploads/branding/${randomName}`;
+      }
+    } else if (type === 'hero') {
+      const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowed.includes(file.mimetype)) {
+        throw new BadRequestException(
+          `Invalid hero image type (${file.mimetype}). Allowed: JPEG, PNG, WebP`,
+        );
+      }
+      const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+      if (file.size > maxSizeBytes) {
+        throw new BadRequestException(
+          `Hero image size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 5 MB limit`,
+        );
+      }
+
+      const brandingDir = path.join(this.baseUploadDir, 'branding');
+      this.ensureDirectoryExists(brandingDir);
+
+      const randomName = `hero-${crypto.randomUUID()}.webp`;
+      const dest = path.join(brandingDir, randomName);
+      try {
+        await sharp(file.buffer)
+          .resize(1920, 1080, {
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 85 })
+          .toFile(dest);
+        return `/uploads/branding/${randomName}`;
+      } catch (err: any) {
+        this.logger.error(`Error resizing hero image: ${err.message}`, err.stack);
+        throw new BadRequestException('Failed to process hero image');
+      }
+    }
+
+    throw new BadRequestException(`Unknown branding image type: ${type}`);
+  }
+
+  async savePaymentProof(file: Express.Multer.File): Promise<string> {
+    if (!file) {
+      throw new BadRequestException('No payment proof file provided');
+    }
+
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException(
+        `Invalid proof file format (${file.mimetype}). Only JPEG, PNG, WebP, and PDF are allowed.`,
+      );
+    }
+
+    const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+    if (file.size > maxSizeBytes) {
+      throw new BadRequestException(
+        `Proof file size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 5 MB maximum limit.`,
+      );
+    }
+
+    const isPdf = file.mimetype === 'application/pdf';
+    const ext = isPdf ? 'pdf' : file.mimetype === 'image/png' ? 'png' : 'webp';
+    const randomName = `${crypto.randomUUID()}.${ext}`;
+    const destinationPath = path.join(this.baseUploadDir, 'payments', randomName);
+
+    if (isPdf) {
+      await fs.promises.writeFile(destinationPath, file.buffer);
+      this.logger.log(`Payment proof PDF saved: ${randomName}`);
+      return `/uploads/payments/${randomName}`;
+    }
+
+    try {
+      await sharp(file.buffer)
+        .resize(1920, 1920, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .webp({ quality: 85 })
+        .toFile(destinationPath);
+
+      this.logger.log(`Payment proof image processed and saved: ${randomName}`);
+      return `/uploads/payments/${randomName}`;
+    } catch (err: any) {
+      this.logger.error(`Error processing proof image: ${err.message}`, err.stack);
+      throw new BadRequestException('Failed to process payment proof image');
     }
   }
 

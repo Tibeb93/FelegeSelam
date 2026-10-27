@@ -17,7 +17,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage --runInBand",
-    "test:e2e": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json --runInBand",
+    "test:e2e": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json --runInBand --forceExit",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "ts-node prisma/seed.ts",
@@ -54,7 +54,8 @@
     "rxjs": "^7.8.1",
     "sharp": "^0.33.5",
     "swagger-ui-express": "^5.0.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@felegeselam/cms-registry": "file:../packages/cms-registry"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.3.2",
@@ -94,7 +95,11 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.ts$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1",
+      "^@felegeselam/cms-registry$": "<rootDir>/../../packages/cms-registry/dist"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s",

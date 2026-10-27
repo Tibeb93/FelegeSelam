@@ -20,9 +20,11 @@ import { EventsModule } from './events/events.module';
 import { FormsModule } from './forms/forms.module';
 import { ReportsModule } from './reports/reports.module';
 import { ContributionsModule } from './contributions/contributions.module';
+import { PaymentsModule } from './payments/payments.module';
 import { SettingsModule } from './settings/settings.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { BackupsModule } from './backups/backups.module';
+import { CmsModule } from './cms/cms.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { RequestLoggingMiddleware } from './common/middleware/logging.middleware';
@@ -53,12 +55,14 @@ import { RequestLoggingMiddleware } from './common/middleware/logging.middleware
     FormsModule,
     ReportsModule,
     ContributionsModule,
+    PaymentsModule,
     SettingsModule,
     AuditLogsModule,
     BackupsModule,
     AuthModule,
     UsersModule,
     HealthModule,
+    CmsModule,
   ],
   providers: [
     // Global JWT Authentication Guard (all routes protected unless @Public())

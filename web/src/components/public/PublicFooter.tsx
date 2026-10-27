@@ -3,8 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Mail, Phone, MapPin, Heart } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { SchoolLogo } from '../common/SchoolLogo';
+import { useSiteIdentity } from '../../hooks/useSiteIdentity';
 
 interface PublicFooterProps {
   locale: string;
@@ -13,6 +14,7 @@ interface PublicFooterProps {
 export function PublicFooter({ locale }: PublicFooterProps) {
   const t = useTranslations('Website');
   const tCommon = useTranslations('Common');
+  const siteIdentity = useSiteIdentity(locale);
 
   return (
     <footer className="border-t border-[#D7E3F1] dark:border-[#1A3E63] bg-white dark:bg-[#0A2644] text-foreground" aria-label="Website Footer">
@@ -23,25 +25,25 @@ export function PublicFooter({ locale }: PublicFooterProps) {
             <div className="flex items-center gap-3">
               <SchoolLogo size={46} />
               <div>
-                <p className="text-xs font-semibold tracking-wider text-[#0F4C81] dark:text-[#68A7E0] uppercase">
-                  {tCommon('churchName')}
-                </p>
                 <h3 className="text-base font-bold text-foreground">
-                  {tCommon('schoolName')}
+                  {siteIdentity.schoolName}
                 </h3>
+                <p className="text-xs font-semibold tracking-wider text-[#0F4C81] dark:text-[#68A7E0]">
+                  {siteIdentity.churchName}
+                </p>
               </div>
             </div>
 
             <p className="text-sm leading-relaxed text-muted-foreground">
               {locale === 'am'
-                ? 'በደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን አዕማደ ሰላም ሰንበት ትምህርት ቤት፤ የኦርቶዶክሳዊ ተዋሕዶ እምነት፣ ሥርዓትና ትውፊት ማዕከል ነው።'
-                : 'Aemade Selam Sunday School at Debre Selam St. Stephen Church, fostering faith, divine knowledge, and holy tradition.'}
+                ? `በ${siteIdentity.churchName} ${siteIdentity.schoolName}፤ የኦርቶዶክሳዊ ተዋሕዶ እምነት፣ ሥርዓትና ትውፊት ማዕከል ነው። (${siteIdentity.combinedLine})`
+                : `${siteIdentity.schoolName} under ${siteIdentity.churchName}, fostering faith, divine knowledge, and holy tradition in ${siteIdentity.combinedLine}.`}
             </p>
 
             <div className="inline-block rounded-xl bg-[#E8F1FB] dark:bg-[#061B30] border border-[#D7E3F1] dark:border-[#1A3E63] px-3 py-1.5 text-xs font-semibold text-[#0F4C81] dark:text-[#F2B233]">
               {locale === 'am'
-                ? 'መሪ ቃል: በሃይማኖት ጽኑ፥ በመልካም ምግባር አብሩ'
-                : 'Motto: Firm in Faith, Shining in Good Deeds'}
+                ? `መሪ ቃል: ${siteIdentity.tagline}`
+                : `Motto: ${siteIdentity.tagline}`}
             </div>
           </div>
 
@@ -151,20 +153,20 @@ export function PublicFooter({ locale }: PublicFooterProps) {
             <div className="space-y-2.5 text-sm text-muted-foreground">
               <div className="flex items-start gap-2.5">
                 <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                <span>
-                  {locale === 'am'
-                    ? 'አዲስ አበባ፣ ኢትዮጵያ (ደብረ ሰላም ቅዱስ እስጢፋኖስ ቤተ ክርስቲያን)'
-                    : 'Addis Ababa, Ethiopia (Debre Selam St. Stephen Church)'}
-                </span>
+                <span>{siteIdentity.address}</span>
               </div>
-              <div className="flex items-center gap-2.5">
-                <Phone className="h-4 w-4 text-primary shrink-0" />
-                <span>+251 91 123 4567 / +251 11 551 2345</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Mail className="h-4 w-4 text-primary shrink-0" />
-                <span>info@aemadeselam.org</span>
-              </div>
+              {siteIdentity.hasPhone && (
+                <div className="flex items-center gap-2.5">
+                  <Phone className="h-4 w-4 text-primary shrink-0" />
+                  <span>{siteIdentity.phone}</span>
+                </div>
+              )}
+              {siteIdentity.hasEmail && (
+                <div className="flex items-center gap-2.5">
+                  <Mail className="h-4 w-4 text-primary shrink-0" />
+                  <span>{siteIdentity.email}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -174,10 +176,6 @@ export function PublicFooter({ locale }: PublicFooterProps) {
           <p>
             © {new Date().getFullYear()} {tCommon('schoolName')}. {locale === 'am' ? 'መብቱ በሕግ የተጠበቀ ነው።' : 'All rights reserved.'}
           </p>
-          <div className="flex items-center gap-2">
-            <span>{locale === 'am' ? 'በፍቅርና በጸሎት የተዘጋጀ' : 'Built with faith and prayer'}</span>
-            <Heart className="h-3.5 w-3.5 text-red-600 fill-red-600" aria-hidden="true" />
-          </div>
         </div>
       </div>
     </footer>

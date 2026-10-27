@@ -27,7 +27,7 @@
   <path id="textArcBottom" d="M 98,60 A 38,38 0 0,1 22,60" fill="none" />
   <text fill="#F2B233" font-size="5.5" font-weight="600" letter-spacing="0.5">
     <textPath href="#textArcBottom" startOffset="50%" text-anchor="middle">
-      ደብረ ሰላም ቅ/እስጢፋኖስ
+      ፈለገ ሰላም ቅ/ጊዮርጊስ
     </textPath>
   </text>
   <rect x="57" y="27" width="6" height="34" rx="2" fill="url(#goldGradient)" />

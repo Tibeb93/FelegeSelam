@@ -23,8 +23,8 @@ import {
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import { useTheme } from '../../providers/ThemeProvider';
 import { useAuth } from '../../providers/AuthProvider';
-import { DateDisplay } from '../DateDisplay';
 import { SchoolLogo } from '../common/SchoolLogo';
+import { useSiteIdentity } from '../../hooks/useSiteIdentity';
 
 interface PublicHeaderProps {
   locale: string;
@@ -32,10 +32,10 @@ interface PublicHeaderProps {
 
 export function PublicHeader({ locale }: PublicHeaderProps) {
   const t = useTranslations('Website');
-  const tCommon = useTranslations('Common');
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
+  const siteIdentity = useSiteIdentity(locale);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -57,40 +57,22 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#0F4C81] text-white shadow-md border-b border-[#0A2E52] transition-colors">
-      {/* Top micro-bar for church details & quick actions */}
-      <div className="hidden border-b border-white/10 bg-[#0A2E52] py-1.5 px-4 sm:block text-white/80">
-        <div className="container mx-auto flex items-center justify-between text-xs">
-          <div className="flex items-center gap-3">
-            <span className="font-semibold text-white">
-              {locale === 'am' ? 'ደብረ ሰላም ቅዱስ እስጢፋኖስ' : 'Debre Selam Saint Stephen'}
-            </span>
-            <span aria-hidden="true" className="text-white/40">•</span>
-            <span>{locale === 'am' ? 'ስልክ: +251 91 123 4567' : 'Tel: +251 91 123 4567'}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <DateDisplay locale={locale as 'am' | 'en'} />
-            <span aria-hidden="true" className="text-white/40">•</span>
-            <span className="text-[#F2B233] font-bold">
-              {locale === 'am' ? 'በሃይማኖት ጽኑ፥ በመልካም ምግባር አብሩ' : 'Firm in Faith, Shining in Good Deeds'}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Navigation Bar */}
-      <div className="container mx-auto flex items-center justify-between px-4 py-2.5">
-        {/* Brand / Logo */}
+      <div className="container mx-auto flex items-center justify-between px-4 py-2.5 sm:py-3">
+        {/* Brand / Logo: School name with Church name under it */}
         <Link
           href={`/${locale}`}
+          title={`${siteIdentity.schoolName} - ${siteIdentity.churchName}`}
           className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#F2B233] rounded-xl p-1"
         >
           <SchoolLogo size={42} />
           <div className="flex flex-col">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#F2B233]">
-              {tCommon('churchName')}
-            </span>
             <span className="text-base font-bold text-white group-hover:text-[#E8F1FB] transition-colors sm:text-lg leading-tight">
-              {tCommon('schoolName')}
+              {siteIdentity.schoolName}
+            </span>
+            <span className="text-[11px] font-medium text-[#F2B233] leading-tight">
+              {siteIdentity.churchName}
+              <span className="sr-only"> ({siteIdentity.combinedLine})</span>
             </span>
           </div>
         </Link>

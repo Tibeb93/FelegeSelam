@@ -106,7 +106,7 @@ describe('MembersService', () => {
       dob: '2000-01-01',
       educationLevel: 'degree',
       occupation: 'Engineer',
-      residenceArea: 'Addis Ababa',
+      residenceArea: 'Finote Selam',
     } as any);
 
     expect(res).toBeDefined();

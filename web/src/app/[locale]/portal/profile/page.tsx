@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -11,6 +12,7 @@ import {
   Save,
   CheckCircle2,
   AlertCircle,
+  Clock,
   Loader2,
   Church,
   MapPin,
@@ -21,11 +23,13 @@ import { apiRequest } from '@/lib/api-client';
 import { Member } from '@/types/api';
 import { useToast } from '@/providers/ToastProvider';
 import { SchoolLogo } from '@/components/common/SchoolLogo';
+import { useSiteIdentity } from '@/hooks/useSiteIdentity';
 
 export default function PortalProfilePage() {
   const t = useTranslations('Portal');
   const tMembers = useTranslations('Members');
   const queryClient = useQueryClient();
+  const siteIdentity = useSiteIdentity();
   const toast = useToast();
 
   const [activeTab, setActiveTab] = useState<'profile' | 'idcard'>('profile');
@@ -64,6 +68,14 @@ export default function PortalProfilePage() {
   } = useQuery<Member>({
     queryKey: ['members', 'me', 'profile'],
     queryFn: () => apiRequest<Member>('/members/me/profile'),
+  });
+
+  const { data: paymentStatus } = useQuery<{
+    status: 'paid' | 'pending' | 'rejected' | 'not_paid';
+    fee?: { yearLabel: string };
+  }>({
+    queryKey: ['payments', 'my-status'],
+    queryFn: () => apiRequest('/payments/my-status'),
   });
 
   useEffect(() => {
@@ -181,6 +193,33 @@ export default function PortalProfilePage() {
           <p className="text-sm text-muted-foreground mt-1">
             {profile.firstName} {profile.fatherName} ({profile.memberNo})
           </p>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {paymentStatus?.status === 'paid' ? (
+              <Link
+                href="/portal/membership"
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-3 py-0.5 text-xs font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:opacity-90 transition-opacity"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>{paymentStatus.fee?.yearLabel || '2019 ዓ.ም.'} ዓመታዊ ክፍያ፡ የተከፈለ</span>
+              </Link>
+            ) : paymentStatus?.status === 'pending' ? (
+              <Link
+                href="/portal/membership"
+                className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 dark:bg-blue-950/60 px-3 py-0.5 text-xs font-bold text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800 hover:opacity-90 transition-opacity"
+              >
+                <Clock className="h-3.5 w-3.5" />
+                <span>{paymentStatus?.fee?.yearLabel || '2019 ዓ.ም.'} ዓመታዊ ክፍያ፡ በመገምገም ላይ</span>
+              </Link>
+            ) : (
+              <Link
+                href="/portal/membership"
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-0.5 text-xs font-bold text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:opacity-90 transition-opacity"
+              >
+                <AlertCircle className="h-3.5 w-3.5" />
+                <span>{paymentStatus?.fee?.yearLabel || '2019 ዓ.ም.'} ዓመታዊ ክፍያ፡ አልተከፈለም</span>
+              </Link>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -239,10 +278,10 @@ export default function PortalProfilePage() {
                 <SchoolLogo size={38} />
                 <div>
                   <h4 className="font-bold text-[11px] text-[#0F4C81] dark:text-[#F2B233] uppercase tracking-wider">
-                    ደብረ ሰላም ቅዱስ እስጢፋኖስ
+                    {siteIdentity.churchName}
                   </h4>
                   <p className="font-bold text-xs text-foreground font-ethiopic leading-tight">
-                    አዕማደ ሰላም ሰንበት ት/ቤት
+                    {siteIdentity.schoolName}
                   </p>
                 </div>
               </div>
@@ -316,7 +355,7 @@ export default function PortalProfilePage() {
             <div className="mt-5 flex items-center justify-between border-t border-[#D7E3F1] dark:border-[#1A3E63] pt-3">
               <div className="text-[10px] text-muted-foreground leading-tight max-w-[200px]">
                 <p className="font-bold text-foreground">Official Sunday School ID</p>
-                <p>ደብረ ሰላም ቅዱስ እስጢፋኖስ ቤ/ክ - አዲስ አበባ</p>
+                <p>{siteIdentity.churchName} • {siteIdentity.town}</p>
               </div>
               <div className="rounded-lg bg-white p-1.5 shadow-xs border border-[#D7E3F1]">
                 <QRCodeSVG value={qrData} size={64} level="M" />

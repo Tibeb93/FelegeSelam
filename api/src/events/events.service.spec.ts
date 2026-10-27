@@ -13,7 +13,7 @@ describe('EventsService', () => {
     descriptionAm: 'ዓመታዊ የሰንበት ትምህርት ቤት ጉባኤ',
     startDate: new Date('2026-12-01T09:00:00Z'),
     endDate: new Date('2026-12-01T17:00:00Z'),
-    location: 'ደብረ ሰላም አዳራሽ',
+    location: 'ፈለገ ሰላም አዳራሽ',
     capacity: 200,
     isPublished: true,
     createdById: 'u1',
@@ -63,7 +63,7 @@ describe('EventsService', () => {
         titleAm: 'የአብነት ጉባኤ',
         startDate: '2026-12-01T09:00:00Z',
         endDate: '2026-12-01T17:00:00Z',
-        location: 'ደብረ ሰላም አዳራሽ',
+        location: 'ፈለገ ሰላም አዳራሽ',
       } as any,
       'u1',
     );

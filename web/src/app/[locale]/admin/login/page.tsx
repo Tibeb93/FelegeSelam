@@ -12,6 +12,7 @@ import { TextField } from '../../../../components/forms';
 import { ShieldAlert, LogIn, ArrowLeft, KeyRound, Lock, Info } from 'lucide-react';
 import { useToast } from '../../../../providers/ToastProvider';
 import { useAuth } from '../../../../providers/AuthProvider';
+import { useSiteIdentity } from '../../../../hooks/useSiteIdentity';
 
 function AdminLoginForm({ locale }: { locale: string }) {
   const router = useRouter();
@@ -264,6 +265,8 @@ export default function AdminLoginPage({
 }: {
   params: { locale: string };
 }) {
+  const siteIdentity = useSiteIdentity(locale);
+
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-between bg-gradient-to-br from-[#0A2E52] via-[#082442] to-[#041527] px-4 py-8 sm:px-6 lg:px-8 text-white selection:bg-[#F2B233] selection:text-[#0F2438]">
       {/* Top micro-bar: Language Switcher only */}
@@ -275,7 +278,7 @@ export default function AdminLoginPage({
         >
           <SchoolLogo size={36} />
           <span className="font-bold text-sm tracking-wide hidden sm:inline text-white/90">
-            {locale === 'am' ? 'አዕማደ ሰላም' : 'Aemade Selam'}
+            {siteIdentity.schoolName}
           </span>
         </Link>
 
@@ -293,11 +296,14 @@ export default function AdminLoginPage({
               <SchoolLogo size={68} />
             </div>
           </div>
+          <p className="text-xs sm:text-sm font-bold text-[#F2B233] uppercase tracking-wider">
+            {siteIdentity.churchName}
+          </p>
           <h1 className="text-xl sm:text-2xl font-black text-white tracking-wide">
-            {locale === 'am' ? 'አዕማደ ሰላም ሰንበት ትምህርት ቤት' : 'Aemade Selam Sunday School'}
+            {siteIdentity.schoolName}
           </h1>
-          <p className="text-xs sm:text-sm text-[#F2B233] font-medium mt-1">
-            {locale === 'am' ? 'የአስተዳደርና አመራር ፖርታል' : 'Administrative Management Portal'}
+          <p className="text-xs text-white/70 font-normal mt-0.5">
+            {siteIdentity.combinedLine}
           </p>
         </div>
 

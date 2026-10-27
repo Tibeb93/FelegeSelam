@@ -109,7 +109,7 @@ export function MemberForm({
   const isAm = locale === 'am';
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [viewMode, setViewMode] = useState<'stepper' | 'full'>('full');
+  const [viewMode, setViewMode] = useState<'stepper' | 'full'>('stepper');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
@@ -139,12 +139,12 @@ export function MemberForm({
       dateOfBirth: initialData?.dateOfBirth ? initialData.dateOfBirth.split('T')[0] : '',
       phone: initialData?.phone || '',
       email: initialData?.email || '',
-      region: initialData?.region || 'አዲስ አበባ',
-      zone: initialData?.zone || '',
-      woreda: initialData?.woreda || '',
-      kebele: initialData?.kebele || '',
+      region: initialData?.region || (isAm ? 'አማራ ክልል' : 'Amhara Region'),
+      zone: initialData?.zone || (isAm ? 'ምዕራብ ጎጃም ዞን' : 'West Gojjam Zone'),
+      woreda: initialData?.woreda || (isAm ? 'ፍኖተ ሰላም' : 'Finote Selam'),
+      kebele: initialData?.kebele || (isAm ? 'ቀበሌ 01' : 'Kebele 01'),
       addressDetail: initialData?.addressDetail || '',
-      parish: initialData?.parish || 'ደብረ ሰላም መድኃኔዓለም',
+      parish: initialData?.parish || (isAm ? 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል' : 'Felegeselam Kidus Giyorgis Cathedral'),
       confessionFather: initialData?.confessionFather || '',
       departmentId: initialData?.departmentId || undefined,
       educationLevel: initialData?.educationLevel || '',
@@ -475,12 +475,12 @@ export function MemberForm({
                 dateOfBirth: '',
                 phone: '',
                 email: '',
-                region: 'አዲስ አበባ',
-                zone: '',
-                woreda: '',
-                kebele: '',
+                region: isAm ? 'አማራ ክልል' : 'Amhara Region',
+                zone: isAm ? 'ምዕራብ ጎጃም ዞን' : 'West Gojjam Zone',
+                woreda: isAm ? 'ፍኖተ ሰላም' : 'Finote Selam',
+                kebele: isAm ? 'ቀበሌ 01' : 'Kebele 01',
                 addressDetail: '',
-                parish: 'ደብረ ሰላም መድኃኔዓለም',
+                parish: isAm ? 'ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል' : 'Felegeselam Kidus Giyorgis Cathedral',
                 confessionFather: '',
                 departmentId: undefined,
                 educationLevel: '',
@@ -760,28 +760,28 @@ export function MemberForm({
                 <TextField
                   name="region"
                   label={isAm ? 'ክልል / ከተማ አስተዳደር' : 'Region / City'}
-                  placeholder={isAm ? 'ለምሳሌ፡ አዲስ አበባ' : 'Addis Ababa'}
+                  placeholder={isAm ? 'ለምሳሌ፡ አማራ ክልል' : 'Amhara Region'}
                 />
                 <TextField
                   name="zone"
                   label={isAm ? 'ዞን / ክፍለ ከተማ' : 'Zone / Sub-city'}
-                  placeholder={isAm ? 'ለምሳሌ፡ የካ / ቦሌ' : 'Yeka / Bole'}
+                  placeholder={isAm ? 'ለምሳሌ፡ ምዕራብ ጎጃም' : 'West Gojjam'}
                 />
                 <TextField
                   name="woreda"
                   label={isAm ? 'ወረዳ' : 'Woreda'}
-                  placeholder={isAm ? 'ለምሳሌ፡ 08' : '08'}
+                  placeholder={isAm ? 'ለምሳሌ፡ ፍኖተ ሰላም' : 'Finote Selam'}
                 />
                 <TextField
                   name="kebele"
                   label={isAm ? 'ቀበሌ / የቤት ቁጥር' : 'Kebele / House No'}
-                  placeholder={isAm ? 'ለምሳሌ፡ 123' : '123'}
+                  placeholder={isAm ? 'ለምሳሌ፡ ቀበሌ 01' : 'Kebele 01'}
                 />
                 <div className="md:col-span-2">
                   <TextArea
                     name="addressDetail"
                     label={isAm ? 'ልዩ የመኖሪያ አድራሻ (መለያ ምልክት)' : 'Detailed Address / Landmark'}
-                    placeholder={isAm ? 'ለምሳሌ፡ ከቅዱስ ሚካኤል ቤተክርስቲያን ጀርባ፣ ግራዶ ታክሲ ተራ' : 'Behind church, landmark...'}
+                    placeholder={isAm ? 'ለምሳሌ፡ ከካቴድራሉ ጀርባ፣ ልዩ ምልክት...' : 'Behind cathedral, landmark...'}
                     rows={2}
                   />
                 </div>
@@ -808,7 +808,7 @@ export function MemberForm({
                 <TextField
                   name="parish"
                   label={isAm ? 'አጥቢያ ቤተ ክርስቲያን' : 'Parish Church'}
-                  placeholder={isAm ? 'ለምሳሌ፡ ደብረ ሰላም መድኃኔዓለም' : 'Debre Selam Medhanealem'}
+                  placeholder={isAm ? 'ለምሳሌ፡ ፈለገ ሰላም ቅዱስ ጊዮርጊስ ካቴድራል' : 'Felegeselam Kidus Giyorgis Cathedral'}
                 />
                 <TextField
                   name="confessionFather"
