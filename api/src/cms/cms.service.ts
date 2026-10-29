@@ -62,11 +62,16 @@ export const DEFAULT_THEME_TOKENS = {
   },
 };
 
+import { EventBusService } from '../realtime/event-bus.service';
+
 @Injectable()
 export class CmsService {
   private readonly logger = new Logger(CmsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventBusService: EventBusService,
+  ) {}
 
   // -------------------------------------------------------------
   // PUBLIC CMS METHODS
@@ -509,6 +514,16 @@ export class CmsService {
       });
 
       return p;
+    });
+
+    this.eventBusService.emit({
+      type: 'cms.published',
+      target: { isPublic: true },
+      data: {
+        pageId: updated.id,
+        slug: updated.slug,
+        title: updated.titleAm,
+      },
     });
 
     return updated;

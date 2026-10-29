@@ -1,0 +1,398 @@
+{
+  "timestamp": "2026-10-28T18:50:26.903Z",
+  "pages": [
+    {
+      "pageName": "Home (/)",
+      "url": "http://localhost:3001/am",
+      "loadTimeMs": 4430,
+      "metrics": {
+        "ttfb": 1419,
+        "domContentLoaded": 2207,
+        "fcp": 3540
+      },
+      "requestCount": 13,
+      "totalKbTransferred": 0,
+      "duplicates": [
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "count": 2
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "count": 2
+        }
+      ],
+      "requests": [
+        {
+          "url": "http://localhost:3001/am",
+          "method": "GET",
+          "resourceType": "document"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/css/app/%5Blocale%5D/layout.css?v=1793213359712",
+          "method": "GET",
+          "resourceType": "stylesheet"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/webpack.js?v=1793213359712",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/main-app.js?v=1793213359712",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app-pages-internals.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/page.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/layout.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "method": "GET",
+          "resourceType": "other"
+        },
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "method": "GET",
+          "resourceType": "other"
+        },
+        {
+          "url": "http://localhost:3000/api/v1/posts/today",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3000/api/v1/settings/public",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "method": "GET",
+          "resourceType": "fetch"
+        }
+      ]
+    },
+    {
+      "pageName": "About (/about)",
+      "url": "http://localhost:3001/am/about",
+      "loadTimeMs": 16782,
+      "metrics": {
+        "ttfb": 12610,
+        "domContentLoaded": 14098,
+        "fcp": 13808
+      },
+      "requestCount": 12,
+      "totalKbTransferred": 0,
+      "duplicates": [
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "count": 2
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "count": 2
+        }
+      ],
+      "requests": [
+        {
+          "url": "http://localhost:3001/am/about",
+          "method": "GET",
+          "resourceType": "document"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/css/app/%5Blocale%5D/layout.css?v=1793213377821",
+          "method": "GET",
+          "resourceType": "stylesheet"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/webpack.js?v=1793213377821",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/main-app.js?v=1793213377821",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app-pages-internals.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/about/page.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/layout.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "method": "GET",
+          "resourceType": "other"
+        },
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "method": "GET",
+          "resourceType": "other"
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3000/api/v1/settings/public",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "method": "GET",
+          "resourceType": "fetch"
+        }
+      ]
+    },
+    {
+      "pageName": "Mezmur (/mezmur)",
+      "url": "http://localhost:3001/am/mezmur",
+      "loadTimeMs": 9747,
+      "metrics": {
+        "ttfb": 6442,
+        "domContentLoaded": 7067,
+        "fcp": 7100
+      },
+      "requestCount": 15,
+      "totalKbTransferred": 0,
+      "duplicates": [
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "count": 2
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "count": 2
+        }
+      ],
+      "requests": [
+        {
+          "url": "http://localhost:3001/am/mezmur",
+          "method": "GET",
+          "resourceType": "document"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/css/app/%5Blocale%5D/layout.css?v=1793213391484",
+          "method": "GET",
+          "resourceType": "stylesheet"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/webpack.js?v=1793213391484",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/main-app.js?v=1793213391484",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app-pages-internals.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/mezmur/page.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/layout.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/page.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "method": "GET",
+          "resourceType": "other"
+        },
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "method": "GET",
+          "resourceType": "other"
+        },
+        {
+          "url": "http://localhost:3000/api/v1/mezmurs/categories",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3000/api/v1/mezmurs/public?limit=30",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3000/api/v1/settings/public",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "method": "GET",
+          "resourceType": "fetch"
+        }
+      ]
+    },
+    {
+      "pageName": "Admin Dashboard (/admin)",
+      "url": "http://localhost:3001/am/admin",
+      "loadTimeMs": 9842,
+      "metrics": {
+        "ttfb": 6668,
+        "domContentLoaded": 7329,
+        "fcp": 7884
+      },
+      "requestCount": 15,
+      "totalKbTransferred": 0,
+      "duplicates": [
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "count": 2
+        },
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "count": 2
+        }
+      ],
+      "requests": [
+        {
+          "url": "http://localhost:3001/am/admin",
+          "method": "GET",
+          "resourceType": "document"
+        },
+        {
+          "url": "http://localhost:3001/am/admin/login?redirect=%2Fam%2Fadmin",
+          "method": "GET",
+          "resourceType": "document"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/css/app/%5Blocale%5D/layout.css?v=1793213405076",
+          "method": "GET",
+          "resourceType": "stylesheet"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/webpack.js?v=1793213405076",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/main-app.js?v=1793213405076",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app-pages-internals.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/admin/login/page.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/admin/layout.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/layout.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/_next/static/chunks/app/%5Blocale%5D/page.js",
+          "method": "GET",
+          "resourceType": "script"
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3000/api/v1/settings/public",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3001/api/auth/session",
+          "method": "GET",
+          "resourceType": "fetch"
+        },
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "method": "GET",
+          "resourceType": "other"
+        },
+        {
+          "url": "http://localhost:3001/logo.svg",
+          "method": "GET",
+          "resourceType": "other"
+        }
+      ]
+    }
+  ],
+  "navigation": {
+    "initialNavs": 2,
+    "menuClicks": [
+      {
+        "target": "/am/about",
+        "causedFullDocumentNav": true
+      },
+      {
+        "target": "/am/news",
+        "causedFullDocumentNav": false
+      },
+      {
+        "target": "/am/mezmur",
+        "causedFullDocumentNav": false
+      },
+      {
+        "target": "/am/courses",
+        "causedFullDocumentNav": false
+      }
+    ],
+    "totalDocumentNavs": 3
+  }
+}

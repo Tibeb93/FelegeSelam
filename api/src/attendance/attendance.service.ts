@@ -18,6 +18,7 @@ import {
   EnrollmentStatus,
   MemberStatus,
 } from '@prisma/client';
+import { EventBusService } from '../realtime/event-bus.service';
 
 @Injectable()
 export class AttendanceService {
@@ -26,6 +27,7 @@ export class AttendanceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly exportService: AttendanceExportService,
+    private readonly eventBusService: EventBusService,
   ) {}
 
   private getRoleName(user: any): string {
@@ -418,6 +420,25 @@ export class AttendanceService {
           markedBy: user.email || user.id,
         },
       },
+    });
+
+    // Emit live real-time attendance update
+    this.eventBusService.emit({
+      type: 'attendance.updated',
+      target: { roles: ['super_admin', 'admin', 'teacher'] },
+      data: {
+        sessionId,
+        memberId,
+        status: dto.status,
+        sessionDate: session.sessionDate,
+        courseId: session.courseId,
+      },
+    });
+
+    this.eventBusService.emit({
+      type: 'dashboard.stats.changed',
+      target: { roles: ['super_admin', 'admin'] },
+      data: { entity: 'attendance' },
     });
 
     // Return updated session state with the new record

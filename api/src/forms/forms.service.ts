@@ -14,6 +14,7 @@ import { FormAnswersValidator } from './forms-validator';
 import { FormSchemaDefinition } from './dto/form-schema.interface';
 import { READY_FORM_TEMPLATES } from './templates/form-templates.data';
 import { FormStatus, FormResponseStatus, Prisma } from '@prisma/client';
+import { EventBusService } from '../realtime/event-bus.service';
 
 @Injectable()
 export class FormsService {
@@ -23,6 +24,7 @@ export class FormsService {
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
     private readonly formsExportService: FormsExportService,
+    private readonly eventBusService: EventBusService,
   ) {}
 
   private async logAudit(data: {
@@ -410,6 +412,21 @@ export class FormsService {
         memberId,
         status: response.status,
       },
+    });
+
+    this.eventBusService.emit({
+      type: 'form.response.created',
+      target: { roles: ['super_admin', 'admin'] },
+      data: {
+        formId,
+        responseId: response.id,
+      },
+    });
+
+    this.eventBusService.emit({
+      type: 'dashboard.stats.changed',
+      target: { roles: ['super_admin', 'admin'] },
+      data: { entity: 'form_response' },
     });
 
     return response;

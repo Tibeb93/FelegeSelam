@@ -6,6 +6,7 @@ import { ThemeProvider } from '../../providers/ThemeProvider';
 import { ToastProvider } from '../../providers/ToastProvider';
 import { AuthProvider } from '../../providers/AuthProvider';
 import { SiteSettingsProvider } from '../../providers/SiteSettingsProvider';
+import { NavigationProgressBar } from '../../components/common/NavigationProgressBar';
 import '../globals.css';
 
 export const viewport: Viewport = {
@@ -48,7 +49,6 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: '/logo.svg',
-    shortcut: '/logo.svg',
     apple: '/logo.svg',
   },
   openGraph: {
@@ -123,6 +123,7 @@ export default async function RootLayout({
         >
           {locale === 'am' ? 'ወደ ዋናው ይዘት ይለፉ (Skip to Content)' : 'Skip to main content'}
         </a>
+        <NavigationProgressBar />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>
             <SiteSettingsProvider>

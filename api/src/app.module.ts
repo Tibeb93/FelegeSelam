@@ -25,6 +25,7 @@ import { SettingsModule } from './settings/settings.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { BackupsModule } from './backups/backups.module';
 import { CmsModule } from './cms/cms.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { RequestLoggingMiddleware } from './common/middleware/logging.middleware';
@@ -63,6 +64,7 @@ import { RequestLoggingMiddleware } from './common/middleware/logging.middleware
     UsersModule,
     HealthModule,
     CmsModule,
+    RealtimeModule,
   ],
   providers: [
     // Global JWT Authentication Guard (all routes protected unless @Public())

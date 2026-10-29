@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
+import { useLiveEvents } from '../hooks/useLiveEvents';
 
 export interface SiteIdentity {
   nameAm: string;
@@ -282,6 +283,7 @@ const SiteSettingsContext = createContext<SiteSettingsContextType>({
 
 export function SiteSettingsProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
+  useLiveEvents();
 
   const { data, isLoading } = useQuery<PublicSettingsResponse>({
     queryKey: ['public-settings'],
@@ -293,8 +295,9 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
         return DEFAULT_SITE_SETTINGS;
       }
     },
-    staleTime: 30 * 1000, // 30s fresh
-    refetchOnWindowFocus: true,
+    staleTime: 60 * 1000, // 60s fresh
+    gcTime: 10 * 60 * 1000, // 10 minutes cache retention
+    refetchOnWindowFocus: false,
   });
 
   const settings = data || DEFAULT_SITE_SETTINGS;

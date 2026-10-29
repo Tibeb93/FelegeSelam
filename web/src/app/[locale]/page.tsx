@@ -99,7 +99,7 @@ export default async function HomePage({ params: { locale } }: PageProps) {
         </section>
 
         {/* About Highlights */}
-        <section className="container mx-auto px-4 py-12 md:py-16">
+        <section id="about" className="scroll-mt-24 container mx-auto px-4 py-12 md:py-16">
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
             <div className="space-y-5">
               <Badge variant="outline" className="text-[#0F4C81] dark:text-[#68A7E0] border-[#0F4C81]/40 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
@@ -199,7 +199,7 @@ export default async function HomePage({ params: { locale } }: PageProps) {
         </section>
 
         {/* Featured Open Courses */}
-        <section className="border-t border-border/80 bg-muted/30 py-12 md:py-16">
+        <section id="courses" className="scroll-mt-24 border-t border-border/80 bg-muted/30 py-12 md:py-16">
           <div className="container mx-auto px-4 space-y-8">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
@@ -258,7 +258,7 @@ export default async function HomePage({ params: { locale } }: PageProps) {
         </section>
 
         {/* Public Mezmur Library Preview */}
-        <section className="container mx-auto px-4 py-12 md:py-16">
+        <section id="mezmur" className="scroll-mt-24 container mx-auto px-4 py-12 md:py-16">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
             <div>
               <Badge variant="outline" className="text-[#0F4C81] dark:text-[#68A7E0] border-[#0F4C81]/40 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
@@ -316,7 +316,7 @@ export default async function HomePage({ params: { locale } }: PageProps) {
         </section>
 
         {/* Calendar & Fasting Highlights CTA */}
-        <section className="border-t border-[#D7E3F1] dark:border-[#1A3E63] bg-gradient-to-r from-[#E8F1FB]/40 via-background to-[#E8F1FB]/20 dark:from-[#061B30] dark:to-[#0A2644] py-12 md:py-16">
+        <section id="calendar" className="scroll-mt-24 border-t border-[#D7E3F1] dark:border-[#1A3E63] bg-gradient-to-r from-[#E8F1FB]/40 via-background to-[#E8F1FB]/20 dark:from-[#061B30] dark:to-[#0A2644] py-12 md:py-16">
           <div className="container mx-auto px-4">
             <div className="rounded-3xl border border-[#D7E3F1] dark:border-[#1A3E63] bg-white dark:bg-[#0A2644] p-6 md:p-12 shadow-md">
               <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">

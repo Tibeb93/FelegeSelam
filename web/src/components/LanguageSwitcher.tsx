@@ -24,6 +24,7 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: string }) {
       <Globe className="h-4 w-4 text-primary ml-1" aria-hidden="true" />
       <Link
         href={getRedirectPath('am')}
+        scroll={false}
         onClick={() => handleLanguageClick('am')}
         className={`flex min-h-[38px] items-center justify-center rounded-full px-3 text-xs md:text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
           currentLocale === 'am'
@@ -36,6 +37,7 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: string }) {
       </Link>
       <Link
         href={getRedirectPath('en')}
+        scroll={false}
         onClick={() => handleLanguageClick('en')}
         className={`flex min-h-[38px] items-center justify-center rounded-full px-3 text-xs md:text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
           currentLocale === 'en'

@@ -19,6 +19,7 @@ import {
   SendPaymentRemindersDto,
 } from './dto/payment.dto';
 import { gregorianToEthiopian } from '../common/ethiopian-calendar';
+import { EventBusService } from '../realtime/event-bus.service';
 
 export interface MembershipFeeConfig {
   amount: number;
@@ -49,6 +50,7 @@ export class PaymentsService {
     private readonly receiptService: PaymentsReceiptService,
     private readonly exportService: PaymentsExportService,
     private readonly manualProvider: ManualPaymentProvider,
+    private readonly eventBusService: EventBusService,
   ) {}
 
   /**
@@ -287,6 +289,23 @@ export class PaymentsService {
         },
         ip: ip || null,
       },
+    });
+
+    this.eventBusService.emit({
+      type: 'payment.submitted',
+      target: { roles: ['super_admin', 'admin'] },
+      data: {
+        paymentId: payment.id,
+        memberId: member.id,
+        amount: Number(payment.amount),
+        membershipYear,
+      },
+    });
+
+    this.eventBusService.emit({
+      type: 'dashboard.stats.changed',
+      target: { roles: ['super_admin', 'admin'] },
+      data: { entity: 'payment' },
     });
 
     return payment;
@@ -563,6 +582,25 @@ export class PaymentsService {
         },
       });
 
+      this.eventBusService.emit({
+        type: 'payment.reviewed',
+        target: {
+          userId: payment.member?.userId || undefined,
+          roles: ['super_admin', 'admin'],
+        },
+        data: {
+          paymentId: payment.id,
+          status: 'approved',
+          receiptNo,
+        },
+      });
+
+      this.eventBusService.emit({
+        type: 'dashboard.stats.changed',
+        target: { roles: ['super_admin', 'admin'] },
+        data: { entity: 'payment' },
+      });
+
       return updated;
     } else {
       // Rejected
@@ -611,6 +649,24 @@ export class PaymentsService {
           newValue: { status: 'rejected', reviewNote: dto.reviewNote },
           ip: ip || null,
         },
+      });
+
+      this.eventBusService.emit({
+        type: 'payment.reviewed',
+        target: {
+          userId: payment.member?.userId || undefined,
+          roles: ['super_admin', 'admin'],
+        },
+        data: {
+          paymentId: payment.id,
+          status: 'rejected',
+        },
+      });
+
+      this.eventBusService.emit({
+        type: 'dashboard.stats.changed',
+        target: { roles: ['super_admin', 'admin'] },
+        data: { entity: 'payment' },
       });
 
       return updated;

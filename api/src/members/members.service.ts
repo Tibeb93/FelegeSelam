@@ -16,6 +16,7 @@ import { ImportReport } from './dto/import-member.dto';
 import { GenerateLetterDto } from './dto/letter-member.dto';
 import { PaginatedResult, paginate } from '../common/dto/pagination.dto';
 import { Member, MemberStatus, Sex, Prisma } from '@prisma/client';
+import { EventBusService } from '../realtime/event-bus.service';
 
 @Injectable()
 export class MembersService {
@@ -25,6 +26,7 @@ export class MembersService {
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
     private readonly exportService: MembersExportService,
+    private readonly eventBusService: EventBusService,
   ) {}
 
   /**
@@ -129,6 +131,23 @@ export class MembersService {
       include: {
         department: true,
       },
+    });
+
+    this.eventBusService.emit({
+      type: 'member.registered',
+      target: { roles: ['super_admin', 'admin'] },
+      data: {
+        memberId: member.id,
+        memberNo: member.memberNo,
+        name: `${member.firstName} ${member.fatherName}`,
+        status: member.status,
+      },
+    });
+
+    this.eventBusService.emit({
+      type: 'dashboard.stats.changed',
+      target: { roles: ['super_admin', 'admin'] },
+      data: { entity: 'member' },
     });
 
     this.logger.log(`Created member ${member.memberNo} (${member.firstName} ${member.fatherName})`);
@@ -443,6 +462,21 @@ export class MembersService {
       include: {
         department: true,
       },
+    });
+
+    this.eventBusService.emit({
+      type: 'member.approved',
+      target: { roles: ['super_admin', 'admin'] },
+      data: {
+        memberId: updated.id,
+        memberNo: updated.memberNo,
+      },
+    });
+
+    this.eventBusService.emit({
+      type: 'dashboard.stats.changed',
+      target: { roles: ['super_admin', 'admin'] },
+      data: { entity: 'member' },
     });
 
     this.logger.log(`Member ${member.memberNo} approved to active status`);

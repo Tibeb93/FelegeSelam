@@ -37,8 +37,17 @@ export class StorageService implements IStorageService {
       throw new BadRequestException('No photo file provided');
     }
 
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!allowedMimeTypes.includes(file.mimetype)) {
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/pjpeg',
+      'image/jfif',
+      'image/x-png',
+    ];
+    const isImageExt = /\.(jpe?g|png|webp|jfif)$/i.test(file.originalname || '');
+    if (!allowedMimeTypes.includes(file.mimetype) && !isImageExt) {
       throw new BadRequestException(
         `Invalid photo type (${file.mimetype}). Allowed types: JPEG, PNG, WebP`,
       );
@@ -76,8 +85,17 @@ export class StorageService implements IStorageService {
       throw new BadRequestException('No image file provided');
     }
 
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!allowedMimeTypes.includes(file.mimetype)) {
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/pjpeg',
+      'image/jfif',
+      'image/x-png',
+    ];
+    const isImageExt = /\.(jpe?g|png|webp|jfif)$/i.test(file.originalname || '');
+    if (!allowedMimeTypes.includes(file.mimetype) && !isImageExt) {
       throw new BadRequestException(
         `Invalid image type (${file.mimetype}). Allowed types: JPEG, PNG, WebP`,
       );
@@ -117,7 +135,13 @@ export class StorageService implements IStorageService {
       throw new BadRequestException('No lesson media file provided');
     }
 
-    const pdfTypes = ['application/pdf'];
+    const pdfTypes = [
+      'application/pdf',
+      'application/x-pdf',
+      'application/acrobat',
+      'applications/vnd.pdf',
+      'text/pdf',
+    ];
     const audioTypes = [
       'audio/mpeg',
       'audio/mp3',
@@ -130,19 +154,23 @@ export class StorageService implements IStorageService {
     ];
     const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
 
+    const isPdfExt = (file.originalname || '').toLowerCase().endsWith('.pdf');
+    const isAudioExt = /\.(mp3|wav|ogg|m4a|aac|webm)$/i.test(file.originalname || '');
+    const isVideoExt = /\.(mp4|webm|ogg|mov)$/i.test(file.originalname || '');
+
     let mediaType: 'pdf' | 'audio' | 'video';
     let maxSizeBytes: number;
     let defaultExt: string;
 
-    if (pdfTypes.includes(file.mimetype)) {
+    if (pdfTypes.includes(file.mimetype) || isPdfExt) {
       mediaType = 'pdf';
       maxSizeBytes = 15 * 1024 * 1024; // 15 MB
       defaultExt = '.pdf';
-    } else if (audioTypes.includes(file.mimetype)) {
+    } else if (audioTypes.includes(file.mimetype) || isAudioExt) {
       mediaType = 'audio';
       maxSizeBytes = 25 * 1024 * 1024; // 25 MB
       defaultExt = path.extname(file.originalname) || '.mp3';
-    } else if (videoTypes.includes(file.mimetype)) {
+    } else if (videoTypes.includes(file.mimetype) || isVideoExt) {
       mediaType = 'video';
       maxSizeBytes = 50 * 1024 * 1024; // 50 MB
       defaultExt = path.extname(file.originalname) || '.mp4';

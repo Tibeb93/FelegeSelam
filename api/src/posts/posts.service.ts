@@ -6,6 +6,7 @@ import { StorageService } from '../storage/storage.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreatePostDto, UpdatePostDto, QueryPostDto } from './dto/post.dto';
 import { paginate } from '../common/dto/pagination.dto';
+import { EventBusService } from '../realtime/event-bus.service';
 
 @Injectable()
 export class PostsService {
@@ -15,6 +16,7 @@ export class PostsService {
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
     private readonly notificationsService: NotificationsService,
+    private readonly eventBusService: EventBusService,
   ) {}
 
   private enrichPostLifecycle(post: Post, now: Date = new Date()) {
@@ -121,7 +123,28 @@ export class PostsService {
     // If post is urgent and already live (not scheduled for future and not expired), notify members immediately
     if (isUrgent && publishAt <= now && (!expiresAt || expiresAt > now)) {
       await this.notificationsService.notifyUrgentPost(post);
+      this.eventBusService.emit({
+        type: 'post.urgent',
+        target: { isPublic: true },
+        data: post,
+      });
     }
+
+    // Emit post.published if published immediately
+    if (publishAt <= now && (!expiresAt || expiresAt > now)) {
+      this.eventBusService.emit({
+        type: 'post.published',
+        target: { isPublic: true },
+        data: post,
+      });
+    }
+
+    // Invalidate dashboard stats
+    this.eventBusService.emit({
+      type: 'dashboard.stats.changed',
+      target: { roles: ['super_admin', 'admin'] },
+      data: { entity: 'post' },
+    });
 
     this.logger.log(`Post created: ${post.id} (${post.type} - ${post.title})`);
     return this.enrichPostLifecycle(post, now);

@@ -8,12 +8,16 @@ import {
   QueryNotificationDto,
 } from './dto/notification.dto';
 import { paginate } from '../common/dto/pagination.dto';
+import { EventBusService } from '../realtime/event-bus.service';
 
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventBusService: EventBusService,
+  ) {}
 
   // =========================================================================
   // 1. IN-APP NOTIFICATIONS (LIST, MARK READ, MARK ALL READ)
@@ -77,10 +81,18 @@ export class NotificationsService {
       return notification;
     }
 
-    return this.prisma.notification.update({
+    const updated = await this.prisma.notification.update({
       where: { id: notificationId },
       data: { readAt: new Date() },
     });
+
+    this.eventBusService.emit({
+      type: 'notification.read',
+      target: { userId },
+      data: { notificationId },
+    });
+
+    return updated;
   }
 
   async markAllAsRead(userId: string) {
@@ -88,6 +100,12 @@ export class NotificationsService {
     const result = await this.prisma.notification.updateMany({
       where: { userId, readAt: null },
       data: { readAt: now },
+    });
+
+    this.eventBusService.emit({
+      type: 'notification.read',
+      target: { userId },
+      data: { all: true },
     });
 
     return {
@@ -158,6 +176,14 @@ export class NotificationsService {
         sentAt: now,
       })),
     });
+
+    for (const uid of targetUserIds) {
+      this.eventBusService.emit({
+        type: 'notification.created',
+        target: { userId: uid },
+        data: { title: dto.title, body: dto.body },
+      });
+    }
 
     this.logger.log(
       `Sent notification "${dto.title}" to ${targetUserIds.length} user(s) [target=${dto.target}]`,
@@ -260,6 +286,19 @@ export class NotificationsService {
         sentAt: now,
       })),
     });
+
+    for (const u of activeUsers) {
+      this.eventBusService.emit({
+        type: 'notification.created',
+        target: { userId: u.id },
+        data: {
+          title: `🚨 አስቸኳይ፡ ${post.title}`,
+          body: previewBody,
+          postId: post.id,
+          isUrgent: true,
+        },
+      });
+    }
 
     this.logger.log(
       `Urgent post "${post.title}" (${post.id}) notified ${activeUsers.length} active user(s)`,

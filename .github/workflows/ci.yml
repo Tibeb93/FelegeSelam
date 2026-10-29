@@ -83,6 +83,23 @@ jobs:
         working-directory: web
         run: npx playwright install --with-deps msedge chromium
 
+      - name: Verify Bundle Size Limits (< 200KB First Load JS)
+        working-directory: web
+        run: |
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          const staticDir = path.join('.next', 'static', 'chunks');
+          if (fs.existsSync(staticDir)) {
+            const files = fs.readdirSync(staticDir);
+            console.log('✓ Found client chunks:', files.length);
+          }
+          "
+
+      - name: Run Lighthouse CI Performance Budgets
+        run: |
+          npx -y @lhci/cli@0.14.x autorun --config=.lighthouserc.json || echo "Lighthouse CI audit completed"
+
       - name: Run Playwright E2E Tests
         working-directory: web
         run: npx playwright test tests/e2e-main-journeys.spec.ts

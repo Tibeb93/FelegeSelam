@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -37,20 +37,99 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
   const { user } = useAuth();
   const siteIdentity = useSiteIdentity(locale);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>('hero');
 
   const navLinks = [
-    { href: `/${locale}`, label: t('navHome'), icon: Church },
-    { href: `/${locale}/about`, label: t('navAbout'), icon: Info },
-    { href: `/${locale}/news`, label: t('navNews'), icon: Newspaper },
-    { href: `/${locale}/mezmur`, label: t('navMezmur'), icon: Music },
-    { href: `/${locale}/calendar`, label: t('navCalendar'), icon: Calendar },
+    { href: `/${locale}#hero`, label: t('navHome'), icon: Church, sectionId: 'hero' },
+    { href: `/${locale}#about`, label: t('navAbout'), icon: Info, sectionId: 'about' },
     { href: `/${locale}/courses`, label: t('navCourses'), icon: BookOpen },
-    { href: `/${locale}/contact`, label: t('navContact'), icon: Phone },
+    { href: `/${locale}/mezmur`, label: t('navMezmur'), icon: Music },
+    { href: `/${locale}#calendar`, label: t('navCalendar'), icon: Calendar, sectionId: 'calendar' },
+    { href: `/${locale}/news`, label: t('navNews'), icon: Newspaper },
+    { href: `/${locale}#contact`, label: t('navContact'), icon: Phone, sectionId: 'contact' },
   ];
 
-  const isActive = (href: string) => {
-    if (href === `/${locale}`) {
-      return pathname === href || pathname === `/${locale}/`;
+  // Client-side smooth scroll & section jump
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, sectionId?: string) => {
+    const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
+
+    if (sectionId && isHome) {
+      e.preventDefault();
+      const el = document.getElementById(sectionId);
+      if (el) {
+        const prefersReducedMotion =
+          typeof window !== 'undefined' &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        el.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+        window.history.pushState(null, '', `#${sectionId}`);
+        setActiveSection(sectionId);
+
+        const heading = el.querySelector('h1, h2, h3, h4') as HTMLElement | null;
+        if (heading) {
+          heading.setAttribute('tabindex', '-1');
+          heading.focus({ preventScroll: true });
+        }
+      }
+      setMobileMenuOpen(false);
+    } else {
+      setMobileMenuOpen(false);
+    }
+  };
+
+  // IntersectionObserver scroll-spy and cross-page anchor restoration
+  useEffect(() => {
+    const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
+    if (!isHome || typeof window === 'undefined') return;
+
+    if (window.location.hash) {
+      const id = window.location.hash.replace('#', '');
+      const el = document.getElementById(id);
+      if (el) {
+        setTimeout(() => {
+          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          el.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+          const heading = el.querySelector('h1, h2, h3, h4') as HTMLElement | null;
+          if (heading) {
+            heading.setAttribute('tabindex', '-1');
+            heading.focus({ preventScroll: true });
+          }
+        }, 120);
+      }
+    }
+
+    const sectionIds = ['hero', 'about', 'courses', 'mezmur', 'calendar', 'contact'];
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: '-20% 0px -60% 0px',
+        threshold: 0,
+      },
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [pathname, locale]);
+
+  const isActive = (href: string, sectionId?: string) => {
+    const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
+    if (isHome && sectionId) {
+      return activeSection === sectionId;
+    }
+    if (href === `/${locale}` || href === `/${locale}#hero`) {
+      return isHome && activeSection === 'hero';
     }
     return pathname.startsWith(href);
   };
@@ -62,6 +141,8 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
         {/* Brand / Logo: School name with Church name under it */}
         <Link
           href={`/${locale}`}
+          prefetch={true}
+          onClick={(e) => handleLinkClick(e, `/${locale}#hero`, 'hero')}
           title={`${siteIdentity.schoolName} - ${siteIdentity.churchName}`}
           className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#F2B233] rounded-xl p-1"
         >
@@ -80,11 +161,13 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
         {/* Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-1" aria-label="Main Navigation">
           {navLinks.map((link) => {
-            const active = isActive(link.href);
+            const active = isActive(link.href, link.sectionId);
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={true}
+                onClick={(e) => handleLinkClick(e, link.href, link.sectionId)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
                   active
                     ? 'bg-[#1E78C8] text-white font-semibold shadow-xs'
@@ -179,12 +262,13 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
         <div className="border-b border-[#0A2E52] bg-[#0A2E52] p-4 lg:hidden shadow-xl animate-in slide-in-from-top-2 text-white">
           <nav className="flex flex-col gap-1.5">
             {navLinks.map((link) => {
-              const active = isActive(link.href);
+              const active = isActive(link.href, link.sectionId);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  prefetch={true}
+                  onClick={(e) => handleLinkClick(e, link.href, link.sectionId)}
                   className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-base font-medium min-h-[48px] ${
                     active
                       ? 'bg-[#1E78C8] text-white font-semibold'

@@ -65,17 +65,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
-      // Read restored session metadata
+      // Check session cookie without redundant refetch if user is already present
       const sessionRes = await fetch('/api/auth/session');
-      const sessionData = await sessionRes.json();
-      if (sessionData.authenticated && sessionData.session) {
-        setUser({
-          id: sessionData.session.userId,
-          email: sessionData.session.email,
-          phone: sessionData.session.phone,
-          status: sessionData.session.status,
-          role: { name: sessionData.session.role },
-        } as any);
+      if (sessionRes.ok) {
+        const sessionData = await sessionRes.json();
+        if (sessionData.authenticated && sessionData.session) {
+          setUser({
+            id: sessionData.session.userId,
+            email: sessionData.session.email,
+            phone: sessionData.session.phone,
+            status: sessionData.session.status,
+            role: { name: sessionData.session.role },
+          } as any);
+        }
       }
 
       return true;
@@ -85,19 +87,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Check and restore session on mount
+  // Check and restore session on mount with zero duplicate requests
   useEffect(() => {
     let isMounted = true;
 
     async function initAuth() {
       try {
-        // First check session cookie availability
+        // Single session lookup on mount
         const sessionRes = await fetch('/api/auth/session');
+        if (!sessionRes.ok) {
+          if (isMounted) setIsLoading(false);
+          return;
+        }
+
         const sessionData = await sessionRes.json();
 
-        if (sessionData.authenticated) {
-          // Exchange refresh token for in-memory access token
-          await refreshSession();
+        if (sessionData.authenticated && sessionData.session) {
+          // Immediately set user from verified session cookie so UI renders instantly
+          if (isMounted) {
+            setUser({
+              id: sessionData.session.userId,
+              email: sessionData.session.email,
+              phone: sessionData.session.phone,
+              status: sessionData.session.status,
+              role: { name: sessionData.session.role },
+            } as any);
+          }
+          // Exchange refresh token for in-memory access token without re-fetching session
+          await refreshAccessToken();
+        } else {
+          if (isMounted) {
+            setUser(null);
+          }
         }
       } catch (err) {
         logger.error('Failed to initialize auth session:', err);

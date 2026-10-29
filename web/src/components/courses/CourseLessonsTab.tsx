@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Lesson } from '@/types/api';
-import { apiClient } from '@/lib/api-client';
+import { apiClient, getAccessToken } from '@/lib/api-client';
 import { logger } from '@/lib/logger';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
@@ -205,7 +205,13 @@ export function CourseLessonsTab({
       // Using XMLHttpRequest for upload progress tracking
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', `/api/v1/courses/${courseId}/lessons/${lessonId}/upload`);
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+        xhr.open('POST', `${apiBase}/courses/${courseId}/lessons/${lessonId}/upload`);
+
+        const token = getAccessToken();
+        if (token) {
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        }
 
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
@@ -218,7 +224,14 @@ export function CourseLessonsTab({
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
           } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`));
+            let errorMsg = `Upload failed with status ${xhr.status}`;
+            try {
+              const res = JSON.parse(xhr.responseText);
+              if (res.message) {
+                errorMsg = Array.isArray(res.message) ? res.message.join(', ') : res.message;
+              }
+            } catch {}
+            reject(new Error(errorMsg));
           }
         };
 

@@ -68,8 +68,9 @@ export function PublicHomeHero({ locale }: PublicHomeHeroProps) {
 
   return (
     <section
+      id="hero"
       style={heroStyle}
-      className={`relative overflow-hidden border-b border-[#0A2E52] text-white py-14 md:py-20 ${
+      className={`scroll-mt-24 relative overflow-hidden border-b border-[#0A2E52] text-white py-14 md:py-20 ${
         !hasImage && bgType === 'gradient'
           ? 'bg-gradient-to-b from-[#0A2E52] via-[#0F4C81] to-[#0A2E52]'
           : ''

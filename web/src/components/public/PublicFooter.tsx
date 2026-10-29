@@ -146,7 +146,7 @@ export function PublicFooter({ locale }: PublicFooterProps) {
           </div>
 
           {/* Column 4: Contact & Location */}
-          <div className="space-y-3">
+          <div id="contact" className="scroll-mt-24 space-y-3">
             <h4 className="text-sm font-bold uppercase tracking-wider text-primary">
               {locale === 'am' ? 'የመገናኛ አድራሻ' : 'Contact & Location'}
             </h4>
