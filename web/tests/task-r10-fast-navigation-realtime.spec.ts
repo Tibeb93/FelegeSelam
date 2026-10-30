@@ -59,11 +59,11 @@ test.describe('TASK R10: Fast Navigation, No Reload Loops, Real-Time Updates', (
     await page.goto('/am', { waitUntil: 'networkidle' });
 
     const duplicateRequests: { url: string; count: number }[] = [];
-    for (const [url, count] of requestCounts.entries()) {
+    Array.from(requestCounts.entries()).forEach(([url, count]) => {
       if (count > 1) {
         duplicateRequests.push({ url, count });
       }
-    }
+    });
 
     expect(duplicateRequests).toHaveLength(0);
   });

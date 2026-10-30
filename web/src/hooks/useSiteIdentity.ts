@@ -6,6 +6,9 @@ export interface SiteIdentityHookResult {
   schoolName: string;
   schoolNameAm: string;
   schoolNameEn: string;
+  shortName: string;
+  shortNameAm: string;
+  shortNameEn: string;
   churchName: string;
   churchNameAm: string;
   churchNameEn: string;
@@ -53,6 +56,18 @@ export function useSiteIdentity(currentLocale?: string): SiteIdentityHookResult 
     settings.siteIdentity?.nameEn ||
     DEFAULT_SITE_SETTINGS.siteIdentity.nameEn;
   const schoolName = isEn ? schoolNameEn : schoolNameAm;
+
+  const shortNameAm =
+    settings.school?.shortNameAm ||
+    settings.siteIdentity?.shortName ||
+    DEFAULT_SITE_SETTINGS.school?.shortNameAm ||
+    DEFAULT_SITE_SETTINGS.siteIdentity?.shortName ||
+    'አዕማደ ሰላም';
+  const shortNameEn =
+    settings.school?.shortNameEn ||
+    DEFAULT_SITE_SETTINGS.school?.shortNameEn ||
+    'Aemade Selam';
+  const shortName = isEn ? shortNameEn : shortNameAm;
 
   const churchNameAm =
     settings.church?.nameAm ||
@@ -143,6 +158,9 @@ export function useSiteIdentity(currentLocale?: string): SiteIdentityHookResult 
     schoolName,
     schoolNameAm,
     schoolNameEn,
+    shortName,
+    shortNameAm,
+    shortNameEn,
     churchName,
     churchNameAm,
     churchNameEn,
