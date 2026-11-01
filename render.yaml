@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: aemade-selam-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: cd packages/cms-registry && npm install && npm run build && cd ../../api && npm install && npx prisma generate && npm run build && npx prisma db seed
+    startCommand: cd api && npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: '*'
+      - key: SUPER_ADMIN_EMAIL
+        value: admin@aemade.org
+      - key: SUPER_ADMIN_PASSWORD
+        value: Admin@123456!
+
