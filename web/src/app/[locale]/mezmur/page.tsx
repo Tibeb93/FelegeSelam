@@ -15,6 +15,7 @@ import {
   Disc,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
+import { resolveMediaUrl } from '@/lib/utils';
 import { MezmurItem, MezmurCategory, PaginatedResult } from '@/types/api';
 import { PublicHeader } from '@/components/public/PublicHeader';
 import { PublicFooter } from '@/components/public/PublicFooter';
@@ -45,45 +46,70 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Fetch categories
-  const { data: categoriesData } = useQuery<{ data: MezmurCategory[] }>({
+  const { data: categoriesData } = useQuery<{ data: MezmurCategory[] } | any>({
     queryKey: ['mezmurs', 'categories'],
     queryFn: () => apiRequest('/mezmurs/categories'),
   });
 
-  const categories = categoriesData?.data || [];
+  const categories: MezmurCategory[] =
+    categoriesData?.data ||
+    categoriesData?.items ||
+    (Array.isArray(categoriesData) ? categoriesData : []);
 
   // Fetch mezmurs
-  const { data: mezmursData, isLoading } = useQuery<PaginatedResult<MezmurItem>>({
+  const { data: mezmursData, isLoading } = useQuery<PaginatedResult<MezmurItem> | any>({
     queryKey: ['mezmurs', 'public', searchQuery, selectedCategory],
     queryFn: () =>
       apiRequest('/mezmurs/public', {
         params: {
           search: searchQuery || undefined,
           categoryId: selectedCategory || undefined,
-          limit: 30,
+          limit: 50,
         },
       }),
   });
 
-  const mezmurs = mezmursData?.data || [];
+  const mezmurs: MezmurItem[] =
+    mezmursData?.data ||
+    mezmursData?.items ||
+    (Array.isArray(mezmursData) ? mezmursData : []);
 
   // Audio playback controls
   const handlePlayMezmur = (m: MezmurItem) => {
+    if (!m.audioUrl) {
+      // If no audio is attached, open the lyrics viewer
+      setSelectedLyricsMezmur(m);
+      return;
+    }
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (activeMezmur?.id === m.id) {
       if (isPlaying) {
-        audioRef.current?.pause();
+        audio.pause();
         setIsPlaying(false);
       } else {
-        audioRef.current?.play();
-        setIsPlaying(true);
+        audio
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch((err) => {
+            console.warn('Audio playback error:', err);
+            setIsPlaying(false);
+          });
       }
     } else {
       setActiveMezmur(m);
-      setIsPlaying(true);
-      if (audioRef.current) {
-        audioRef.current.src = m.audioUrl || '';
-        audioRef.current.play().catch(() => setIsPlaying(false));
-      }
+      const fullUrl = resolveMediaUrl(m.audioUrl);
+      audio.src = fullUrl;
+      audio.load();
+      audio
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch((err) => {
+          console.warn('Audio playback error:', err);
+          setIsPlaying(false);
+        });
     }
   };
 
@@ -190,6 +216,28 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
           </div>
         </div>
 
+        {/* Hidden permanent audio element - always mounted so playback never misses initial click */}
+        <audio
+          ref={audioRef}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={() => {
+            if (audioRef.current) {
+              setDuration(audioRef.current.duration || 0);
+            }
+          }}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => {
+            setIsPlaying(false);
+            setCurrentTime(0);
+          }}
+          onError={() => {
+            setIsPlaying(false);
+          }}
+          preload="metadata"
+          className="hidden"
+        />
+
         {/* Sticky Audio Player if active */}
         {activeMezmur && (
           <div className="sticky top-20 z-30 rounded-2xl border-2 border-secondary/40 bg-card/95 backdrop-blur-md p-4 shadow-xl animate-in slide-in-from-top-4">
@@ -260,13 +308,6 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
                 </div>
               </div>
             </div>
-
-            <audio
-              ref={audioRef}
-              onTimeUpdate={handleTimeUpdate}
-              onEnded={() => setIsPlaying(false)}
-              className="hidden"
-            />
           </div>
         )}
 
@@ -291,6 +332,7 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {mezmurs.map((m) => {
               const isThisPlaying = activeMezmur?.id === m.id && isPlaying;
+              const hasAudio = !!m.audioUrl;
               return (
                 <Card
                   key={m.id}
@@ -306,14 +348,27 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
                         className={`h-11 w-11 rounded-xl shrink-0 transition-transform ${
                           isThisPlaying
                             ? 'bg-secondary text-secondary-foreground scale-105 shadow-md'
-                            : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            : hasAudio
+                              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                              : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
-                        aria-label={`Play ${m.title}`}
+                        aria-label={hasAudio ? `Play ${m.title}` : `View lyrics for ${m.title}`}
+                        title={
+                          hasAudio
+                            ? isThisPlaying
+                              ? 'Pause'
+                              : 'Play'
+                            : locale === 'am'
+                            ? 'ግጥሙን አንብብ (ድምፅ የለውም)'
+                            : 'Read lyrics (no audio)'
+                        }
                       >
                         {isThisPlaying ? (
                           <Pause className="h-5 w-5" />
-                        ) : (
+                        ) : hasAudio ? (
                           <Play className="h-5 w-5 ml-0.5" />
+                        ) : (
+                          <FileText className="h-5 w-5" />
                         )}
                       </Button>
 
@@ -324,11 +379,24 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
                         <CardDescription className="text-xs text-muted-foreground truncate">
                           {m.singer || (locale === 'am' ? 'የሰንበት ት/ቤት መዘምራን' : 'Sunday School Choir')}
                         </CardDescription>
-                        {m.category && (
-                          <span className="inline-block text-[11px] font-semibold text-secondary mt-0.5">
-                            {locale === 'am' ? m.category.nameAm : m.category.nameEn || m.category.nameAm}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          {m.category && (
+                            <span className="inline-block text-[11px] font-semibold text-secondary">
+                              {locale === 'am' ? m.category.nameAm : m.category.nameEn || m.category.nameAm}
+                            </span>
+                          )}
+                          {hasAudio ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                              <Volume2 className="h-2.5 w-2.5" />
+                              <span>{locale === 'am' ? 'ድምፅ ያለው' : 'Audio'}</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                              <FileText className="h-2.5 w-2.5" />
+                              <span>{locale === 'am' ? 'ግጥም ብቻ' : 'Lyrics only'}</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -398,13 +466,33 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
               </div>
 
               <div className="pt-2 border-t border-border flex items-center justify-between">
-                <Button
-                  onClick={() => handlePlayMezmur(selectedLyricsMezmur)}
-                  className="gap-2 bg-primary text-primary-foreground rounded-xl min-h-[44px]"
-                >
-                  <Play className="h-4 w-4" />
-                  <span>{t('play')}</span>
-                </Button>
+                {selectedLyricsMezmur.audioUrl ? (
+                  <Button
+                    onClick={() => handlePlayMezmur(selectedLyricsMezmur)}
+                    className="gap-2 bg-primary text-primary-foreground rounded-xl min-h-[44px]"
+                  >
+                    {activeMezmur?.id === selectedLyricsMezmur.id && isPlaying ? (
+                      <>
+                        <Pause className="h-4 w-4" />
+                        <span>{locale === 'am' ? 'አቁም' : 'Pause'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4" />
+                        <span>{t('play')}</span>
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <FileText className="h-4 w-4" />
+                    <span>
+                      {locale === 'am'
+                        ? 'የዚህ መዝሙር ድምፅ እስካሁን አልተጫነም (ግጥሙ ብቻ ነው)'
+                        : 'No audio uploaded for this hymn (lyrics only)'}
+                    </span>
+                  </span>
+                )}
                 <Button
                   variant="ghost"
                   onClick={() => setSelectedLyricsMezmur(null)}

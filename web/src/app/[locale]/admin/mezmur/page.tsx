@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { resolveMediaUrl } from '@/lib/utils';
 import { Mezmur, MezmurCategory, PaginatedResponse } from '@/types/api';
 import { DataTable, ColumnDef } from '@/components/ui/DataTable';
 import { MezmurFormDialog } from '@/components/mezmur/MezmurFormDialog';
@@ -345,7 +346,7 @@ export default function MezmurAdminPage({
             <audio
               controls
               autoPlay={isPlaying}
-              src={currentlyPlayingUrl}
+              src={currentlyPlayingUrl ? resolveMediaUrl(currentlyPlayingUrl) : undefined}
               className="w-full h-8"
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}

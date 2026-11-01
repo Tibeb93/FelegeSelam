@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
+import { resolveMediaUrl } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { Mezmur } from '@/types/api';
 
@@ -80,11 +81,18 @@ export default function PortalFavoritesPage({ params: { locale } }: { params: { 
       audioElement.pause();
     }
 
-    const audio = new Audio(m.audioUrl);
-    audio.play();
+    const audio = new Audio(resolveMediaUrl(m.audioUrl));
+    audio
+      .play()
+      .then(() => {
+        setPlayingId(m.id);
+      })
+      .catch((err) => {
+        logger.warn('Audio playback error:', err);
+        setPlayingId(null);
+      });
     audio.onended = () => setPlayingId(null);
     setAudioElement(audio);
-    setPlayingId(m.id);
   };
 
   if (isLoading) {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { resolveMediaUrl } from '@/lib/utils';
 import { Mezmur, MezmurCategory } from '@/types/api';
 import {
   Dialog,
@@ -332,7 +333,7 @@ export function MezmurFormDialog({
                   <Play className="h-3.5 w-3.5 text-primary fill-primary" />
                   <span>{locale === 'am' ? 'የድምፅ ቅድመ-ዕይታ' : 'Audio Player Preview'}</span>
                 </p>
-                <audio controls src={audioUrl} className="w-full h-9 mt-1" />
+                <audio controls src={resolveMediaUrl(audioUrl)} className="w-full h-9 mt-1" />
               </div>
             )}
           </div>
