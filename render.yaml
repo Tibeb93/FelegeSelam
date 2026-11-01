@@ -4,7 +4,7 @@ services:
     runtime: node
     region: frankfurt
     plan: free
-    buildCommand: cd packages/cms-registry && npm install --include=dev && npm run build && cd ../../api && npm install --include=dev && npx prisma generate && npm run build && npx prisma db seed
+    buildCommand: cd packages/cms-registry && npm install --include=dev && npm run build && cd ../../api && npm install --include=dev && npx prisma generate && npm run build && npx prisma db seed --demo
     startCommand: cd api && npm run start:prod
     envVars:
       - key: NODE_ENV
