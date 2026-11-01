@@ -217,10 +217,15 @@ export class StorageService implements IStorageService {
       'audio/mp4',
       'audio/aac',
       'audio/webm',
+      'audio/x-m4a',
+      'audio/m4a',
+      'audio/flac',
+      'audio/x-flac',
     ];
     const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
 
-    if (type === 'audio' && !audioTypes.includes(file.mimetype)) {
+    const isAudioExt = /\.(mp3|wav|ogg|m4a|aac|webm|flac)$/i.test(file.originalname || '');
+    if (type === 'audio' && !audioTypes.includes(file.mimetype) && !isAudioExt) {
       throw new BadRequestException(
         `Invalid audio type (${file.mimetype}). Allowed types: MP3, WAV, OGG, M4A, AAC, WebM`,
       );

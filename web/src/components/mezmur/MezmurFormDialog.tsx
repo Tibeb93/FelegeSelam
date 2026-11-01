@@ -92,11 +92,27 @@ export function MezmurFormDialog({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('audio/') && !file.name.endsWith('.mp3')) {
+    // Reset input value so selecting the same file again triggers change event
+    e.target.value = '';
+
+    const isAudio =
+      file.type.startsWith('audio/') ||
+      /\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i.test(file.name);
+
+    if (!isAudio) {
       setErrorMsg(
         locale === 'am'
-          ? 'እባክዎ የድምፅ ፋይል (MP3) ይምረጡ'
-          : 'Please select an audio file (MP3/WAV)',
+          ? 'እባክዎ የድምፅ ፋይል (MP3, WAV, M4A, OGG) ይምረጡ'
+          : 'Please select an audio file (MP3, WAV, M4A, OGG)',
+      );
+      return;
+    }
+
+    if (file.size > 25 * 1024 * 1024) {
+      setErrorMsg(
+        locale === 'am'
+          ? 'የድምፅ ፋይሉ መጠን ከ 25MB መብለጥ የለበትም'
+          : 'Audio file size exceeds 25MB limit',
       );
       return;
     }
@@ -107,13 +123,15 @@ export function MezmurFormDialog({
       const formData = new FormData();
       formData.append('file', file);
 
-      // Upload via upload service
-      const res = await apiClient.post<any>('/forms/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Upload via standalone mezmur audio endpoint
+      const res = await apiClient.postFormData<any>('/mezmurs/upload-audio', formData);
 
-      const uploadedUrl = res.url || res.data?.url || res;
-      setAudioUrl(uploadedUrl);
+      const uploadedUrl = res?.url || res?.fileUrl || res?.data?.url || (typeof res === 'string' ? res : '');
+      if (uploadedUrl) {
+        setAudioUrl(uploadedUrl);
+      } else {
+        throw new Error('No URL returned from server');
+      }
     } catch (err: any) {
       setErrorMsg(err.message || 'Audio upload failed');
     } finally {
@@ -286,7 +304,7 @@ export function MezmurFormDialog({
                 </span>
                 <input
                   type="file"
-                  accept="audio/*,.mp3,.wav,.m4a"
+                  accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac,.flac"
                   onChange={handleAudioUpload}
                   disabled={isUploading}
                   className="hidden"

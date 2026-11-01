@@ -303,6 +303,14 @@ export class MezmursService {
     });
   }
 
+  async uploadStandaloneAudio(file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No audio file provided');
+    }
+    const fileUrl = await this.storageService.saveMezmurMedia(file, 'audio');
+    return { url: fileUrl, fileUrl };
+  }
+
   async uploadMezmurMedia(id: string, file: Express.Multer.File, type: 'audio' | 'video') {
     const mezmur = await this.prisma.mezmur.findUnique({ where: { id } });
     if (!mezmur) {

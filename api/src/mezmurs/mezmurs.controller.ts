@@ -134,6 +134,24 @@ export class MezmursController {
     return this.mezmursService.createMezmur(dto, userId);
   }
 
+  @Post('upload-audio')
+  @ApiBearerAuth('JWT-auth')
+  @Roles('super_admin', 'admin', 'content_manager')
+  @ApiOperation({ summary: 'Upload standalone mezmur audio file (MP3/WAV/OGG/M4A/AAC, max 25MB)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadAudioFile(@UploadedFile() file: Express.Multer.File) {
+    return this.mezmursService.uploadStandaloneAudio(file);
+  }
+
   @Get()
   @ApiBearerAuth('JWT-auth')
   @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
