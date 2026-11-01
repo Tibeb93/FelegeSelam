@@ -26,10 +26,17 @@ export function resolveMediaUrl(url?: string | null): string {
 
   const cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 
-  // If NEXT_PUBLIC_API_URL is configured with an origin (e.g. Render backend in production), prepend it
-  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/api\/v1\/?$/, '');
-  if (apiBase && (apiBase.startsWith('http://') || apiBase.startsWith('https://'))) {
-    return `${apiBase}${cleanPath}`;
+  // If on client side (in browser)
+  if (typeof window !== 'undefined') {
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/api\/v1\/?$/, '');
+    if (apiBase && (apiBase.startsWith('http://') || apiBase.startsWith('https://'))) {
+      try {
+        const apiUrl = new URL(apiBase);
+        if (apiUrl.origin !== window.location.origin) {
+          return `${apiUrl.origin}${cleanPath}`;
+        }
+      } catch {}
+    }
   }
 
   return cleanPath;
