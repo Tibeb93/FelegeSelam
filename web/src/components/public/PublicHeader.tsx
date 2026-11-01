@@ -14,7 +14,6 @@ import {
   Newspaper,
   Phone,
   Info,
-  LogIn,
   Sun,
   Moon,
   ShieldCheck,

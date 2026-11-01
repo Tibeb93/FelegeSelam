@@ -96,6 +96,7 @@ export function AboutStatsSection({ locale }: AboutStatsSectionProps) {
     }
 
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasAnimated]);
 
   return (
