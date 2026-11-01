@@ -7,7 +7,7 @@ const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  output: process.env.VERCEL ? undefined : 'standalone',
   productionBrowserSourceMaps: false,
   async rewrites() {
     return [

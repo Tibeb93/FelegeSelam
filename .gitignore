@@ -37,6 +37,7 @@ pnpm-debug.log*
 /api/src/generated/
 
 # OS and Editor
+*.tsbuildinfo
 .DS_Store
 Thumbs.db
 .vscode/*

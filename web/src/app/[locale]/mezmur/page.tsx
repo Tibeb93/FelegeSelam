@@ -9,7 +9,6 @@ import {
   Pause,
   Search,
   Volume2,
-  VolumeX,
   FileText,
   Heart,
   Disc,
