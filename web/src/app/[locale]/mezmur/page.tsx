@@ -38,6 +38,7 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [activeMezmur, setActiveMezmur] = useState<MezmurItem | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const [selectedLyricsMezmur, setSelectedLyricsMezmur] = useState<MezmurItem | null>(null);
 
   // Fetch categories
@@ -71,6 +72,7 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
 
   // Audio playback controls
   const handlePlayMezmur = (m: MezmurItem) => {
+    setAudioError(null);
     if (!m.audioUrl) {
       // If no audio is attached, open the lyrics viewer
       setSelectedLyricsMezmur(m);
@@ -178,27 +180,46 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
               </div>
 
               {/* Native browser audio controls with autoPlay */}
-              <div className="flex-1 max-w-xl flex items-center gap-3">
-                <audio
-                  key={activeMezmur.id}
-                  controls
-                  autoPlay
-                  src={resolveMediaUrl(activeMezmur.audioUrl)}
-                  className="w-full h-9"
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                />
+              <div className="flex-1 max-w-xl flex flex-col gap-1.5">
+                <div className="flex items-center gap-3">
+                  <audio
+                    key={activeMezmur.id}
+                    controls
+                    autoPlay
+                    src={resolveMediaUrl(activeMezmur.audioUrl)}
+                    className="w-full h-9"
+                    onPlay={() => {
+                      setIsPlaying(true);
+                      setAudioError(null);
+                    }}
+                    onPause={() => setIsPlaying(false)}
+                    onError={() => {
+                      setIsPlaying(false);
+                      setAudioError(
+                        locale === 'am'
+                          ? 'የድምፅ ፋይሉ በአገልጋዩ ላይ አልተገኘም (በድጋሚ ይጫኑ ወይም ቀጥተኛ ሊንክ ያስገቡ)'
+                          : 'Audio file not found on server (Please re-upload or provide direct URL)'
+                      );
+                    }}
+                  />
 
-                {activeMezmur.lyrics && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedLyricsMezmur(activeMezmur)}
-                    className="text-xs gap-1.5 rounded-lg text-secondary font-semibold shrink-0"
-                  >
-                    <FileText className="h-4 w-4" />
-                    <span>{t('lyrics')}</span>
-                  </Button>
+                  {activeMezmur.lyrics && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedLyricsMezmur(activeMezmur)}
+                      className="text-xs gap-1.5 rounded-lg text-secondary font-semibold shrink-0"
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span>{t('lyrics')}</span>
+                    </Button>
+                  )}
+                </div>
+
+                {audioError && (
+                  <p className="text-[11px] font-semibold text-destructive animate-fadeIn">
+                    ⚠️ {audioError}
+                  </p>
                 )}
               </div>
             </div>

@@ -46,6 +46,7 @@ export default function MezmurAdminPage({
   // Audio playback preview state
   const [currentlyPlayingUrl, setCurrentlyPlayingUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
 
   // Fetch categories
   const { data: categories = [] } = useQuery<MezmurCategory[]>({
@@ -87,6 +88,7 @@ export default function MezmurAdminPage({
   });
 
   const togglePlayAudio = (url: string) => {
+    setAudioError(null);
     if (currentlyPlayingUrl === url) {
       setIsPlaying(!isPlaying);
     } else {
@@ -327,18 +329,23 @@ export default function MezmurAdminPage({
 
       {/* Floating Audio Player Preview Bar */}
       {currentlyPlayingUrl && (
-        <div className="fixed bottom-4 left-4 right-4 md:left-72 md:right-8 z-40 flex items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-card/95 p-3 shadow-xl backdrop-blur-md">
+        <div className="fixed bottom-4 left-4 right-4 md:left-72 md:right-8 z-40 flex flex-col md:flex-row md:items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-card/95 p-3 shadow-xl backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shrink-0">
               <Volume2 className="h-5 w-5 animate-pulse" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-bold text-foreground">
                 {locale === 'am' ? 'የድምፅ ቅድመ-ዕይታ እየተጫወተ ነው' : 'Playing Audio Preview'}
               </p>
               <p className="text-[11px] text-muted-foreground truncate max-w-xs md:max-w-md">
                 {currentlyPlayingUrl}
               </p>
+              {audioError && (
+                <p className="text-[11px] font-semibold text-destructive animate-fadeIn mt-0.5">
+                  ⚠️ {audioError}
+                </p>
+              )}
             </div>
           </div>
 
@@ -348,16 +355,28 @@ export default function MezmurAdminPage({
               autoPlay={isPlaying}
               src={currentlyPlayingUrl ? resolveMediaUrl(currentlyPlayingUrl) : undefined}
               className="w-full h-8"
-              onPlay={() => setIsPlaying(true)}
+              onPlay={() => {
+                setIsPlaying(true);
+                setAudioError(null);
+              }}
               onPause={() => setIsPlaying(false)}
+              onError={() => {
+                setIsPlaying(false);
+                setAudioError(
+                  locale === 'am'
+                    ? 'የድምፅ ፋይሉ አልተገኘም (404 Not Found)'
+                    : 'Audio file not found on server (404 Not Found)'
+                );
+              }}
             />
             <button
               type="button"
               onClick={() => {
                 setCurrentlyPlayingUrl(null);
                 setIsPlaying(false);
+                setAudioError(null);
               }}
-              className="text-xs font-semibold text-muted-foreground hover:text-foreground px-2 py-1"
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground px-2 py-1 shrink-0"
             >
               {locale === 'am' ? 'ዝጋ' : 'Close'}
             </button>

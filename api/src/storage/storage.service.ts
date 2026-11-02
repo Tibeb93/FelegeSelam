@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import * as sharpModule from 'sharp';
 const sharp = (sharpModule as any).default || sharpModule;
 import { IStorageService } from './storage.interface';
@@ -34,6 +35,65 @@ export class StorageService implements IStorageService {
     }
   }
 
+  private get cloudinaryConfig() {
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    if (cloudName && apiKey && apiSecret) {
+      return { cloudName, apiKey, apiSecret };
+    }
+    return null;
+  }
+
+  private async uploadToCloudinary(
+    buffer: Buffer,
+    folder: string,
+    resourceType: 'image' | 'video' | 'raw' | 'auto' = 'auto',
+    originalFilename?: string,
+  ): Promise<string | null> {
+    const config = this.cloudinaryConfig;
+    if (!config) return null;
+
+    try {
+      const timestamp = Math.round(Date.now() / 1000);
+      const paramsToSign = `folder=${folder}&timestamp=${timestamp}${config.apiSecret}`;
+      const signature = crypto.createHash('sha1').update(paramsToSign).digest('hex');
+
+      const formData = new FormData();
+      const ext = originalFilename ? path.extname(originalFilename) : '';
+      const filename = `${crypto.randomUUID()}${ext}`;
+      formData.append('file', new Blob([new Uint8Array(buffer)]), filename);
+      formData.append('api_key', config.apiKey);
+      formData.append('timestamp', String(timestamp));
+      formData.append('signature', signature);
+      formData.append('folder', folder);
+
+      const endpoint = `https://api.cloudinary.com/v1_1/${config.cloudName}/${resourceType}/upload`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.logger.warn(
+          `Cloudinary upload returned ${response.status}: ${errorText}. Falling back to local storage.`,
+        );
+        return null;
+      }
+
+      const data = (await response.json()) as { secure_url?: string };
+      if (data?.secure_url) {
+        this.logger.log(`File uploaded to Cloudinary successfully: ${data.secure_url}`);
+        return data.secure_url;
+      }
+      return null;
+    } catch (err: any) {
+      this.logger.error(`Error uploading to Cloudinary: ${err.message}`, err.stack);
+      return null;
+    }
+  }
+
   async savePhoto(file: Express.Multer.File): Promise<string> {
     if (!file) {
       throw new BadRequestException('No photo file provided');
@@ -63,17 +123,28 @@ export class StorageService implements IStorageService {
     }
 
     const randomName = `${crypto.randomUUID()}.webp`;
-    const destinationPath = path.join(this.baseUploadDir, 'photos', randomName);
 
     try {
-      await sharp(file.buffer)
+      const optimizedBuffer = await sharp(file.buffer)
         .resize(400, 400, {
           fit: 'cover',
           position: 'center',
         })
         .webp({ quality: 85 })
-        .toFile(destinationPath);
+        .toBuffer();
 
+      const cloudUrl = await this.uploadToCloudinary(
+        optimizedBuffer,
+        'felegeselam/photos',
+        'image',
+        randomName,
+      );
+      if (cloudUrl) {
+        return cloudUrl;
+      }
+
+      const destinationPath = path.join(this.baseUploadDir, 'photos', randomName);
+      await fs.promises.writeFile(destinationPath, optimizedBuffer);
       this.logger.log(`Photo saved successfully: ${randomName}`);
       return `/uploads/photos/${randomName}`;
     } catch (err: any) {
@@ -111,16 +182,28 @@ export class StorageService implements IStorageService {
     }
 
     const randomName = `${crypto.randomUUID()}.webp`;
-    const destinationPath = path.join(this.baseUploadDir, 'posts', randomName);
 
     try {
-      await sharp(file.buffer)
+      const optimizedBuffer = await sharp(file.buffer)
         .resize(1200, 800, {
           fit: 'inside',
           withoutEnlargement: true,
         })
         .webp({ quality: 85 })
-        .toFile(destinationPath);
+        .toBuffer();
+
+      const cloudUrl = await this.uploadToCloudinary(
+        optimizedBuffer,
+        'felegeselam/posts',
+        'image',
+        randomName,
+      );
+      if (cloudUrl) {
+        return cloudUrl;
+      }
+
+      const destinationPath = path.join(this.baseUploadDir, 'posts', randomName);
+      await fs.promises.writeFile(destinationPath, optimizedBuffer);
 
       this.logger.log(`Post image saved successfully: ${randomName}`);
       return `/uploads/posts/${randomName}`;
@@ -248,6 +331,18 @@ export class StorageService implements IStorageService {
 
     const defaultExt = path.extname(file.originalname) || (type === 'audio' ? '.mp3' : '.mp4');
     const safeName = `${crypto.randomUUID()}${defaultExt}`;
+
+    // Try Cloudinary if configured
+    const cloudUrl = await this.uploadToCloudinary(
+      file.buffer,
+      `felegeselam/mezmurs/${type}`,
+      'video', // Cloudinary handles audio files under the video resource endpoint
+      file.originalname,
+    );
+    if (cloudUrl) {
+      return cloudUrl;
+    }
+
     const destinationPath = path.join(this.baseUploadDir, 'mezmurs', type, safeName);
 
     try {
@@ -345,6 +440,17 @@ export class StorageService implements IStorageService {
   ): Promise<string> {
     if (!file) {
       throw new BadRequestException('No branding image file provided');
+    }
+
+    // Try Cloudinary if configured
+    const cloudUrl = await this.uploadToCloudinary(
+      file.buffer,
+      `felegeselam/branding/${type}`,
+      'image',
+      file.originalname,
+    );
+    if (cloudUrl) {
+      return cloudUrl;
     }
 
     if (type === 'logo') {
