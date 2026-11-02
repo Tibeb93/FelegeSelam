@@ -37,6 +37,20 @@ export class AttendanceService {
     return '';
   }
 
+  private getTeacherIdentifiers(user: any): string[] {
+    if (!user) return [];
+    const ids: string[] = [];
+    if (user.id) ids.push(user.id);
+    if (user.member?.id) ids.push(user.member.id);
+    return ids;
+  }
+
+  private isTeacherOwner(course: { teacherId: string | null } | null | undefined, user: any): boolean {
+    if (!course || !course.teacherId || !user) return false;
+    const teacherIds = this.getTeacherIdentifiers(user);
+    return teacherIds.includes(course.teacherId);
+  }
+
   private normalizeDate(dateStr?: string): Date {
     const d = dateStr ? new Date(dateStr) : new Date();
     return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -58,16 +72,11 @@ export class AttendanceService {
       if (!course) {
         throw new NotFoundException(`Course with id ${courseId} not found`);
       }
-      if (this.getRoleName(user) === 'teacher' && course.teacherId !== user.id) {
+      if (this.getRoleName(user) === 'teacher' && !this.isTeacherOwner(course, user)) {
         throw new ForbiddenException(
           'Teachers can only manage attendance for their assigned course',
         );
       }
-    } else if (this.getRoleName(user) === 'teacher') {
-      // General sessions can only be managed by super_admin and admin
-      throw new ForbiddenException(
-        'General Sunday service attendance can only be opened by administrators',
-      );
     }
 
     // Check if an open session already exists for this date and course
@@ -126,11 +135,15 @@ export class AttendanceService {
   async getSessions(user: any) {
     const where: any = {};
     if (this.getRoleName(user) === 'teacher') {
+      const teacherIds = this.getTeacherIdentifiers(user);
       const teacherCourses = await this.prisma.course.findMany({
-        where: { teacherId: user.id },
+        where: { teacherId: { in: teacherIds } },
         select: { id: true },
       });
-      where.courseId = { in: teacherCourses.map((c) => c.id) };
+      where.OR = [
+        { courseId: null },
+        { courseId: { in: teacherCourses.map((c) => c.id) } },
+      ];
     }
 
     return this.prisma.attendanceSession.findMany({
@@ -187,7 +200,7 @@ export class AttendanceService {
     if (
       this.getRoleName(user) === 'teacher' &&
       session.courseId &&
-      session.course?.teacherId !== user.id
+      !this.isTeacherOwner(session.course, user)
     ) {
       throw new ForbiddenException('You do not have permission to view attendance for this course');
     }
@@ -260,7 +273,7 @@ export class AttendanceService {
     if (
       this.getRoleName(user) === 'teacher' &&
       session.courseId &&
-      session.course?.teacherId !== user.id
+      !this.isTeacherOwner(session.course, user)
     ) {
       throw new ForbiddenException('Teachers can only close sessions for their own course');
     }
@@ -350,7 +363,7 @@ export class AttendanceService {
 
     // Teacher permission check
     if (this.getRoleName(user) === 'teacher') {
-      if (!session.courseId || session.course?.teacherId !== user.id) {
+      if (session.courseId && !this.isTeacherOwner(session.course, user)) {
         throw new ForbiddenException('Teachers can only mark attendance for their assigned course');
       }
     }
@@ -519,7 +532,7 @@ export class AttendanceService {
     if (
       this.getRoleName(user) === 'teacher' &&
       session.courseId &&
-      session.course?.teacherId !== user.id
+      !this.isTeacherOwner(session.course, user)
     ) {
       throw new ForbiddenException('Teachers can only manage their own course');
     }

@@ -185,24 +185,32 @@ export default function AdminAttendancePage({
         setIsLoadingSession(true);
         // First, open or reuse today's general session
         const todayStr = new Date().toISOString().split('T')[0];
-        const defaultSessionRes = await apiRequest<AttendanceSession>('attendance/sessions', {
-          method: 'POST',
-          body: {
-            sessionDate: todayStr,
-            title: isAmharic ? 'የሰንበት መርሐ-ግብር / Sunday Service' : 'Sunday Service Attendance',
-          },
-        });
+        let defaultSessionRes: AttendanceSession | null = null;
+        try {
+          defaultSessionRes = await apiRequest<AttendanceSession>('attendance/sessions', {
+            method: 'POST',
+            body: {
+              sessionDate: todayStr,
+              title: isAmharic ? 'የሰንበት መርሐ-ግብር / Sunday Service' : 'Sunday Service Attendance',
+            },
+          });
+        } catch {
+          // Fall back gracefully to listing existing sessions
+        }
 
         // List sessions
         const list = await apiRequest<AttendanceSession[]>('attendance/sessions');
         setSessions(list || []);
 
-        const activeId = preferId || defaultSessionRes.id;
-        setSelectedSessionId(activeId);
-
-        // Fetch complete active session data
-        const activeData = await apiRequest<AttendanceSession>(`attendance/sessions/${activeId}`);
-        setSession(activeData);
+        const activeId = preferId || defaultSessionRes?.id || list?.[0]?.id;
+        if (activeId) {
+          setSelectedSessionId(activeId);
+          // Fetch complete active session data
+          const activeData = await apiRequest<AttendanceSession>(`attendance/sessions/${activeId}`);
+          setSession(activeData);
+        } else {
+          setSession(null);
+        }
       } catch (err: any) {
         toast.error(err.message || 'Failed to initialize attendance session');
       } finally {
