@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { useSiteSettings } from '../../providers/SiteSettingsProvider';
+import { resolveMediaUrl } from '../../lib/utils';
 
 interface SchoolLogoProps {
   className?: string;
@@ -19,6 +20,14 @@ export function SchoolLogo({
   logoUrl: propLogoUrl,
 }: SchoolLogoProps) {
   const [imageError, setImageError] = useState(false);
+  const reactId = useId();
+  const safeId = reactId.replace(/[^a-zA-Z0-9_-]/g, '');
+  const blueGradientId = `blueGrad_${safeId}`;
+  const goldGradientId = `goldGrad_${safeId}`;
+  const shadowId = `shadow_${safeId}`;
+  const textArcTopId = `textArcTop_${safeId}`;
+  const textArcBottomId = `textArcBottom_${safeId}`;
+
   let contextLogoUrl: string | undefined;
 
   try {
@@ -36,7 +45,7 @@ export function SchoolLogo({
     if (showCustomImage) {
       return (
         <img
-          src={activeLogo}
+          src={resolveMediaUrl(activeLogo)}
           alt="School Logo"
           width={size}
           height={size}
@@ -59,27 +68,27 @@ export function SchoolLogo({
         role="img"
       >
         <defs>
-          <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={blueGradientId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0F4C81" />
             <stop offset="50%" stopColor="#0A2E52" />
             <stop offset="100%" stopColor="#061B30" />
           </linearGradient>
-          <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={goldGradientId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FAD872" />
             <stop offset="50%" stopColor="#F2B233" />
             <stop offset="100%" stopColor="#C98914" />
           </linearGradient>
-          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <filter id={shadowId} x="-10%" y="-10%" width="120%" height="120%">
             <feDropShadow dx="0" dy="1.5" stdDeviation="2" floodColor="#000000" floodOpacity="0.25" />
           </filter>
         </defs>
 
         {/* Outer Gold Ring */}
-        <circle cx="60" cy="60" r="57" fill="url(#goldGradient)" />
+        <circle cx="60" cy="60" r="57" fill={`url(#${goldGradientId})`} />
         {/* Navy Ring */}
-        <circle cx="60" cy="60" r="53" fill="url(#blueGradient)" />
+        <circle cx="60" cy="60" r="53" fill={`url(#${blueGradientId})`} />
         {/* Inner Gold Inset Circle */}
-        <circle cx="60" cy="60" r="44" stroke="url(#goldGradient)" strokeWidth="1.8" fill="#0A2E52" />
+        <circle cx="60" cy="60" r="44" stroke={`url(#${goldGradientId})`} strokeWidth="1.8" fill="#0A2E52" />
 
         {/* Decorative Stars / Cross Accents */}
         <circle cx="60" cy="11" r="2.5" fill="#F2B233" />
@@ -89,34 +98,34 @@ export function SchoolLogo({
 
         {/* Amharic Circular Text Inscription Path representation */}
         <path
-          id="textArcTop"
+          id={textArcTopId}
           d="M 22,60 A 38,38 0 0,1 98,60"
           fill="none"
         />
         <text fill="#FFFFFF" fontSize="6.2" fontWeight="bold" letterSpacing="0.8">
-          <textPath href="#textArcTop" startOffset="50%" textAnchor="middle">
+          <textPath href={`#${textArcTopId}`} startOffset="50%" textAnchor="middle">
             አዕማደ ሰላም ሰንበት ት/ቤት
           </textPath>
         </text>
 
         <path
-          id="textArcBottom"
+          id={textArcBottomId}
           d="M 98,60 A 38,38 0 0,1 22,60"
           fill="none"
         />
         <text fill="#F2B233" fontSize="5.5" fontWeight="600" letterSpacing="0.5">
-          <textPath href="#textArcBottom" startOffset="50%" textAnchor="middle">
+          <textPath href={`#${textArcBottomId}`} startOffset="50%" textAnchor="middle">
             ፈለገ ሰላም ቅ/ጊዮርጊስ
           </textPath>
         </text>
 
         {/* Center Emblem: Sacred Orthodox Cross + Open Book */}
         {/* Cross Vertical Beam */}
-        <rect x="57" y="27" width="6" height="34" rx="2" fill="url(#goldGradient)" filter="url(#shadow)" />
+        <rect x="57" y="27" width="6" height="34" rx="2" fill={`url(#${goldGradientId})`} filter={`url(#${shadowId})`} />
         {/* Cross Horizontal Beam */}
-        <rect x="47" y="34" width="26" height="5.5" rx="2" fill="url(#goldGradient)" filter="url(#shadow)" />
+        <rect x="47" y="34" width="26" height="5.5" rx="2" fill={`url(#${goldGradientId})`} filter={`url(#${shadowId})`} />
         {/* Cross Upper Bar */}
-        <rect x="52" y="29.5" width="16" height="3" rx="1" fill="url(#goldGradient)" />
+        <rect x="52" y="29.5" width="16" height="3" rx="1" fill={`url(#${goldGradientId})`} />
         {/* Cross Finials */}
         <circle cx="60" cy="25" r="2.5" fill="#FAD872" />
         <circle cx="45" cy="36.75" r="2" fill="#FAD872" />

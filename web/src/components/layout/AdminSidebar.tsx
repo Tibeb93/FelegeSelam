@@ -194,7 +194,9 @@ export function AdminSidebar({
           className="flex items-center gap-3 overflow-hidden"
           onClick={onNavigate}
         >
-          <SchoolLogo size={36} />
+          <div className="w-10 h-10 rounded-full border-2 border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0A2E52] shadow-sm">
+            <SchoolLogo size={36} />
+          </div>
           {!collapsed && (
             <div className="min-w-0">
               <h1 className="truncate text-sm font-bold text-white">

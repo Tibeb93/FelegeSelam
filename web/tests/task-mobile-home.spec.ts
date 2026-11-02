@@ -113,8 +113,8 @@ test.describe('TASK MOBILE HOME (FINAL): Full-Screen Hero, One-Row Header, Menu 
     // Height should be 64px (h-16)
     expect(Math.round(box!.height)).toBe(64);
 
-    // Left: 40px circular logo
-    const mobileLogo = header.locator('.w-10.h-10');
+    // Left: circular logo matching desktop
+    const mobileLogo = header.locator('[data-testid="mobile-header-logo"], .rounded-full').first();
     await expect(mobileLogo).toBeVisible();
 
     // Short school name on one line

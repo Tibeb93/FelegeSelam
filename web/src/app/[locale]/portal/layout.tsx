@@ -100,12 +100,14 @@ export default function PortalLayout({ children, params: { locale } }: PortalLay
             </button>
 
             <Link href={`/${locale}/portal`} className="flex items-center gap-2.5">
-              <SchoolLogo size={38} className="shrink-0" />
-              <div className="hidden sm:block">
-                <h1 className="text-sm font-bold text-foreground">
+              <div className="w-10 h-10 rounded-full border-2 border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0A2E52] shadow-sm">
+                <SchoolLogo size={36} className="shrink-0" />
+              </div>
+              <div>
+                <h1 className="text-xs sm:text-sm font-bold text-foreground leading-tight">
                   {locale === 'am' ? 'የአባላት ፖርታል' : 'Member Portal'}
                 </h1>
-                <p className="text-[11px] text-primary-700 dark:text-primary-300 font-semibold">
+                <p className="text-[10px] sm:text-[11px] text-primary-700 dark:text-primary-300 font-semibold leading-tight truncate max-w-[170px] sm:max-w-none">
                   {locale === 'am' ? 'አዕማደ ሰላም ሰንበት ትምህርት ቤት' : 'Aemade Selam Sunday School'}
                 </p>
               </div>

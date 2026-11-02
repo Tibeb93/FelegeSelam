@@ -203,8 +203,11 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
             title={`${siteIdentity.schoolName} - ${siteIdentity.churchName}`}
             className="flex items-center gap-3.5 group focus:outline-none focus:ring-2 focus:ring-[#F2B233] rounded-xl p-1 shrink-0"
           >
-            <div className="w-12 h-12 rounded-full border-[3px] border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0A2E52] shadow-sm">
-              <SchoolLogo size={48} />
+            <div
+              data-testid="desktop-header-logo"
+              className="w-12 h-12 rounded-full border-[3px] border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0A2E52] shadow-sm"
+            >
+              <SchoolLogo size={48} logoUrl={siteIdentity.logoUrl} />
             </div>
             <div className="flex flex-col text-left justify-center">
               <span className="text-base xl:text-lg font-bold text-white group-hover:text-[#E8F1FB] transition-colors leading-tight whitespace-nowrap">
@@ -290,28 +293,39 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
 
         {/* 
           MOBILE HEADER (below 1024px)
-          - One single row, 64px high (h-16), sticky, no text wrapping
-          - Left: 40px round logo with gold ring, short school name (Amharic: አዕማደ ሰላም / English: Aemade Selam)
+          - One single row, 64px high (h-16), sticky, matching desktop logo, styling and 2-line brand
+          - Left: 48px round logo with gold ring, 2-line school name & church name matching desktop
           - Right: 44x44 hamburger button ONLY
         */}
-        <div className="flex lg:hidden items-center justify-between h-16 px-4 pt-[env(safe-area-inset-top,0px)] max-w-full">
-          {/* Left: 40px Logo + Short School Name on 1 Line */}
+        <div className="flex lg:hidden items-center justify-between h-16 px-3.5 pt-[env(safe-area-inset-top,0px)] max-w-full gap-2">
+          {/* Left: 48px Logo + 2-line Brand matching Desktop */}
           <Link
             href={`/${locale}`}
             prefetch={true}
             onClick={(e) => handleLinkClick(e, `/${locale}#hero`, 'hero')}
-            title={siteIdentity.schoolName}
-            className="flex items-center gap-2.5 min-w-0 focus:outline-none focus:ring-2 focus:ring-[#F2B233] rounded-lg p-0.5"
+            title={`${siteIdentity.schoolName} - ${siteIdentity.churchName}`}
+            className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 focus:outline-none focus:ring-2 focus:ring-[#F2B233] rounded-xl p-1"
           >
-            <div className="w-10 h-10 rounded-full border-[3px] border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0A2E52] shadow-sm">
-              <SchoolLogo size={40} />
-            </div>
-            <span
-              data-testid="mobile-header-short-name"
-              className="text-[17px] font-bold text-white whitespace-nowrap truncate max-w-[210px] sm:max-w-xs"
+            <div
+              data-testid="mobile-header-logo"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-[3px] border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0A2E52] shadow-sm"
             >
-              {siteIdentity.shortName}
-            </span>
+              <SchoolLogo size={48} logoUrl={siteIdentity.logoUrl} />
+            </div>
+            <div className="flex flex-col text-left justify-center min-w-0">
+              <span
+                data-testid="mobile-header-short-name"
+                className="text-sm sm:text-base font-bold text-white leading-tight whitespace-nowrap truncate max-w-[200px] xs:max-w-[240px] sm:max-w-xs"
+              >
+                {siteIdentity.schoolName}
+              </span>
+              <span
+                data-testid="mobile-header-church-name"
+                className="text-[11px] sm:text-xs font-medium text-[#F2B233] leading-tight whitespace-nowrap truncate max-w-[200px] xs:max-w-[240px] sm:max-w-xs"
+              >
+                {siteIdentity.churchName}
+              </span>
+            </div>
           </Link>
 
           {/* Right: 44x44 Hamburger Button */}
@@ -333,7 +347,7 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
         MOBILE MENU DRAWER (hamburger)
         - Slides in from right: width 330px (max 85%), background #0A2E52, 200ms ease
         - Backdrop overlay (60% dark)
-        - Top row: 40px logo, short school name, 44x44 close button
+        - Top row: 48px logo with gold ring, 2-line brand matching desktop, 44x44 close button
         - Menu rows: 52px high, radius 12px, active row in #1E78C8
         - Bottom area: Segmented language switch (44px) + dark toggle (44x44)
           followed by full-width gold Members Portal button (52px)
@@ -355,16 +369,21 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
             data-testid="mobile-drawer-container"
             className="fixed top-0 right-0 z-50 h-full w-[330px] max-w-[85vw] bg-[#0A2E52] p-4 flex flex-col justify-between shadow-2xl transition-transform duration-200 ease-in-out text-white overflow-y-auto"
           >
-            {/* Top Row: Logo, Short Name, Close Button */}
+            {/* Top Row: Logo, Brand Name, Close Button */}
             <div>
-              <div className="flex items-center justify-between pb-4 border-b border-white/15">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-10 h-10 rounded-full border-[3px] border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0F4C81] shadow-sm">
-                    <SchoolLogo size={40} />
+              <div className="flex items-center justify-between pb-4 border-b border-white/15 gap-2">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-[3px] border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0A2E52] shadow-sm">
+                    <SchoolLogo size={48} logoUrl={siteIdentity.logoUrl} />
                   </div>
-                  <span className="text-[17px] font-bold text-white whitespace-nowrap truncate max-w-[180px]">
-                    {siteIdentity.shortName}
-                  </span>
+                  <div className="flex flex-col text-left justify-center min-w-0">
+                    <span className="text-sm font-bold text-white leading-tight whitespace-nowrap truncate max-w-[170px]">
+                      {siteIdentity.schoolName}
+                    </span>
+                    <span className="text-[11px] font-medium text-[#F2B233] leading-tight whitespace-nowrap truncate max-w-[170px]">
+                      {siteIdentity.churchName}
+                    </span>
+                  </div>
                 </div>
 
                 <button
