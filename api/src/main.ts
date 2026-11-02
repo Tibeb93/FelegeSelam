@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
@@ -26,7 +26,10 @@ async function bootstrap() {
   );
 
   // Serve static uploaded files (/uploads/photos, /uploads/documents)
-  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+  const uploadDir = process.env.UPLOAD_DIR
+    ? resolve(process.env.UPLOAD_DIR)
+    : join(process.cwd(), 'uploads');
+  app.useStaticAssets(uploadDir, {
     prefix: '/uploads/',
   });
 

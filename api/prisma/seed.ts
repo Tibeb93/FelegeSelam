@@ -199,12 +199,6 @@ async function main() {
     where: { memberNo: 'MEM-0001' },
     update: {
       userId: superAdminUser.id,
-      firstName: 'ተክለ',
-      fatherName: 'ሃይማኖት',
-      grandfatherName: 'ወልደስላሴ',
-      baptismalName: 'ገብረ ክርስቶስ',
-      sex: Sex.male,
-      status: MemberStatus.active,
     },
     create: {
       memberNo: 'MEM-0001',
@@ -1106,7 +1100,7 @@ async function main() {
   for (const s of defaultSettingsData) {
     await prisma.setting.upsert({
       where: { settingKey: s.settingKey },
-      update: { settingValue: s.settingValue as any },
+      update: {}, // Preserve existing user-modified settings
       create: { settingKey: s.settingKey, settingValue: s.settingValue as any },
     });
   }
