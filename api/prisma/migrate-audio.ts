@@ -2,11 +2,14 @@ import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 import { extractAudioMetadata } from '../src/common/utils/audio-metadata.util';
+import { ensureMezmurAudioColumns } from '../src/prisma/schema-migration.util';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('--- Migrating and Verifying Audio Files in Database ---');
+  await ensureMezmurAudioColumns(prisma);
+
   const baseUploadDir = process.env.UPLOAD_DIR
     ? path.resolve(process.env.UPLOAD_DIR)
     : path.resolve(__dirname, '..', 'uploads');

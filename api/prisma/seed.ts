@@ -1,6 +1,7 @@
 import { PrismaClient, Sex, MemberStatus, CourseStatus, MediaType, EnrollmentStatus, AttendanceStatus, AttendanceSessionStatus, PostType, EventRsvpStatus, FormStatus, FormResponseStatus, UserStatus } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { DEFAULT_SITE_IDENTITY } from '../src/common/site-identity';
+import { ensureMezmurAudioColumns } from '../src/prisma/schema-migration.util';
 
 const prisma = new PrismaClient();
 
@@ -9,6 +10,9 @@ const isDemo = process.argv.includes('--demo');
 async function main() {
   console.log('--- Starting Aemade Selam Database Seed ---');
   console.log(`Demo data mode: ${isDemo ? 'ENABLED (--demo)' : 'DISABLED (Core only)'}`);
+
+  // Ensure all required schema columns exist before running any seeds
+  await ensureMezmurAudioColumns(prisma);
 
   // ------------------------------------------------------------------
   // 1. ROLES & PERMISSIONS (5 roles)
