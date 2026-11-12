@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsInt,
   Min,
+  Max,
   MaxLength,
   IsBoolean,
 } from 'class-validator';
@@ -70,6 +71,39 @@ export class CreateMezmurDto {
   @MaxLength(500)
   audioUrl?: string;
 
+  @ApiPropertyOptional({ description: 'Permanent object storage key' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  audioStorageKey?: string;
+
+  @ApiPropertyOptional({ description: 'Audio MIME type' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  audioMimeType?: string;
+
+  @ApiPropertyOptional({ description: 'Audio file size in bytes' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  audioSizeBytes?: number;
+
+  @ApiPropertyOptional({ description: 'Audio duration in seconds' })
+  @IsOptional()
+  @Type(() => Number)
+  audioDurationSeconds?: number;
+
+  @ApiPropertyOptional({ description: 'Audio availability status', default: 'available' })
+  @IsOptional()
+  @IsString()
+  audioStatus?: string;
+
+  @ApiPropertyOptional({ description: 'Audio storage provider' })
+  @IsOptional()
+  @IsString()
+  audioStorageProvider?: string;
+
   @ApiPropertyOptional({
     example: '/uploads/mezmurs/video/sample.mp4',
     description: 'Video file URL or external link',
@@ -106,6 +140,32 @@ export class QueryMezmurDto extends PaginationDto {
   singer?: string;
 
   @ApiPropertyOptional({ description: 'Filter by public visibility' })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isPublic?: boolean;
+}
+
+export class PresignedAudioUploadDto {
+  @ApiProperty({ example: 'mezmur.mp3' })
+  @IsString()
+  @IsNotEmpty()
+  filename!: string;
+
+  @ApiProperty({ example: 'audio/mpeg' })
+  @IsString()
+  @IsNotEmpty()
+  mimeType!: string;
+
+  @ApiPropertyOptional({ example: 1048576, description: 'File size in bytes (max 50MB = 52428800)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(52428800)
+  sizeBytes?: number;
+
+  @ApiPropertyOptional({ default: true })
   @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()

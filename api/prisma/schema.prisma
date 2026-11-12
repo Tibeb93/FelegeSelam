@@ -413,8 +413,14 @@ model Mezmur {
   lyrics     String?  @db.LongText
   categoryId Int?
   singer     String?  @db.VarChar(150)
-  audioUrl   String?  @db.VarChar(500)
-  videoUrl   String?  @db.VarChar(500)
+  audioUrl              String?         @db.VarChar(500)
+  audioStorageKey       String?         @db.VarChar(500)
+  audioMimeType         String?         @db.VarChar(100)
+  audioSizeBytes        Int?
+  audioDurationSeconds  Float?
+  audioStatus           String          @default("available") @db.VarChar(50)
+  audioStorageProvider  String?         @db.VarChar(50)
+  videoUrl              String?         @db.VarChar(500)
   isPublic   Boolean  @default(true)
   createdBy  String?  @db.Char(36)
   createdAt  DateTime @default(now())

@@ -8,12 +8,15 @@ import {
   Param,
   Body,
   Query,
+  Headers,
+  Res,
   UseGuards,
   UseInterceptors,
   UploadedFile,
   ParseUUIDPipe,
   ParseIntPipe,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -31,6 +34,7 @@ import {
   CreateMezmurDto,
   UpdateMezmurDto,
   QueryMezmurDto,
+  PresignedAudioUploadDto,
 } from './dto/mezmur.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -137,7 +141,7 @@ export class MezmursController {
   @Post('upload-audio')
   @ApiBearerAuth('JWT-auth')
   @Roles('super_admin', 'admin', 'content_manager')
-  @ApiOperation({ summary: 'Upload standalone mezmur audio file (MP3/WAV/OGG/M4A/AAC, max 25MB)' })
+  @ApiOperation({ summary: 'Upload standalone mezmur audio file (MP3/WAV/OGG/M4A/AAC, max 50MB)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -152,6 +156,59 @@ export class MezmursController {
     return this.mezmursService.uploadStandaloneAudio(file);
   }
 
+  @Get('storage/health')
+  @ApiBearerAuth('JWT-auth')
+  @Roles('super_admin', 'admin', 'content_manager')
+  @ApiOperation({ summary: 'Storage health check for mezmur audio files' })
+  async storageHealthCheck() {
+    return this.mezmursService.storageHealthCheck();
+  }
+
+  @Post('presigned-upload')
+  @ApiBearerAuth('JWT-auth')
+  @Roles('super_admin', 'admin', 'content_manager')
+  @ApiOperation({ summary: 'Generate presigned URL for direct browser-to-storage upload' })
+  async getPresignedUpload(@Body() dto: PresignedAudioUploadDto) {
+    return this.mezmursService.getPresignedUpload(dto);
+  }
+
+  @Post('upload-direct')
+  @ApiBearerAuth('JWT-auth')
+  @Roles('super_admin', 'admin', 'content_manager')
+  @ApiOperation({ summary: 'Direct upload audio endpoint (up to 50MB, extracts duration)' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadDirect(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('isPublic') isPublic?: string | boolean,
+  ) {
+    const isPub = isPublic === 'false' || isPublic === false ? false : true;
+    return this.mezmursService.uploadDirectAudio(file, isPub);
+  }
+
+  @Get('stream/:key(*)')
+  @Public()
+  @ApiOperation({ summary: 'Stream audio with HTTP 206 Range support' })
+  async streamAudio(
+    @Param('key') key: string,
+    @Headers('range') range: string,
+    @Query('token') token: string,
+    @CurrentUser() user: any,
+    @Res() res: Response,
+  ) {
+    const streamResult = await this.mezmursService.streamAudio(key, range, token, user);
+    for (const [k, v] of Object.entries(streamResult.headers)) {
+      if (v !== undefined) {
+        res.setHeader(k, v);
+      }
+    }
+    if (!streamResult.stream) {
+      return res.status(streamResult.statusCode).end();
+    }
+    res.status(streamResult.statusCode);
+    streamResult.stream.pipe(res);
+  }
+
   @Get()
   @ApiBearerAuth('JWT-auth')
   @Roles('super_admin', 'admin', 'teacher', 'content_manager', 'member')
@@ -160,6 +217,16 @@ export class MezmursController {
   })
   async findAllMezmurs(@Query() query: QueryMezmurDto, @CurrentUser() user: any) {
     return this.mezmursService.findAllMezmurs(query, false, user);
+  }
+
+  @Get(':id/playback-url')
+  @Public()
+  @ApiOperation({ summary: 'Get or refresh playback URL (signed 1hr if members-only, or CDN with cache)' })
+  async getPlaybackUrl(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.mezmursService.getPlaybackUrl(id, user);
   }
 
   @Get(':id')
@@ -193,7 +260,7 @@ export class MezmursController {
   @ApiBearerAuth('JWT-auth')
   @Roles('super_admin', 'admin', 'content_manager')
   @ApiParam({ name: 'id', description: 'Mezmur UUID' })
-  @ApiOperation({ summary: 'Upload mezmur audio file (MP3/WAV/OGG/M4A/AAC, max 25MB)' })
+  @ApiOperation({ summary: 'Upload mezmur audio file (MP3/WAV/OGG/M4A/AAC, max 50MB)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -205,6 +272,28 @@ export class MezmursController {
   })
   @UseInterceptors(FileInterceptor('file'))
   async uploadAudio(
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.mezmursService.uploadMezmurMedia(id, file, 'audio');
+  }
+
+  @Post(':id/reupload')
+  @ApiBearerAuth('JWT-auth')
+  @Roles('super_admin', 'admin', 'content_manager')
+  @ApiParam({ name: 'id', description: 'Mezmur UUID' })
+  @ApiOperation({ summary: 'Re-upload audio for an existing mezmur' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async reuploadAudio(
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {

@@ -3,8 +3,10 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import * as fs from 'fs';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
@@ -14,6 +16,7 @@ import {
   CreateMezmurDto,
   UpdateMezmurDto,
   QueryMezmurDto,
+  PresignedAudioUploadDto,
 } from './dto/mezmur.dto';
 import { PaginationDto, paginate } from '../common/dto/pagination.dto';
 
@@ -138,6 +141,12 @@ export class MezmursService {
         categoryId: dto.categoryId ?? null,
         singer: dto.singer ?? null,
         audioUrl: dto.audioUrl ?? null,
+        audioStorageKey: dto.audioStorageKey ?? null,
+        audioMimeType: dto.audioMimeType ?? null,
+        audioSizeBytes: dto.audioSizeBytes ?? null,
+        audioDurationSeconds: dto.audioDurationSeconds ?? null,
+        audioStatus: dto.audioStatus ?? (dto.audioStorageKey || dto.audioUrl ? 'ready' : 'ready'),
+        audioStorageProvider: dto.audioStorageProvider ?? (dto.audioStorageKey ? 'local' : null),
         videoUrl: dto.videoUrl ?? null,
         isPublic: dto.isPublic ?? true,
         createdBy: createdBy ?? null,
@@ -234,10 +243,23 @@ export class MezmursService {
       favoriteSet = new Set(favs.map((f) => f.mezmurId));
     }
 
-    const enriched = mezmurs.map((m) => ({
-      ...m,
-      isFavorited: favoriteSet.has(m.id),
-    }));
+    const enriched = await Promise.all(
+      mezmurs.map(async (m) => {
+        let playbackUrl = m.audioUrl;
+        if (m.audioStorageKey) {
+          playbackUrl = await this.storageService.getAudioPlaybackUrl(
+            m.audioStorageKey,
+            m.isPublic,
+            m.audioUrl,
+          );
+        }
+        return {
+          ...m,
+          audioUrl: playbackUrl,
+          isFavorited: favoriteSet.has(m.id),
+        };
+      }),
+    );
 
     return paginate(enriched, total, page, limit);
   }
@@ -270,8 +292,18 @@ export class MezmursService {
       isFavorited = !!fav;
     }
 
+    let playbackUrl = mezmur.audioUrl;
+    if (mezmur.audioStorageKey) {
+      playbackUrl = await this.storageService.getAudioPlaybackUrl(
+        mezmur.audioStorageKey,
+        mezmur.isPublic,
+        mezmur.audioUrl,
+      );
+    }
+
     return {
       ...mezmur,
+      audioUrl: playbackUrl,
       isFavorited,
     };
   }
@@ -307,8 +339,77 @@ export class MezmursService {
     if (!file) {
       throw new BadRequestException('No audio file provided');
     }
-    const fileUrl = await this.storageService.saveMezmurMedia(file, 'audio');
-    return { url: fileUrl, fileUrl };
+    const saved = await this.storageService.saveMezmurAudioBuffer(
+      file.buffer,
+      file.originalname,
+      true,
+    );
+    return {
+      url: saved.fileUrl,
+      fileUrl: saved.fileUrl,
+      storageKey: saved.storageKey,
+      mimeType: saved.mimeType,
+      sizeBytes: saved.sizeBytes,
+      durationSeconds: saved.durationSeconds,
+      provider: saved.provider,
+    };
+  }
+
+  async getPresignedUpload(dto: PresignedAudioUploadDto) {
+    return this.storageService.getPresignedAudioUpload(
+      dto.filename,
+      dto.mimeType,
+      dto.isPublic ?? true,
+    );
+  }
+
+  async uploadDirectAudio(file: Express.Multer.File, isPublic: boolean = true) {
+    if (!file) {
+      throw new BadRequestException('No audio file provided');
+    }
+    const saved = await this.storageService.saveMezmurAudioBuffer(
+      file.buffer,
+      file.originalname,
+      isPublic,
+    );
+    return {
+      url: saved.fileUrl,
+      fileUrl: saved.fileUrl,
+      storageKey: saved.storageKey,
+      mimeType: saved.mimeType,
+      sizeBytes: saved.sizeBytes,
+      durationSeconds: saved.durationSeconds,
+      provider: saved.provider,
+      audioStatus: 'available',
+    };
+  }
+
+  async getPlaybackUrl(id: string, user?: any) {
+    const mezmur = await this.prisma.mezmur.findUnique({ where: { id } });
+    if (!mezmur) {
+      throw new NotFoundException(`Mezmur with ID ${id} not found`);
+    }
+
+    if (!mezmur.isPublic && !user) {
+      throw new ForbiddenException('Members-only mezmur requires active authentication');
+    }
+
+    const playbackUrl = await this.storageService.getAudioPlaybackUrl(
+      mezmur.audioStorageKey,
+      mezmur.isPublic,
+      mezmur.audioUrl,
+    );
+
+    return {
+      id: mezmur.id,
+      title: mezmur.title,
+      audioUrl: playbackUrl,
+      audioStorageKey: mezmur.audioStorageKey,
+      mimeType: mezmur.audioMimeType || 'audio/mpeg',
+      durationSeconds: mezmur.audioDurationSeconds || 0,
+      isPublic: mezmur.isPublic,
+      audioStatus: mezmur.audioStatus || 'available',
+    };
   }
 
   async uploadMezmurMedia(id: string, file: Express.Multer.File, type: 'audio' | 'video') {
@@ -317,18 +418,180 @@ export class MezmursService {
       throw new NotFoundException(`Mezmur with ID ${id} not found`);
     }
 
-    const fileUrl = await this.storageService.saveMezmurMedia(file, type);
+    if (type === 'audio') {
+      const saved = await this.storageService.saveMezmurAudioBuffer(
+        file.buffer,
+        file.originalname,
+        mezmur.isPublic,
+      );
 
-    const oldUrl = type === 'audio' ? mezmur.audioUrl : mezmur.videoUrl;
+      if (mezmur.audioUrl && mezmur.audioUrl.startsWith('/uploads/')) {
+        await this.storageService.deleteFile(mezmur.audioUrl);
+      }
+
+      return this.prisma.mezmur.update({
+        where: { id },
+        data: {
+          audioUrl: saved.fileUrl,
+          audioStorageKey: saved.storageKey,
+          audioMimeType: saved.mimeType,
+          audioSizeBytes: saved.sizeBytes,
+          audioDurationSeconds: saved.durationSeconds,
+          audioStorageProvider: saved.provider,
+          audioStatus: 'available',
+        },
+        include: { category: true },
+      });
+    }
+
+    const fileUrl = await this.storageService.saveMezmurMedia(file, type);
+    const oldUrl = mezmur.videoUrl;
     if (oldUrl && oldUrl.startsWith('/uploads/')) {
       await this.storageService.deleteFile(oldUrl);
     }
 
     return this.prisma.mezmur.update({
       where: { id },
-      data: type === 'audio' ? { audioUrl: fileUrl } : { videoUrl: fileUrl },
+      data: { videoUrl: fileUrl },
       include: { category: true },
     });
+  }
+
+  async storageHealthCheck() {
+    const mezmurs = await this.prisma.mezmur.findMany({
+      where: {
+        OR: [
+          { audioStorageKey: { not: null } },
+          { audioUrl: { not: null } },
+        ],
+      },
+      include: { category: true },
+    });
+
+    let availableCount = 0;
+    let missingCount = 0;
+    const items: Array<{
+      id: string;
+      title: string;
+      singer: string | null;
+      category: any;
+      audioStatus: string;
+      audioUrl: string | null;
+      audioStorageKey: string | null;
+      durationSeconds: number | null;
+      sizeBytes: number | null;
+    }> = [];
+
+    for (const m of mezmurs) {
+      const health = await this.storageService.checkAudioHealth(m.audioStorageKey, m.audioUrl);
+      const newStatus = health.available ? 'available' : 'missing';
+      if (newStatus !== m.audioStatus) {
+        await this.prisma.mezmur.update({
+          where: { id: m.id },
+          data: { audioStatus: newStatus },
+        });
+      }
+      if (health.available) {
+        availableCount++;
+      } else {
+        missingCount++;
+      }
+      items.push({
+        id: m.id,
+        title: m.title,
+        singer: m.singer,
+        category: m.category,
+        audioStatus: newStatus,
+        audioUrl: m.audioUrl,
+        audioStorageKey: m.audioStorageKey,
+        durationSeconds: m.audioDurationSeconds,
+        sizeBytes: m.audioSizeBytes || health.sizeBytes || null,
+      });
+    }
+
+    return {
+      total: mezmurs.length,
+      available: availableCount,
+      missing: missingCount,
+      items,
+    };
+  }
+
+  async streamAudio(
+    storageKey: string,
+    rangeHeader?: string,
+    token?: string,
+    user?: any,
+  ) {
+    const cleanKey = decodeURIComponent(storageKey).replace(/^\/+/, '');
+    const fileInfo = this.storageService.getStreamableFile(cleanKey);
+
+    if (!fileInfo.exists) {
+      throw new NotFoundException('Audio file not found on storage');
+    }
+
+    // Check if mezmur is restricted
+    const mezmur = await this.prisma.mezmur.findFirst({
+      where: {
+        OR: [
+          { audioStorageKey: cleanKey },
+          { audioUrl: { contains: cleanKey } },
+        ],
+      },
+    });
+
+    if (mezmur && !mezmur.isPublic) {
+      // Must have valid stream token or logged in user
+      const isTokenValid = token ? this.storageService.verifyStreamToken(cleanKey, token) : false;
+      if (!isTokenValid && !user) {
+        throw new ForbiddenException('Access denied to members-only audio stream');
+      }
+    }
+
+    const { fullPath, size: totalSize, mimeType } = fileInfo;
+
+    if (rangeHeader) {
+      const parts = rangeHeader.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+
+      if (start >= totalSize || end >= totalSize || start > end) {
+        return {
+          statusCode: 416,
+          headers: {
+            'Content-Range': `bytes */${totalSize}`,
+          },
+          stream: null,
+        };
+      }
+
+      const chunkSize = end - start + 1;
+      const stream = fs.createReadStream(fullPath, { start, end });
+
+      return {
+        statusCode: 206,
+        headers: {
+          'Content-Range': `bytes ${start}-${end}/${totalSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': String(chunkSize),
+          'Content-Type': mimeType,
+          'Cache-Control': mezmur?.isPublic ? 'public, max-age=31536000, immutable' : 'private, no-cache',
+        },
+        stream,
+      };
+    }
+
+    const stream = fs.createReadStream(fullPath);
+    return {
+      statusCode: 200,
+      headers: {
+        'Accept-Ranges': 'bytes',
+        'Content-Length': String(totalSize),
+        'Content-Type': mimeType,
+        'Cache-Control': mezmur?.isPublic ? 'public, max-age=31536000, immutable' : 'private, no-cache',
+      },
+      stream,
+    };
   }
 
   async deleteMezmur(id: string) {

@@ -4,7 +4,9 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as sharpModule from 'sharp';
 const sharp = (sharpModule as any).default || sharpModule;
-import { IStorageService } from './storage.interface';
+import { IStorageService, AudioPresignedUploadResult, AudioHealthResult } from './storage.interface';
+import { S3SignerConfig, generateS3PresignedUrl, getS3PublicUrl } from './s3-signer.util';
+import { extractAudioMetadata } from '../common/utils/audio-metadata.util';
 
 @Injectable()
 export class StorageService implements IStorageService {
@@ -90,6 +92,55 @@ export class StorageService implements IStorageService {
       return null;
     } catch (err: any) {
       this.logger.error(`Error uploading to Cloudinary: ${err.message}`, err.stack);
+      return null;
+    }
+  }
+
+  private get s3Config(): S3SignerConfig | null {
+    const bucket = process.env.S3_BUCKET || process.env.AWS_S3_BUCKET || process.env.R2_BUCKET;
+    const accessKeyId =
+      process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID;
+    const secretAccessKey =
+      process.env.S3_SECRET_ACCESS_KEY ||
+      process.env.AWS_SECRET_ACCESS_KEY ||
+      process.env.R2_SECRET_ACCESS_KEY;
+    if (bucket && accessKeyId && secretAccessKey) {
+      return {
+        bucket,
+        accessKeyId,
+        secretAccessKey,
+        endpoint: process.env.S3_ENDPOINT || process.env.R2_ENDPOINT,
+        region: process.env.S3_REGION || process.env.AWS_DEFAULT_REGION || 'auto',
+        publicBaseUrl: process.env.S3_PUBLIC_BASE_URL || process.env.R2_PUBLIC_BASE_URL,
+      };
+    }
+    return null;
+  }
+
+  private async uploadToS3(
+    buffer: Buffer,
+    key: string,
+    mimeType: string,
+  ): Promise<string | null> {
+    const config = this.s3Config;
+    if (!config) return null;
+    try {
+      const putUrl = generateS3PresignedUrl(config, 'PUT', key, 900, mimeType);
+      const res = await fetch(putUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': mimeType,
+        },
+        body: new Blob([new Uint8Array(buffer)]),
+      });
+      if (res.ok) {
+        return getS3PublicUrl(config, key);
+      }
+      const errText = await res.text();
+      this.logger.warn(`S3 upload returned ${res.status}: ${errText}`);
+      return null;
+    } catch (err: any) {
+      this.logger.error(`Error uploading to S3: ${err.message}`, err.stack);
       return null;
     }
   }
@@ -293,66 +344,327 @@ export class StorageService implements IStorageService {
       throw new BadRequestException(`No mezmur ${type} file provided`);
     }
 
-    const audioTypes = [
-      'audio/mpeg',
-      'audio/mp3',
-      'audio/wav',
-      'audio/x-wav',
-      'audio/ogg',
-      'audio/mp4',
-      'audio/aac',
-      'audio/webm',
-      'audio/x-m4a',
-      'audio/m4a',
-      'audio/flac',
-      'audio/x-flac',
-    ];
-    const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
-
-    const isAudioExt = /\.(mp3|wav|ogg|m4a|aac|webm|flac)$/i.test(file.originalname || '');
-    if (type === 'audio' && !audioTypes.includes(file.mimetype) && !isAudioExt) {
-      throw new BadRequestException(
-        `Invalid audio type (${file.mimetype}). Allowed types: MP3, WAV, OGG, M4A, AAC, WebM`,
-      );
+    if (type === 'audio') {
+      const saved = await this.saveMezmurAudioBuffer(file.buffer, file.originalname, true);
+      return saved.fileUrl;
     }
-    if (type === 'video' && !videoTypes.includes(file.mimetype)) {
+
+    const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+    const isVideoExt = /\.(mp4|webm|ogg|mov)$/i.test(file.originalname || '');
+    if (!videoTypes.includes(file.mimetype) && !isVideoExt) {
       throw new BadRequestException(
         `Invalid video type (${file.mimetype}). Allowed types: MP4, WebM, OGG, MOV`,
       );
     }
 
-    const maxSizeBytes = type === 'audio' ? 25 * 1024 * 1024 : 50 * 1024 * 1024;
+    const maxSizeBytes = 50 * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       const limitMb = maxSizeBytes / (1024 * 1024);
       throw new BadRequestException(
-        `Mezmur ${type} size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds ${limitMb} MB maximum limit`,
+        `Mezmur video size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds ${limitMb} MB maximum limit`,
       );
     }
 
-    const defaultExt = path.extname(file.originalname) || (type === 'audio' ? '.mp3' : '.mp4');
+    const defaultExt = path.extname(file.originalname) || '.mp4';
     const safeName = `${crypto.randomUUID()}${defaultExt}`;
 
     // Try Cloudinary if configured
     const cloudUrl = await this.uploadToCloudinary(
       file.buffer,
-      `felegeselam/mezmurs/${type}`,
-      'video', // Cloudinary handles audio files under the video resource endpoint
+      'felegeselam/mezmurs/video',
+      'video',
       file.originalname,
     );
     if (cloudUrl) {
       return cloudUrl;
     }
 
-    const destinationPath = path.join(this.baseUploadDir, 'mezmurs', type, safeName);
+    const destinationPath = path.join(this.baseUploadDir, 'mezmurs', 'video', safeName);
 
     try {
       await fs.promises.writeFile(destinationPath, file.buffer);
-      this.logger.log(`Mezmur ${type} saved successfully: ${safeName}`);
-      return `/uploads/mezmurs/${type}/${safeName}`;
+      this.logger.log(`Mezmur video saved successfully: ${safeName}`);
+      return `/uploads/mezmurs/video/${safeName}`;
     } catch (err: any) {
-      this.logger.error(`Error saving mezmur ${type}: ${err.message}`, err.stack);
-      throw new BadRequestException(`Failed to save mezmur ${type} file`);
+      this.logger.error(`Error saving mezmur video: ${err.message}`, err.stack);
+      throw new BadRequestException(`Failed to save mezmur video file`);
     }
+  }
+
+  async saveMezmurAudioBuffer(
+    buffer: Buffer,
+    originalFilename: string,
+    isPublic: boolean = true,
+  ): Promise<{
+    storageKey: string;
+    fileUrl: string;
+    mimeType: string;
+    sizeBytes: number;
+    durationSeconds: number;
+    provider: 's3' | 'r2' | 'cloudinary' | 'local';
+  }> {
+    const meta = extractAudioMetadata(buffer, originalFilename);
+    const ext = path.extname(originalFilename) || `.${meta.format}`;
+    const storageKey = `mezmurs/audio/${crypto.randomUUID()}${ext}`;
+
+    // 1. Try S3 / R2 if configured
+    if (this.s3Config) {
+      const s3Url = await this.uploadToS3(buffer, storageKey, meta.mimeType);
+      if (s3Url) {
+        const fileUrl = isPublic
+          ? getS3PublicUrl(this.s3Config, storageKey)
+          : await this.getAudioPlaybackUrl(storageKey, false);
+        return {
+          storageKey,
+          fileUrl,
+          mimeType: meta.mimeType,
+          sizeBytes: meta.sizeBytes,
+          durationSeconds: meta.durationSeconds,
+          provider: process.env.R2_BUCKET ? 'r2' : 's3',
+        };
+      }
+    }
+
+    // 2. Try Cloudinary if configured
+    if (this.cloudinaryConfig) {
+      const cloudUrl = await this.uploadToCloudinary(
+        buffer,
+        'felegeselam/mezmurs/audio',
+        'video',
+        originalFilename,
+      );
+      if (cloudUrl) {
+        return {
+          storageKey,
+          fileUrl: cloudUrl,
+          mimeType: meta.mimeType,
+          sizeBytes: meta.sizeBytes,
+          durationSeconds: meta.durationSeconds,
+          provider: 'cloudinary',
+        };
+      }
+    }
+
+    // 3. Fallback to Local Persistent Disk / Volume
+    const destPath = path.join(this.baseUploadDir, storageKey);
+    this.ensureDirectoryExists(path.dirname(destPath));
+    await fs.promises.writeFile(destPath, buffer);
+    this.logger.log(`Audio saved to local persistent storage: ${storageKey}`);
+
+    const fileUrl = isPublic
+      ? `/api/v1/mezmurs/stream/${encodeURIComponent(storageKey)}`
+      : `/api/v1/mezmurs/stream/${encodeURIComponent(storageKey)}?token=${this.createStreamToken(storageKey, 3600)}`;
+
+    return {
+      storageKey,
+      fileUrl,
+      mimeType: meta.mimeType,
+      sizeBytes: meta.sizeBytes,
+      durationSeconds: meta.durationSeconds,
+      provider: 'local',
+    };
+  }
+
+  async getPresignedAudioUpload(
+    filename: string,
+    mimeType: string,
+    isPublic: boolean = true,
+  ): Promise<AudioPresignedUploadResult> {
+    const ext = (path.extname(filename) || '').toLowerCase() || '.mp3';
+    const allowedExts = ['.mp3', '.m4a', '.ogg', '.wav', '.aac'];
+    if (!allowedExts.includes(ext)) {
+      throw new BadRequestException('Only MP3, M4A, OGG, and WAV audio formats are supported.');
+    }
+
+    const storageKey = `mezmurs/audio/${crypto.randomUUID()}${ext}`;
+
+    // S3 / R2 Presigned PUT
+    if (this.s3Config) {
+      const uploadUrl = generateS3PresignedUrl(this.s3Config, 'PUT', storageKey, 900, mimeType);
+      return {
+        uploadUrl,
+        storageKey,
+        provider: process.env.R2_BUCKET ? 'r2' : 's3',
+        publicUrl: isPublic ? getS3PublicUrl(this.s3Config, storageKey) : undefined,
+        headers: {
+          'Content-Type': mimeType,
+        },
+      };
+    }
+
+    // Cloudinary Direct Upload
+    if (this.cloudinaryConfig) {
+      const timestamp = Math.round(Date.now() / 1000);
+      const folder = 'felegeselam/mezmurs/audio';
+      const paramsToSign = `folder=${folder}&public_id=${storageKey}&timestamp=${timestamp}${this.cloudinaryConfig.apiSecret}`;
+      const signature = crypto.createHash('sha1').update(paramsToSign).digest('hex');
+
+      return {
+        uploadUrl: `https://api.cloudinary.com/v1_1/${this.cloudinaryConfig.cloudName}/video/upload`,
+        storageKey,
+        provider: 'cloudinary',
+        fields: {
+          api_key: this.cloudinaryConfig.apiKey,
+          timestamp: String(timestamp),
+          signature,
+          folder,
+          public_id: storageKey,
+        },
+      };
+    }
+
+    // Local API direct upload fallback
+    return {
+      uploadUrl: '/api/v1/mezmurs/upload-direct',
+      storageKey,
+      provider: 'local',
+      headers: {
+        'X-Storage-Key': storageKey,
+      },
+    };
+  }
+
+  async getAudioPlaybackUrl(
+    storageKey?: string | null,
+    isPublic: boolean = true,
+    fallbackUrl?: string | null,
+  ): Promise<string> {
+    if (!storageKey) {
+      return fallbackUrl || '';
+    }
+
+    // S3 / R2
+    if (this.s3Config) {
+      if (isPublic) {
+        return getS3PublicUrl(this.s3Config, storageKey);
+      }
+      return generateS3PresignedUrl(this.s3Config, 'GET', storageKey, 3600);
+    }
+
+    // Cloudinary
+    if (this.cloudinaryConfig && (fallbackUrl?.includes('cloudinary.com') || storageKey.startsWith('felegeselam/'))) {
+      if (fallbackUrl) return fallbackUrl;
+      return `https://res.cloudinary.com/${this.cloudinaryConfig.cloudName}/video/upload/${storageKey}`;
+    }
+
+    // Local stream with range support
+    if (isPublic) {
+      return `/api/v1/mezmurs/stream/${encodeURIComponent(storageKey)}`;
+    }
+    const token = this.createStreamToken(storageKey, 3600);
+    return `/api/v1/mezmurs/stream/${encodeURIComponent(storageKey)}?token=${token}`;
+  }
+
+  async checkAudioHealth(
+    storageKey?: string | null,
+    fallbackUrl?: string | null,
+  ): Promise<AudioHealthResult> {
+    if (!storageKey && !fallbackUrl) {
+      return { available: false, status: 'missing', provider: 'unknown' };
+    }
+
+    // If local or starts with /uploads/ or storageKey without http
+    const targetKey = storageKey || (fallbackUrl?.startsWith('/uploads/') ? fallbackUrl : null);
+    if (targetKey && !targetKey.startsWith('http://') && !targetKey.startsWith('https://')) {
+      const diskPath = this.getFilePath(targetKey);
+      if (fs.existsSync(diskPath)) {
+        const stat = fs.statSync(diskPath);
+        if (stat.size > 0) {
+          return { available: true, status: 'available', provider: 'local', sizeBytes: stat.size };
+        }
+      }
+      // Check if sample audio
+      if (targetKey.includes('sample-orthodox-chime.wav')) {
+        const samplePath = path.join(this.baseUploadDir, 'mezmurs', 'audio', 'sample-orthodox-chime.wav');
+        if (fs.existsSync(samplePath)) {
+          return { available: true, status: 'available', provider: 'local', sizeBytes: fs.statSync(samplePath).size };
+        }
+      }
+      return { available: false, status: 'missing', provider: 'local' };
+    }
+
+    // Remote HTTP / S3 / Cloudinary
+    const checkUrl = fallbackUrl || (this.s3Config ? getS3PublicUrl(this.s3Config, storageKey!) : null);
+    if (checkUrl && (checkUrl.startsWith('http://') || checkUrl.startsWith('https://'))) {
+      try {
+        const res = await fetch(checkUrl, {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(4000),
+        });
+        if (res.ok) {
+          const length = res.headers.get('content-length');
+          return {
+            available: true,
+            status: 'available',
+            provider: checkUrl.includes('cloudinary') ? 'cloudinary' : 's3',
+            sizeBytes: length ? parseInt(length, 10) : undefined,
+          };
+        }
+      } catch {
+        // Fall through to missing
+      }
+      return {
+        available: false,
+        status: 'missing',
+        provider: checkUrl.includes('cloudinary') ? 'cloudinary' : 's3',
+      };
+    }
+
+    return { available: false, status: 'missing', provider: 'unknown' };
+  }
+
+  createStreamToken(storageKey: string, expiresInSeconds: number = 3600): string {
+    const secret = process.env.JWT_ACCESS_SECRET || 'dev_audio_stream_secret_key_32_chars';
+    const expiresAt = Math.floor(Date.now() / 1000) + expiresInSeconds;
+    const payload = `${storageKey}:${expiresAt}`;
+    const sig = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    return `${expiresAt}.${sig}`;
+  }
+
+  verifyStreamToken(storageKey: string, token: string): boolean {
+    if (!token || !token.includes('.')) return false;
+    const [expStr, sig] = token.split('.');
+    const expiresAt = parseInt(expStr, 10);
+    if (isNaN(expiresAt) || expiresAt < Math.floor(Date.now() / 1000)) {
+      return false;
+    }
+    const secret = process.env.JWT_ACCESS_SECRET || 'dev_audio_stream_secret_key_32_chars';
+    const payload = `${storageKey}:${expiresAt}`;
+    const expectedSig = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    return sig === expectedSig;
+  }
+
+  getStreamableFile(storageKey: string): { exists: boolean; fullPath: string; size: number; mimeType: string } {
+    const cleanKey = storageKey.replace(/^\/+/, '').replace(/^uploads\//, '');
+    const fullPath = path.join(this.baseUploadDir, cleanKey);
+    if (!fs.existsSync(fullPath)) {
+      // Check if sample audio
+      if (cleanKey.includes('sample-orthodox-chime.wav')) {
+        const samplePath = path.join(this.baseUploadDir, 'mezmurs', 'audio', 'sample-orthodox-chime.wav');
+        if (fs.existsSync(samplePath)) {
+          const stat = fs.statSync(samplePath);
+          return { exists: true, fullPath: samplePath, size: stat.size, mimeType: 'audio/wav' };
+        }
+      }
+      return { exists: false, fullPath, size: 0, mimeType: 'application/octet-stream' };
+    }
+    const stat = fs.statSync(fullPath);
+    const ext = path.extname(fullPath).toLowerCase();
+    const mimeMap: Record<string, string> = {
+      '.mp3': 'audio/mpeg',
+      '.m4a': 'audio/mp4',
+      '.ogg': 'audio/ogg',
+      '.wav': 'audio/wav',
+      '.aac': 'audio/aac',
+      '.webm': 'audio/webm',
+      '.flac': 'audio/flac',
+    };
+    return {
+      exists: true,
+      fullPath,
+      size: stat.size,
+      mimeType: mimeMap[ext] || 'audio/mpeg',
+    };
   }
 
   async saveFile(buffer: Buffer, filename: string, _mimeType: string): Promise<string> {

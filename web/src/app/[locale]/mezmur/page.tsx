@@ -8,10 +8,9 @@ import {
   Play,
   Pause,
   Search,
-  Volume2,
   FileText,
+  Volume2,
   Heart,
-  Disc,
   AlertCircle,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api-client';
@@ -24,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/providers/AuthProvider';
+import { AudioPlayer } from '@/components/audio/AudioPlayer';
 
 interface MezmurPageProps {
   params: { locale: string };
@@ -37,8 +37,6 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [activeMezmur, setActiveMezmur] = useState<MezmurItem | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [audioError, setAudioError] = useState<string | null>(null);
   const [selectedLyricsMezmur, setSelectedLyricsMezmur] = useState<MezmurItem | null>(null);
 
   // Fetch categories
@@ -72,19 +70,12 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
 
   // Audio playback controls
   const handlePlayMezmur = (m: MezmurItem) => {
-    setAudioError(null);
-    if (!m.audioUrl) {
+    if (!m.audioUrl && !m.audioStorageKey) {
       // If no audio is attached, open the lyrics viewer
       setSelectedLyricsMezmur(m);
       return;
     }
-
-    if (activeMezmur?.id === m.id) {
-      setIsPlaying(!isPlaying);
-    } else {
-      setActiveMezmur(m);
-      setIsPlaying(true);
-    }
+    setActiveMezmur(m);
   };
 
   // Add / Remove Favorite mutation
@@ -102,10 +93,10 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground overflow-x-clip max-w-full">
       <PublicHeader locale={locale} />
 
-      <main id="main-content" className="flex-1 container mx-auto px-4 py-10 md:py-16 space-y-8" tabIndex={-1}>
+      <main id="main-content" className="flex-1 container mx-auto px-4 py-10 md:py-16 space-y-8 max-w-full overflow-x-clip" tabIndex={-1}>
         {/* Header */}
         <div className="space-y-2 text-center max-w-2xl mx-auto">
           <Badge variant="outline" className="text-secondary border-secondary/40 px-3 py-1 text-xs uppercase font-semibold">
@@ -161,74 +152,19 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
           </div>
         </div>
 
-        {/* Sticky Audio Player if active */}
-        {activeMezmur && activeMezmur.audioUrl && (
-          <div className="sticky top-20 z-30 rounded-2xl border-2 border-secondary/40 bg-card/95 backdrop-blur-md p-4 shadow-xl animate-in slide-in-from-top-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground shadow-sm shrink-0">
-                  <Disc className={`h-6 w-6 ${isPlaying ? 'animate-spin' : ''}`} />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm sm:text-base font-bold text-foreground line-clamp-1">
-                    {activeMezmur.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {activeMezmur.singer || (locale === 'am' ? 'የሰንበት ት/ቤት መዘምራን' : 'Sunday School Choir')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Native browser audio controls with autoPlay */}
-              <div className="flex-1 max-w-xl flex flex-col gap-1.5">
-                <div className="flex items-center gap-3">
-                  <audio
-                    key={activeMezmur.id}
-                    controls
-                    autoPlay
-                    src={resolveMediaUrl(activeMezmur.audioUrl)}
-                    className="w-full h-9"
-                    onPlay={() => {
-                      setIsPlaying(true);
-                      setAudioError(null);
-                    }}
-                    onPause={() => setIsPlaying(false)}
-                    onError={() => {
-                      setIsPlaying(false);
-                      setAudioError(
-                        locale === 'am'
-                          ? 'የድምፅ ፋይሉ በአገልጋዩ ላይ አልተገኘም (በድጋሚ ይጫኑ ወይም ቀጥተኛ ሊንክ ያስገቡ)'
-                          : 'Audio file not found on server (Please re-upload or provide direct URL)'
-                      );
-                    }}
-                  />
-
-                  {activeMezmur.lyrics && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedLyricsMezmur(activeMezmur)}
-                      className="text-xs gap-1.5 rounded-lg text-secondary font-semibold shrink-0"
-                    >
-                      <FileText className="h-4 w-4" />
-                      <span>{t('lyrics')}</span>
-                    </Button>
-                  )}
-                </div>
-
-                {audioError && (
-                  <p className="text-[11px] font-semibold text-destructive animate-fadeIn">
-                    ⚠️ {audioError}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+        {/* Responsive Mobile-First Audio Player */}
+        {activeMezmur && (activeMezmur.audioUrl || activeMezmur.audioStorageKey) && (
+          <AudioPlayer
+            mezmur={activeMezmur}
+            onClose={() => setActiveMezmur(null)}
+            onOpenLyrics={(m) => setSelectedLyricsMezmur(m)}
+            locale={locale}
+          />
         )}
 
-        {/* Mezmurs List Grid */}
+        {/* Mezmurs List Grid: 1 col on mobile, 2 col on tablet, 3 col on desktop */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-28 rounded-2xl bg-muted/40 animate-pulse border border-border" />
             ))}
@@ -244,10 +180,10 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div data-testid="mezmur-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {mezmurs.map((m) => {
-              const isThisPlaying = activeMezmur?.id === m.id && isPlaying;
-              const hasAudio = !!m.audioUrl;
+              const isThisPlaying = activeMezmur?.id === m.id;
+              const hasAudio = !!(m.audioUrl || m.audioStorageKey);
               return (
                 <Card
                   key={m.id}
@@ -260,6 +196,7 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
                       <Button
                         onClick={() => handlePlayMezmur(m)}
                         size="icon"
+                        data-testid="play-mezmur-btn"
                         className={`h-11 w-11 rounded-xl shrink-0 transition-transform ${
                           isThisPlaying
                             ? 'bg-secondary text-secondary-foreground scale-105 shadow-md'
@@ -348,22 +285,32 @@ export default function MezmurLibraryPage({ params: { locale } }: MezmurPageProp
                   {/* Built-in player on card if audio is available */}
                   <div className="px-4 pb-3.5 pt-0">
                     {hasAudio ? (
-                      <div className="rounded-xl bg-muted/40 p-2 border border-border/50">
-                        <audio
-                          controls
-                          preload="none"
-                          src={resolveMediaUrl(m.audioUrl)}
-                          className="w-full h-8"
-                          onPlay={() => {
-                            setActiveMezmur(m);
-                            setIsPlaying(true);
-                          }}
-                          onPause={() => {
-                            if (activeMezmur?.id === m.id) {
-                              setIsPlaying(false);
-                            }
-                          }}
-                        />
+                      <div className="flex items-center justify-between rounded-xl bg-muted/40 px-3 py-2 border border-border/50">
+                        <button
+                          type="button"
+                          onClick={() => setActiveMezmur(m)}
+                          className="flex items-center gap-2 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                        >
+                          <Play className="h-3.5 w-3.5 fill-primary" />
+                          <span>{locale === 'am' ? 'ድምፅ አጫውት' : 'Play Audio'}</span>
+                          {m.audioDurationSeconds ? (
+                            <span className="text-[10px] opacity-75 font-mono">
+                              ({Math.floor(m.audioDurationSeconds / 60)}:
+                              {Math.floor(m.audioDurationSeconds % 60) < 10 ? '0' : ''}
+                              {Math.floor(m.audioDurationSeconds % 60)})
+                            </span>
+                          ) : null}
+                        </button>
+                        {m.lyrics && (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedLyricsMezmur(m)}
+                            className="text-[11px] font-semibold text-secondary hover:underline flex items-center gap-1"
+                          >
+                            <FileText className="h-3.5 w-3.5" />
+                            <span>{t('lyrics')}</span>
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <div className="flex items-center justify-between rounded-xl bg-muted/20 px-3 py-1.5 text-xs text-muted-foreground border border-dashed border-border/60">

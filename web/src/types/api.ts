@@ -464,6 +464,12 @@ export interface Mezmur {
   category?: MezmurCategory | null;
   singer?: string | null;
   audioUrl?: string | null;
+  audioStorageKey?: string | null;
+  audioMimeType?: string | null;
+  audioSizeBytes?: number | null;
+  audioDurationSeconds?: number | null;
+  audioStatus?: string;
+  audioStorageProvider?: string | null;
   videoUrl?: string | null;
   isPublic: boolean;
   createdBy?: string | null;

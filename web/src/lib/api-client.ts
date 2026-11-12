@@ -5,14 +5,34 @@ const BASE_API_URL =
 
 // In-memory access token storage
 let inMemoryAccessToken: string | null = null;
+if (typeof window !== 'undefined') {
+  try {
+    inMemoryAccessToken = localStorage.getItem('access_token');
+  } catch {}
+}
 let refreshPromise: Promise<string | null> | null = null;
 
 export function getAccessToken(): string | null {
-  return inMemoryAccessToken;
+  if (inMemoryAccessToken) return inMemoryAccessToken;
+  if (typeof window !== 'undefined') {
+    try {
+      return localStorage.getItem('access_token');
+    } catch {}
+  }
+  return null;
 }
 
 export function setAccessToken(token: string | null): void {
   inMemoryAccessToken = token;
+  if (typeof window !== 'undefined') {
+    try {
+      if (token) {
+        localStorage.setItem('access_token', token);
+      } else {
+        localStorage.removeItem('access_token');
+      }
+    } catch {}
+  }
 }
 
 export class ApiError extends Error {

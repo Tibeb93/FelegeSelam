@@ -22,7 +22,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:seed:demo": "ts-node prisma/seed.ts --demo",
-    "prisma:count": "ts-node prisma/count-rows.ts"
+    "prisma:count": "ts-node prisma/count-rows.ts",
+    "audio:migrate": "ts-node prisma/migrate-audio.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

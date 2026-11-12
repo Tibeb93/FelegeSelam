@@ -191,29 +191,29 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
       */}
       <header
         role="banner"
-        className="sticky top-0 z-40 w-full h-16 lg:h-auto bg-[#0F4C81] text-white shadow-[0_2px_8px_rgba(10,46,82,0.25)] border-b border-white/10 transition-colors"
+        className="sticky top-0 z-40 w-full max-w-full overflow-x-clip bg-[#0F4C81] text-white shadow-[0_2px_8px_rgba(10,46,82,0.25)] border-b border-white/10 transition-colors"
       >
         {/* DESKTOP HEADER (1024px and wider) */}
-        <div className="hidden lg:flex container mx-auto items-center justify-between px-6 py-3 min-h-[76px] gap-3">
+        <div className="hidden lg:flex container mx-auto items-center justify-between px-3 xl:px-6 py-2.5 xl:py-3 min-h-[72px] xl:min-h-[76px] gap-2 xl:gap-3">
           {/* Brand: 2 lines without text-wrapping */}
           <Link
             href={`/${locale}`}
             prefetch={true}
             onClick={(e) => handleLinkClick(e, `/${locale}#hero`, 'hero')}
             title={`${siteIdentity.schoolName} - ${siteIdentity.churchName}`}
-            className="flex items-center gap-3.5 group focus:outline-none focus:ring-2 focus:ring-[#F2B233] rounded-xl p-1 shrink-0"
+            className="flex items-center gap-2 xl:gap-3 group focus:outline-none focus:ring-2 focus:ring-[#F2B233] rounded-xl p-1 shrink-0"
           >
             <div
               data-testid="desktop-header-logo"
-              className="w-12 h-12 rounded-full border-[3px] border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0A2E52] shadow-sm"
+              className="w-10 h-10 xl:w-12 xl:h-12 rounded-full border-[2.5px] xl:border-[3px] border-white ring-2 ring-[#F2B233] overflow-hidden shrink-0 flex items-center justify-center bg-[#0A2E52] shadow-sm"
             >
               <SchoolLogo size={48} logoUrl={siteIdentity.logoUrl} />
             </div>
-            <div className="flex flex-col text-left justify-center">
-              <span className="text-base xl:text-lg font-bold text-white group-hover:text-[#E8F1FB] transition-colors leading-tight whitespace-nowrap">
+            <div className="flex flex-col text-left justify-center min-w-0">
+              <span className="text-sm xl:text-lg font-bold text-white group-hover:text-[#E8F1FB] transition-colors leading-tight whitespace-nowrap">
                 {siteIdentity.schoolName}
               </span>
-              <span className="text-xs font-medium text-[#F2B233] leading-tight whitespace-nowrap">
+              <span className="text-[11px] xl:text-xs font-medium text-[#F2B233] leading-tight whitespace-nowrap">
                 {siteIdentity.churchName}
                 <span className="sr-only"> ({siteIdentity.combinedLine})</span>
               </span>
@@ -221,7 +221,7 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
           </Link>
 
           {/* Desktop Navigation Links (7 items) */}
-          <nav className="flex items-center gap-1 xl:gap-1.5" aria-label="Main Navigation">
+          <nav className="flex items-center gap-0.5 xl:gap-1 2xl:gap-1.5" aria-label="Main Navigation">
             {navLinks.map((link) => {
               const active = isActive(link.href, link.sectionId);
               return (
@@ -230,13 +230,13 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
                   href={link.href}
                   prefetch={true}
                   onClick={(e) => handleLinkClick(e, link.href, link.sectionId)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all min-h-[44px] ${
+                  className={`flex items-center gap-1 xl:gap-1.5 px-2 xl:px-2.5 2xl:px-3 py-1.5 xl:py-2 rounded-xl text-xs xl:text-sm font-semibold transition-all min-h-[40px] xl:min-h-[44px] ${
                     active
                       ? 'bg-[#1E78C8] text-white shadow-xs'
                       : 'text-white/90 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  <link.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <link.icon className="h-3.5 w-3.5 xl:h-4 xl:w-4 shrink-0 hidden 2xl:block" aria-hidden="true" />
                   <span className="whitespace-nowrap">{link.label}</span>
                 </Link>
               );
@@ -244,13 +244,13 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
           </nav>
 
           {/* Desktop Controls: Language switch, Theme toggle, Member Portal CTA, Admin entrance */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 xl:gap-3 shrink-0">
             <LanguageSwitcher currentLocale={locale as 'am' | 'en'} />
 
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-colors shadow-xs"
+              className="flex h-9 w-9 xl:h-11 xl:w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-colors shadow-xs"
               aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
             >
               {theme === 'dark' ? (
@@ -263,24 +263,25 @@ export function PublicHeader({ locale }: PublicHeaderProps) {
             {user ? (
               <Link
                 href={`/${locale}/portal`}
-                className="flex items-center gap-2 rounded-xl bg-[#F2B233] px-4 py-2 text-sm font-bold text-[#0F2438] shadow-md hover:bg-[#e0a42b] transition-all min-h-[44px]"
+                className="flex items-center gap-1.5 xl:gap-2 rounded-xl bg-[#F2B233] px-3 xl:px-4 py-2 text-xs xl:text-sm font-bold text-[#0F2438] shadow-md hover:bg-[#e0a42b] transition-all min-h-[40px] xl:min-h-[44px]"
               >
                 <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                 <span>{locale === 'am' ? 'የእኔ ፖርታል' : 'My Portal'}</span>
               </Link>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 xl:gap-2">
                 <Link
                   href={`/${locale}/portal`}
-                  className="flex items-center gap-2 rounded-xl bg-[#F2B233] px-4 py-2 text-sm font-bold text-[#0F2438] shadow-md hover:bg-[#e0a42b] transition-all min-h-[44px]"
+                  className="flex items-center gap-1.5 xl:gap-2 rounded-xl bg-[#F2B233] px-2.5 xl:px-4 py-2 text-xs xl:text-sm font-bold text-[#0F2438] shadow-md hover:bg-[#e0a42b] transition-all min-h-[40px] xl:min-h-[44px]"
                 >
-                  <ShieldCheck className="h-4 w-4 text-[#0F2438]" aria-hidden="true" />
-                  <span>{locale === 'am' ? 'የአባላት ፖርታል' : 'Members Portal'}</span>
+                  <ShieldCheck className="h-3.5 w-3.5 xl:h-4 xl:w-4 text-[#0F2438]" aria-hidden="true" />
+                  <span className="hidden xl:inline">{locale === 'am' ? 'የአባላት ፖርታል' : 'Members Portal'}</span>
+                  <span className="xl:hidden">{locale === 'am' ? 'ፖርታል' : 'Portal'}</span>
                 </Link>
 
                 <Link
                   href={`/${locale}/admin/login`}
-                  className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white/90 hover:bg-white/20 transition-all min-h-[40px]"
+                  className="flex items-center gap-1 xl:gap-1.5 rounded-xl border border-white/20 bg-white/10 px-2 xl:px-3 py-1.5 xl:py-2 text-xs font-semibold text-white/90 hover:bg-white/20 transition-all min-h-[38px] xl:min-h-[40px]"
                   title={locale === 'am' ? 'የአስተዳደር መግቢያ' : 'Admin Login'}
                 >
                   <Lock className="h-3.5 w-3.5 text-white/80" aria-hidden="true" />
